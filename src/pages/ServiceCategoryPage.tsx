@@ -1,0 +1,261 @@
+import { useState, useEffect } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { Button } from '../components/ui/Button';
+import { CountUpStats } from '../components/CountUpStats';
+import { ProfessionalReviewCarousel } from '../components/ProfessionalReviewCarousel';
+import { ArrowRight, CheckCircle, Layers, Loader2, Code, Smartphone, Globe, Cpu, Palette, BarChart, Shield, Cloud } from 'lucide-react';
+import { apiService } from '../services/api';
+import { ServiceCategoryDetail } from '../types/api';
+
+const iconMap: Record<string, any> = {
+  'code': Code,
+  'smartphone': Smartphone,
+  'globe': Globe,
+  'cpu': Cpu,
+  'palette': Palette,
+  'bar-chart': BarChart,
+  'shield': Shield,
+  'cloud': Cloud,
+};
+
+export function ServiceCategoryPage() {
+  const { category } = useParams<{ category: string }>();
+  const [serviceDetail, setServiceDetail] = useState<ServiceCategoryDetail | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchService = async () => {
+      if (!category) return;
+      try {
+        setLoading(true);
+        const response = await apiService.getServiceCategoryBySlug(category);
+        if (response.success) {
+          setServiceDetail(response.data);
+        } else {
+          setError(response.message || 'Service not found');
+        }
+      } catch (err: any) {
+        setError(err.message || 'An error occurred while fetching service details');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchService();
+  }, [category]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#050505] flex items-center justify-center text-white">
+        <Loader2 className="w-12 h-12 text-[color:var(--bright-red)] animate-spin" />
+      </div>
+    );
+  }
+
+  if (error || !serviceDetail) {
+    return (
+      <div className="min-h-screen bg-[#050505] flex items-center justify-center text-white">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold mb-4 text-red-500">Service Not Found</h1>
+          <p className="text-gray-400 mb-8">{error}</p>
+          <Link to="/services" className="text-[color:var(--bright-red)] hover:underline">
+            Back to Services
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const { category: categoryData, subcategories } = serviceDetail;
+  const Icon = iconMap[(categoryData.iconKey || '').toLowerCase()] || Code;
+
+  return <main className="bg-[#050505] min-h-screen pt-40 pb-20">
+    {/* Hero Section */}
+    <section className="container mx-auto px-4 mb-24">
+      <div className="flex flex-col md:flex-row items-center gap-12">
+        <div className="flex-1">
+          <motion.div initial={{
+            opacity: 0,
+            y: 20
+          }} animate={{
+            opacity: 1,
+            y: 0
+          }} className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-sm text-[color:var(--bright-red)] font-bold mb-6">
+            <Icon size={16} />
+            {categoryData.name}
+          </motion.div>
+
+          <motion.h1 initial={{
+            opacity: 0,
+            y: 20
+          }} animate={{
+            opacity: 1,
+            y: 0
+          }} transition={{
+            delay: 0.1
+          }} className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
+            {categoryData.name} <br />
+            <span className="text-gradient">Solutions</span>
+          </motion.h1>
+
+          <motion.p initial={{
+            opacity: 0,
+            y: 20
+          }} animate={{
+            opacity: 1,
+            y: 0
+          }} transition={{
+            delay: 0.2
+          }} className="text-xl text-gray-400 max-w-2xl mb-8 leading-relaxed">
+            {categoryData.description}
+          </motion.p>
+
+          <motion.div initial={{
+            opacity: 0,
+            y: 20
+          }} animate={{
+            opacity: 1,
+            y: 0
+          }} transition={{
+            delay: 0.3
+          }}>
+            <Button variant="primary" triggerPopup className="px-8 py-4 text-lg">
+              Consult Our Experts
+            </Button>
+          </motion.div>
+        </div>
+
+        <div className="w-full md:w-1/3">
+          <motion.div initial={{
+            opacity: 0,
+            scale: 0.9
+          }} animate={{
+            opacity: 1,
+            scale: 1
+          }} transition={{
+            delay: 0.2
+          }} className="aspect-square rounded-3xl bg-gradient-to-br from-white/5 to-white/0 border border-white/10 flex items-center justify-center relative overflow-hidden group">
+            <div className="absolute inset-0 bg-[color:var(--bright-red)]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <Icon size={120} className="text-white/20 group-hover:text-[color:var(--bright-red)] group-hover:scale-110 transition-all duration-500" />
+          </motion.div>
+        </div>
+      </div>
+    </section>
+
+    {/* Subcategories Grid */}
+    <section className="container mx-auto px-4 mb-24">
+      <div className="text-center mb-16">
+        <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+          Specialized Services
+        </h2>
+        <p className="text-gray-400">
+          Explore our specific capabilities within {categoryData.name}
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {subcategories.map((sub, index) => {
+          return (
+            <motion.div key={index} initial={{
+              opacity: 0,
+              y: 20
+            }} whileInView={{
+              opacity: 1,
+              y: 0
+            }} viewport={{
+              once: true
+            }} transition={{
+              delay: index * 0.05
+            }}>
+              <Link to={`/services/${categoryData.slug}/${sub.slug}`} className="group block p-8 rounded-2xl bg-white/5 border border-white/10 hover:border-[color:var(--neon-yellow)] transition-all duration-300 h-full hover:-translate-y-1">
+                <div className="w-12 h-12 rounded-xl bg-[color:var(--deep-navy)] flex items-center justify-center mb-6 text-white group-hover:scale-110 transition-transform">
+                  <Layers size={24} />
+                </div>
+                <h3 className="text-xl font-bold text-white mb-3 group-hover:text-[color:var(--neon-yellow)] transition-colors flex items-center justify-between">
+                  {sub.name}
+                  <ArrowRight size={18} className="opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+                </h3>
+                <p className="text-sm text-gray-400">
+                  {sub.shortDescription}
+                </p>
+              </Link>
+            </motion.div>
+          );
+        })}
+      </div>
+    </section>
+
+    {/* Why Choose Us */}
+    <section className="bg-[#0A0A0A] py-24 mb-24">
+      <div className="container mx-auto px-4">
+        <div className="flex flex-col md:flex-row gap-16 items-center">
+          <div className="w-full md:w-1/2">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
+              Why Choose Phixels for <br /> {categoryData.name}?
+            </h2>
+            <div className="space-y-6">
+              {['Industry-leading expertise and proven track record', 'Agile methodology ensuring timely delivery', 'Scalable and secure architecture design', 'Post-launch support and maintenance', 'Transparent communication and reporting'].map((item, i) => <div key={i} className="flex items-start gap-4">
+                <CheckCircle className="text-[color:var(--vibrant-green)] shrink-0 mt-1" size={20} />
+                <span className="text-lg text-gray-300">{item}</span>
+              </div>)}
+            </div>
+          </div>
+          <div className="w-full md:w-1/2">
+            <div className="grid grid-cols-2 gap-4">
+              {[{
+                label: 'Projects Delivered',
+                value: 500,
+                suffix: '+'
+              }, {
+                label: 'Client Retention',
+                value: 98,
+                suffix: '%'
+              }, {
+                label: 'Expert Developers',
+                value: 50,
+                suffix: '+'
+              }, {
+                label: 'Support Available',
+                value: 24,
+                suffix: '/7'
+              }].map((stat, i) => <div key={i} className="p-6 rounded-2xl bg-white/5 border border-white/10 text-center">
+                <div className="text-4xl font-bold text-white mb-2">
+                  <CountUpStats end={stat.value} suffix={stat.suffix} />
+                </div>
+                <div className="text-sm text-gray-400">{stat.label}</div>
+              </div>)}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {/* New Professional Review Section */}
+    <ProfessionalReviewCarousel />
+
+    {/* CTA */}
+    <section className="container mx-auto px-4 text-center">
+      <div className="max-w-4xl mx-auto bg-gradient-to-b from-white/10 to-black rounded-3xl p-12 border border-white/10">
+        <h2 className="text-4xl font-bold text-white mb-6">
+          Ready to start your {categoryData.name} project?
+        </h2>
+        <p className="text-xl text-gray-400 mb-8">
+          Let's discuss your requirements and build something extraordinary
+          together.
+        </p>
+        <div className="flex flex-col sm:flex-row justify-center gap-4">
+          <Button variant="primary" triggerPopup className="px-8 py-4 text-lg">
+            Get Free Consultation
+          </Button>
+          <Link to="/portfolio">
+            <Button variant="outline" className="px-8 py-4 text-lg w-full sm:w-auto">
+              View Our Work
+            </Button>
+          </Link>
+        </div>
+      </div>
+    </section>
+  </main>;
+}
