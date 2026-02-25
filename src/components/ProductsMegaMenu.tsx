@@ -15,7 +15,7 @@ export function ProductsMegaMenu() {
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        const response = await apiService.getProducts();
+        const response = await apiService.getPinnedProducts();
         if (response.success) {
           setProducts(response.data);
         } else {
@@ -67,7 +67,7 @@ export function ProductsMegaMenu() {
               <div>
                 <h3 className="text-2xl font-bold text-white mb-2">Our Digital Products</h3>
                 <p className="text-gray-400 text-sm">
-                  Innovative solutions built by our team, used by thousands.
+                  Hand-picked pinned products from our latest portfolio.
                 </p>
               </div>
               <Link
@@ -87,7 +87,12 @@ export function ProductsMegaMenu() {
               <div className="text-center py-12 text-red-500/80 text-sm capitalize">{error}</div>
             ) : (
               <div className="grid grid-cols-3 gap-6">
-                {products.slice(0, 6).map((product, index) => {
+                {products.length === 0 ? (
+                  <div className="col-span-3 text-center py-12 text-gray-400 text-sm">
+                    No pinned products available.
+                  </div>
+                ) : (
+                  products.map((product, index) => {
                   const Icon = getPlatformIcon(product.category);
                   return (
                     <Link key={product._id} to={`/products/${product._id}`} className="block">
@@ -145,7 +150,8 @@ export function ProductsMegaMenu() {
                       </motion.div>
                     </Link>
                   );
-                })}
+                  })
+                )}
               </div>
             )}
           </div>

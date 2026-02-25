@@ -40,6 +40,8 @@ export interface Product {
     demoLink: string;
     images: string[];
     category: string;
+    isPinned?: boolean;
+    pinOrder?: 1 | 2 | 3 | null;
     createdAt: string;
     tagline?: string; // For frontend mapping
 }

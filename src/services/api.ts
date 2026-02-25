@@ -28,6 +28,8 @@ export const apiService = {
   // Products
   getProducts: () =>
     fetch(`${BASE_URL}/products`).then((res) => handleResponse<any>(res)),
+  getPinnedProducts: () =>
+    fetch(`${BASE_URL}/products/pinned`).then((res) => handleResponse<any>(res)),
   getProductById: (id: string) =>
     fetch(`${BASE_URL}/products/${id}`).then((res) => handleResponse<any>(res)),
 
