@@ -138,7 +138,18 @@ export function ServiceCategoryPage() {
             delay: 0.2
           }} className="aspect-square rounded-3xl bg-gradient-to-br from-white/5 to-white/0 border border-white/10 flex items-center justify-center relative overflow-hidden group">
             <div className="absolute inset-0 bg-[color:var(--bright-red)]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-            <Icon size={120} className="text-white/20 group-hover:text-[color:var(--bright-red)] group-hover:scale-110 transition-all duration-500" />
+            {categoryData.heroImage ? (
+              <img
+                src={categoryData.heroImage}
+                alt={categoryData.name}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <Icon
+                size={120}
+                className="text-white/20 group-hover:text-[color:var(--bright-red)] group-hover:scale-110 transition-all duration-500"
+              />
+            )}
           </motion.div>
         </div>
       </div>
