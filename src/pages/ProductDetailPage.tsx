@@ -101,28 +101,42 @@ export function ProductDetailPage() {
             <div className="flex items-center gap-6 mb-8 pb-8 border-b border-white/10">
               <div className="flex items-center gap-2">
                 <Users size={20} className="text-gray-500" />
-                <span className="text-white font-bold">10k+</span>
+                <span className="text-white font-bold">
+                  {product.userCount != null ? product.userCount.toLocaleString() : 'N/A'}
+                </span>
                 <span className="text-gray-500 text-sm">Users</span>
               </div>
               <div className="flex items-center gap-2">
                 <Star size={20} className="text-yellow-500 fill-yellow-500" />
-                <span className="text-white font-bold">4.8</span>
+                <span className="text-white font-bold">
+                  {product.reviewRating != null ? product.reviewRating.toFixed(1) : 'N/A'}
+                </span>
                 <span className="text-gray-500 text-sm">Rating</span>
               </div>
-              <div className="flex items-center gap-2">
-                <Download size={20} className="text-gray-500" />
-                <span className="text-white font-bold">25k+</span>
-                <span className="text-gray-500 text-sm">Downloads</span>
-              </div>
+              {product.downloadsEnabled && (
+                <div className="flex items-center gap-2">
+                  <Download size={20} className="text-gray-500" />
+                  <span className="text-white font-bold">
+                    {(product.downloadCount ?? 0).toLocaleString()}
+                  </span>
+                  <span className="text-gray-500 text-sm">Downloads</span>
+                </div>
+              )}
             </div>
 
             {/* CTA */}
             <div className="flex flex-col sm:flex-row gap-4">
-              <a href={product.demoLink} target="_blank" rel="noopener noreferrer" className="flex-1">
-                <Button variant="primary" glow className="w-full py-4 text-lg">
-                  Launch Product <ExternalLink size={20} className="ml-2" />
+              {product.demoLink ? (
+                <a href={product.demoLink} target="_blank" rel="noopener noreferrer" className="flex-1">
+                  <Button variant="primary" glow className="w-full py-4 text-lg">
+                    Launch Product <ExternalLink size={20} className="ml-2" />
+                  </Button>
+                </a>
+              ) : (
+                <Button variant="outline" className="flex-1 py-4 text-lg opacity-60 cursor-not-allowed" disabled>
+                  Launch Product (Coming Soon)
                 </Button>
-              </a>
+              )}
               <Button variant="outline" triggerPopup className="flex-1 py-4 text-lg">
                 Contact Sales
               </Button>
@@ -209,12 +223,18 @@ export function ProductDetailPage() {
               Join thousands of users who are already using {product.name} to
               improve their workflow and achieve more.
             </p>
-            <a href={product.demoLink} target="_blank" rel="noopener noreferrer">
-              <Button variant="primary" glow className="text-lg px-10 py-5 rounded-full shadow-xl shadow-[color:var(--bright-red)]/20 hover:shadow-[color:var(--bright-red)]/40 transition-all">
-                Launch {product.name}{' '}
-                <ExternalLink size={20} className="ml-2" />
+            {product.demoLink ? (
+              <a href={product.demoLink} target="_blank" rel="noopener noreferrer">
+                <Button variant="primary" glow className="text-lg px-10 py-5 rounded-full shadow-xl shadow-[color:var(--bright-red)]/20 hover:shadow-[color:var(--bright-red)]/40 transition-all">
+                  Launch {product.name}{' '}
+                  <ExternalLink size={20} className="ml-2" />
+                </Button>
+              </a>
+            ) : (
+              <Button variant="outline" className="text-lg px-10 py-5 rounded-full opacity-60 cursor-not-allowed" disabled>
+                Launch {product.name} (Coming Soon)
               </Button>
-            </a>
+            )}
           </div>
         </motion.section>
       </div>

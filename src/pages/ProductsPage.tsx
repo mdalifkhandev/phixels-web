@@ -169,9 +169,6 @@ export function ProductsPage() {
                         {product.category}
                       </span>
                     </div>
-                    <div className="absolute top-4 left-4 px-3 py-1 rounded-full bg-[color:var(--bright-red)] text-white text-xs font-bold">
-                      ${product.pricing}
-                    </div>
                   </div>
 
                   <div className="relative z-10 p-6">
@@ -186,15 +183,25 @@ export function ProductsPage() {
                       <div className="flex items-center gap-1">
                         <Users size={14} className="text-gray-500" />
                         <span className="text-xs text-gray-400">
-                          10k+ Users
+                          {product.userCount != null
+                            ? `${product.userCount.toLocaleString()} Users`
+                            : 'N/A Users'}
                         </span>
                       </div>
                       <div className="flex items-center gap-1">
                         <Star size={14} className="text-yellow-500 fill-yellow-500" />
                         <span className="text-xs text-gray-400">
-                          4.8
+                          {product.reviewRating != null ? product.reviewRating.toFixed(1) : 'N/A'}
                         </span>
                       </div>
+                      {product.downloadsEnabled && (
+                        <div className="flex items-center gap-1">
+                          <Download size={14} className="text-gray-500" />
+                          <span className="text-xs text-gray-400">
+                            {(product.downloadCount ?? 0).toLocaleString()}
+                          </span>
+                        </div>
+                      )}
                     </div>
 
                     <div className="flex flex-wrap gap-2 mb-6">
@@ -206,10 +213,16 @@ export function ProductsPage() {
                 </Link>
 
                 <div className="relative z-10 px-6 pb-6">
-                  <a href={product.demoLink} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-[color:var(--bright-red)] text-white font-bold hover:bg-[color:var(--bright-red)]/90 transition-colors group/btn">
-                    Launch Product
-                    <ExternalLink size={16} className="group-hover/btn:translate-x-1 transition-transform" />
-                  </a>
+                  {product.demoLink ? (
+                    <a href={product.demoLink} target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()} className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-[color:var(--bright-red)] text-white font-bold hover:bg-[color:var(--bright-red)]/90 transition-colors group/btn">
+                      Launch Product
+                      <ExternalLink size={16} className="group-hover/btn:translate-x-1 transition-transform" />
+                    </a>
+                  ) : (
+                    <button type="button" disabled className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-white/10 text-gray-400 font-bold cursor-not-allowed">
+                      Launch Product (Coming Soon)
+                    </button>
+                  )}
                 </div>
               </motion.div>
             );
