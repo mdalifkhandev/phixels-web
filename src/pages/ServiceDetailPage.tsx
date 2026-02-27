@@ -5,6 +5,7 @@ import { Button } from '../components/ui/Button';
 import { Zap, Layers, Cpu, ArrowRight, Loader2 } from 'lucide-react';
 import { TechStack } from '../components/TechStack';
 import { ProfessionalReviewCarousel } from '../components/ProfessionalReviewCarousel';
+import { ServiceInlineForm } from '../components/ServiceInlineForm';
 import { apiService } from '../services/api';
 import { ServiceSubcategoryDetail } from '../types/api';
 
@@ -75,26 +76,37 @@ export function ServiceDetailPage() {
   return <main className="bg-[#050505] min-h-screen pt-40 pb-20">
     {/* Hero Section */}
     <section className="container mx-auto px-4 mb-20">
-      <motion.div initial={{
-        opacity: 0,
-        y: 20
-      }} animate={{
-        opacity: 1,
-        y: 0
-      }} className="max-w-4xl">
-        <div className="text-[color:var(--bright-red)] text-sm font-bold uppercase tracking-widest mb-4">
-          <Link to={`/services/${categoryData.slug}`} className="hover:underline">{categoryTitle}</Link> / {title}
-        </div>
-        <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 capitalize leading-tight">
-          {title}
-        </h1>
-        <p className="text-xl text-gray-400 max-w-2xl mb-8">
-          {description}
-        </p>
-        <Button variant="primary" triggerPopup className="px-8 py-4 text-lg">
-          Start Your Project
-        </Button>
-      </motion.div>
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-10 items-start">
+        <motion.div initial={{
+          opacity: 0,
+          y: 20
+        }} animate={{
+          opacity: 1,
+          y: 0
+        }} className="max-w-3xl">
+          <div className="text-[color:var(--bright-red)] text-sm font-bold uppercase tracking-widest mb-4">
+            <Link to={`/services/${categoryData.slug}`} className="hover:underline">{categoryTitle}</Link> / {title}
+          </div>
+          <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 capitalize leading-tight">
+            {title}
+          </h1>
+          <p className="text-xl text-gray-400 max-w-2xl mb-8">
+            {description}
+          </p>
+          <Button variant="primary" triggerPopup className="px-8 py-4 text-lg">
+            Start Your Project
+          </Button>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="xl:justify-self-end w-full max-w-xl"
+        >
+          <ServiceInlineForm serviceTitle={title} />
+        </motion.div>
+      </div>
     </section>
 
     {/* Key Features */}

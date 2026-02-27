@@ -6,12 +6,14 @@ interface FileUploadProps {
   onFilesChange: (files: File[]) => void;
   maxSizeMB?: number;
   acceptedTypes?: string[];
+  compact?: boolean;
 }
 export function FileUpload({
   files,
   onFilesChange,
   maxSizeMB = 10,
-  acceptedTypes = ['image/*', '.pdf', '.doc', '.docx', '.jpg', '.jpeg', '.png']
+  acceptedTypes = ['image/*', '.pdf', '.doc', '.docx', '.jpg', '.jpeg', '.png'],
+  compact = false
 }: FileUploadProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
@@ -44,15 +46,15 @@ export function FileUpload({
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
   return <div className="w-full">
-      <div onClick={() => fileInputRef.current?.click()} className="border-2 border-dashed border-white/20 rounded-xl p-6 flex flex-col items-center justify-center cursor-pointer hover:border-[color:var(--bright-red)] hover:bg-white/5 transition-all group">
+      <div onClick={() => fileInputRef.current?.click()} className={`border-2 border-dashed border-white/20 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-[color:var(--bright-red)] hover:bg-white/5 transition-all group ${compact ? 'p-3.5' : 'p-6'}`}>
         <input type="file" ref={fileInputRef} onChange={handleFileSelect} className="hidden" multiple accept={acceptedTypes.join(',')} />
-        <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-          <Upload className="text-gray-400 group-hover:text-[color:var(--bright-red)]" size={24} />
+        <div className={`rounded-full bg-white/10 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform ${compact ? 'w-9 h-9' : 'w-12 h-12'}`}>
+          <Upload className="text-gray-400 group-hover:text-[color:var(--bright-red)]" size={compact ? 18 : 24} />
         </div>
-        <p className="text-sm text-gray-300 font-medium">
+        <p className={`text-gray-300 font-medium ${compact ? 'text-xs' : 'text-sm'}`}>
           Click to upload project files
         </p>
-        <p className="text-xs text-gray-500 mt-1">Max {maxSizeMB}MB per file</p>
+        <p className={`text-gray-500 mt-1 ${compact ? 'text-[11px]' : 'text-xs'}`}>Max {maxSizeMB}MB per file</p>
       </div>
 
       {error && <div className="mt-2 flex items-center gap-2 text-red-400 text-xs">
