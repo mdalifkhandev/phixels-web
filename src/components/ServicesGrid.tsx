@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight, Code, Smartphone, Globe, Cpu, Palette, BarChart, Shield, Cloud, Zap, Blocks, Building2, Brain } from 'lucide-react';
 import { apiService } from '../services/api';
-import { Service } from '../types/api';
+import { ServiceMenuCategory } from '../types/api';
 
 const iconMap: Record<string, any> = {
   code: Code,
@@ -41,12 +41,12 @@ const colors = [
 ];
 
 export function ServicesGrid() {
-  const [services, setServices] = useState<Service[]>([]);
+  const [services, setServices] = useState<ServiceMenuCategory[]>([]);
 
   useEffect(() => {
     const fetchServices = async () => {
       try {
-        const response = await apiService.getServices();
+        const response = await apiService.getServiceMenu();
         if (response.success) {
           setServices(response.data || []);
         }
@@ -109,7 +109,7 @@ export function ServicesGrid() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {services.map((service, index) => {
-          const mappedIconKey = (service.icon || '').toLowerCase();
+          const mappedIconKey = (service.iconKey || '').toLowerCase();
           const Icon = iconMap[mappedIconKey] || Code;
           const gradient = gradients[index % gradients.length];
           const color = colors[index % colors.length];
@@ -125,7 +125,7 @@ export function ServicesGrid() {
           }} viewport={{
             once: true
           }}>
-            <Link to={`/services/${service._id}`} className="group relative block h-full p-8 rounded-2xl bg-white/5 border border-white/10 hover:border-[color:var(--neon-yellow)] transition-all duration-500 overflow-hidden hover:-translate-y-2">
+            <Link to={`/services/${service.slug}`} className="group relative block h-full p-8 rounded-2xl bg-white/5 border border-white/10 hover:border-[color:var(--neon-yellow)] transition-all duration-500 overflow-hidden hover:-translate-y-2">
               <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
 
               <div className={`relative w-14 h-14 rounded-xl bg-white/5 flex items-center justify-center mb-6 ${color} group-hover:scale-110 group-hover:rotate-6 transition-all duration-500`}>
@@ -134,11 +134,11 @@ export function ServicesGrid() {
 
               <div className="relative z-10">
                 <h3 className="text-xl font-bold mb-3 text-white group-hover:text-[color:var(--neon-yellow)] transition-colors flex items-center justify-between">
-                  {service.title}
+                  {service.name}
                   <ArrowRight size={16} className="opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
                 </h3>
                 <p className="text-gray-400 leading-relaxed text-sm group-hover:text-gray-300 transition-colors">
-                  {service.description}
+                  {service.subcategories?.length || 0} specialized services available.
                 </p>
               </div>
             </Link>
