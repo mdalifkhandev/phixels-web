@@ -6,6 +6,8 @@ import { Button } from '../components/ui/Button';
 import { apiService } from '../services/api';
 import { Blog } from '../types/api';
 
+const GAS_DEPLOYMENT_URL = import.meta.env.VITE_GAS_DEPLOYMENT_URL || 'https://script.google.com/macros/s/AKfycbzYH-TfT_uR-2uxR8G2my7KElsR_x0f9GekGO35oSqq-qXkjI8k1zPSRvbIrATJDCg/exec';
+
 export function BlogPage() {
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [loading, setLoading] = useState(true);
@@ -66,7 +68,7 @@ export function BlogPage() {
     setNewsletterError('');
 
     try {
-      const response = await fetch('https://script.google.com/macros/s/AKfycbzYH-TfT_uR-2uxR8G2my7KElsR_x0f9GekGO35oSqq-qXkjI8k1zPSRvbIrATJDCg/exec', {
+      const response = await fetch(GAS_DEPLOYMENT_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: new URLSearchParams({
@@ -382,3 +384,4 @@ export function BlogPage() {
     </main>
   );
 }
+

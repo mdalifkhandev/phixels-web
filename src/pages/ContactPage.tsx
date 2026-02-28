@@ -5,7 +5,7 @@ import { Button } from '../components/ui/Button';
 import { COUNTRY_CODES } from '../constants/common';
 
 // Google Apps Script URL
-const GAS_DEPLOYMENT_URL = 'https://script.google.com/macros/s/AKfycbzYH-TfT_uR-2uxR8G2my7KElsR_x0f9GekGO35oSqq-qXkjI8k1zPSRvbIrATJDCg/exec';
+const GAS_DEPLOYMENT_URL = import.meta.env.VITE_GAS_DEPLOYMENT_URL || 'https://script.google.com/macros/s/AKfycbzYH-TfT_uR-2uxR8G2my7KElsR_x0f9GekGO35oSqq-qXkjI8k1zPSRvbIrATJDCg/exec';
 
 const validatePhone = (phone: string, countryCode: string) => {
   const cleaned = phone.replace(/\D/g, '');

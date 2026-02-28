@@ -6,7 +6,7 @@ import { FileUpload } from './FileUpload';
 import { Button } from './ui/Button';
 
 const GAS_DEPLOYMENT_URL =
-  'https://script.google.com/macros/s/AKfycbzYH-TfT_uR-2uxR8G2my7KElsR_x0f9GekGO35oSqq-qXkjI8k1zPSRvbIrATJDCg/exec';
+  import.meta.env.VITE_GAS_DEPLOYMENT_URL || 'https://script.google.com/macros/s/AKfycbzYH-TfT_uR-2uxR8G2my7KElsR_x0f9GekGO35oSqq-qXkjI8k1zPSRvbIrATJDCg/exec';
 
 const budgetOptions = [
   'Less than $1k',
@@ -584,3 +584,4 @@ export function ServiceInlineForm({ serviceTitle }: { serviceTitle: string }) {
     </div>
   );
 }
+

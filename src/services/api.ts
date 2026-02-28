@@ -1,5 +1,5 @@
 /// <reference types="vite/client" />
-const BASE_URL = import.meta.env.VITE_API_BASE_URL; //|| "https://api.phixels.agency/api/v1";
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://api.phixels.agency/api/v1";
 
 async function handleResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
@@ -69,3 +69,4 @@ export const apiService = {
   getReviews: () =>
     fetch(`${BASE_URL}/reviews`).then((res) => handleResponse<any>(res)),
 };
+

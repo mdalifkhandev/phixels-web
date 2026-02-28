@@ -17,7 +17,7 @@ export function JobDetailPage() {
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [modalType, setModalType] = useState<'success' | 'error' | null>(null);
 
-  const GAS_DEPLOYMENT_URL = 'https://script.google.com/macros/s/AKfycbzYH-TfT_uR-2uxR8G2my7KElsR_x0f9GekGO35oSqq-qXkjI8k1zPSRvbIrATJDCg/exec';
+  const GAS_DEPLOYMENT_URL = import.meta.env.VITE_GAS_DEPLOYMENT_URL || 'https://script.google.com/macros/s/AKfycbzYH-TfT_uR-2uxR8G2my7KElsR_x0f9GekGO35oSqq-qXkjI8k1zPSRvbIrATJDCg/exec';
 
   useEffect(() => {
     const fetchJob = async () => {
@@ -247,3 +247,4 @@ export function JobDetailPage() {
     </>
   );
 }
+

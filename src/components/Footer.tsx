@@ -22,7 +22,7 @@ export function Footer() {
   >(null);
 
   const GAS_DEPLOYMENT_URL =
-    "https://script.google.com/macros/s/AKfycbzYH-TfT_uR-2uxR8G2my7KElsR_x0f9GekGO35oSqq-qXkjI8k1zPSRvbIrATJDCg/exec";
+    import.meta.env.VITE_GAS_DEPLOYMENT_URL || 'https://script.google.com/macros/s/AKfycbzYH-TfT_uR-2uxR8G2my7KElsR_x0f9GekGO35oSqq-qXkjI8k1zPSRvbIrATJDCg/exec';
 
   useEffect(() => {
     setEmail("");
@@ -433,3 +433,4 @@ export function Footer() {
     </footer>
   );
 }
+
