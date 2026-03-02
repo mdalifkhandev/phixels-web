@@ -14,8 +14,12 @@ export const apiService = {
   // Blogs
   getBlogs: () =>
     fetch(`${BASE_URL}/blogs`).then((res) => handleResponse<any>(res)),
+  getFeaturedBlogs: () =>
+    fetch(`${BASE_URL}/blogs/featured`).then((res) => handleResponse<any>(res)),
   getBlogById: (id: string) =>
     fetch(`${BASE_URL}/blogs/${id}`).then((res) => handleResponse<any>(res)),
+  getBlogBySlug: (slug: string) =>
+    fetch(`${BASE_URL}/blogs/slug/${slug}`).then((res) => handleResponse<any>(res)),
 
   // Portfolio
   getPortfolios: () =>

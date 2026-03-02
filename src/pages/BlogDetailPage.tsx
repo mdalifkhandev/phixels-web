@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { Calendar, User, Clock, Share2, ArrowLeft, Loader2 } from 'lucide-react';
 import { apiService } from '../services/api';
 import { Blog } from '../types/api';
+import { renderRichTextToHtml } from '../utils/richText';
 
 export function BlogDetailPage() {
   const { id } = useParams();
@@ -15,11 +16,24 @@ export function BlogDetailPage() {
       if (!id) return;
       try {
         setLoading(true);
-        const response = await apiService.getBlogById(id);
-        if (response.success) {
-          setBlog(response.data);
+        const slugResponse = await apiService.getBlogBySlug(id);
+        if (slugResponse.success && slugResponse.data) {
+          if (slugResponse.data.status !== 'published') {
+            setError('Blog not found');
+            return;
+          }
+          setBlog(slugResponse.data);
         } else {
-          setError(response.message || 'Blog not found');
+          const response = await apiService.getBlogById(id);
+          if (response.success) {
+            if (response.data.status !== 'published') {
+              setError('Blog not found');
+              return;
+            }
+            setBlog(response.data);
+          } else {
+            setError(response.message || 'Blog not found');
+          }
         }
       } catch (err: any) {
         setError(err.message || 'An error occurred while fetching the blog');
@@ -59,7 +73,7 @@ export function BlogDetailPage() {
 
         <header className="mb-12 text-center">
           <div className="inline-block px-4 py-1 rounded-full bg-[color:var(--bright-red)]/10 text-[color:var(--bright-red)] text-sm font-bold mb-6">
-            {Array.isArray(blog.tags) ? blog.tags[0] : 'Technology'}
+            {blog.categoryName || (Array.isArray(blog.tags) ? blog.tags[0] : 'Technology')}
           </div>
           <h1 className="text-4xl md:text-6xl font-bold text-white mb-8 capitalize leading-tight">
             {blog.title}
@@ -81,13 +95,10 @@ export function BlogDetailPage() {
           <img src={blog.image} alt={blog.title} className="w-full h-full object-cover" />
         </div>
 
-        <div className="prose prose-invert prose-lg max-w-none">
-          {blog.details.split('\n').map((para, i) => (
-            <p key={i} className={i === 0 ? "lead text-xl text-gray-300 mb-8" : "text-gray-300 mb-6"}>
-              {para}
-            </p>
-          ))}
-        </div>
+        <div
+          className="prose prose-invert prose-lg max-w-none [&_span]:text-inherit"
+          dangerouslySetInnerHTML={{ __html: renderRichTextToHtml(blog.details) }}
+        />
 
         <div className="mt-12 pt-8 border-t border-white/10 flex justify-between items-center">
           <div className="text-white font-bold">Share this article:</div>

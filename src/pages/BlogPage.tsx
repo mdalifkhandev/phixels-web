@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '../components/ui/Button';
 import { apiService } from '../services/api';
 import { Blog } from '../types/api';
+import { stripRichText } from '../utils/richText';
 
 const GAS_DEPLOYMENT_URL = import.meta.env.VITE_GAS_DEPLOYMENT_URL || 'https://script.google.com/macros/s/AKfycbzYH-TfT_uR-2uxR8G2my7KElsR_x0f9GekGO35oSqq-qXkjI8k1zPSRvbIrATJDCg/exec';
 
@@ -28,7 +29,7 @@ export function BlogPage() {
         setLoading(true);
         const response = await apiService.getBlogs();
         if (response.success) {
-          setBlogs(response.data);
+          setBlogs(response.data.filter((blog) => blog.status === 'published'));
         } else {
           setError(response.message || 'Failed to fetch blogs');
         }
@@ -42,16 +43,18 @@ export function BlogPage() {
     fetchBlogs();
   }, []);
 
-  const categories = ['All', ...new Set(blogs.flatMap(blog => blog.tags).filter(Boolean))];
+  const categories = ['All', ...new Set(blogs.map((blog) => blog.categoryName || 'General'))];
 
   const filteredPosts = blogs.filter(post => {
     const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      post.details.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'All' || post.tags.includes(selectedCategory);
+      stripRichText(post.details).toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory =
+      selectedCategory === 'All' || (post.categoryName || 'General') === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
-  const featuredPost = filteredPosts.length > 0 ? filteredPosts[0] : null;
+  const featuredPost =
+    filteredPosts.find((post) => post.isFeatured) || (filteredPosts.length > 0 ? filteredPosts[0] : null);
 
   const handleNewsletterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -198,7 +201,7 @@ export function BlogPage() {
 
         {/* Featured Post */}
         {selectedCategory === 'All' && !searchTerm && featuredPost && (
-          <Link to={`/blog/${featuredPost._id}`}>
+          <Link to={`/blog/${featuredPost.slug || featuredPost._id}`}>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -220,7 +223,7 @@ export function BlogPage() {
                   {featuredPost.title}
                 </h2>
                 <p className="text-xl text-gray-300 max-w-2xl mb-8 line-clamp-2">
-                  {featuredPost.details}
+                  {stripRichText(featuredPost.details)}
                 </p>
                 <div className="flex items-center gap-6 text-gray-400">
                   <span className="flex items-center gap-2">
@@ -265,7 +268,7 @@ export function BlogPage() {
                     <span>{cat}</span>
                     {cat !== 'All' && (
                       <span className="text-xs bg-black/20 px-2 py-1 rounded">
-                        {blogs.filter(p => p.tags.includes(cat)).length}
+                        {blogs.filter(p => (p.categoryName || 'General') === cat).length}
                       </span>
                     )}
                   </li>
@@ -325,7 +328,7 @@ export function BlogPage() {
                     key={post._id}
                     className="group bg-white/5 rounded-2xl border border-white/10 overflow-hidden hover:border-[color:var(--bright-red)] transition-all duration-300 flex flex-col"
                   >
-                    <Link to={`/blog/${post._id}`} className="flex-1 flex flex-col">
+                    <Link to={`/blog/${post.slug || post._id}`} className="flex-1 flex flex-col">
                       <div className="relative aspect-video overflow-hidden bg-gray-800">
                         <img
                           src={post.image}
@@ -335,7 +338,7 @@ export function BlogPage() {
                         />
                         <div className="absolute top-4 left-4">
                           <span className="px-3 py-1 rounded-full bg-black/70 backdrop-blur-md text-white text-xs font-bold border border-white/10">
-                            {post.tags[0] || 'Article'}
+                            {post.categoryName || post.tags[0] || 'Article'}
                           </span>
                         </div>
                       </div>
@@ -351,7 +354,7 @@ export function BlogPage() {
                           {post.title}
                         </h2>
                         <p className="text-gray-400 text-sm mb-4 line-clamp-2 flex-1">
-                          {post.details}
+                          {stripRichText(post.details)}
                         </p>
 
                         <div className="flex items-center justify-between pt-4 border-t border-white/5 mt-auto">

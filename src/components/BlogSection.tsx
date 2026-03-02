@@ -1,8 +1,41 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowRight, Calendar, Clock } from 'lucide-react';
 import { featuredPosts } from '../constants/common';
+import { apiService } from '../services/api';
+import { Blog } from '../types/api';
+import { stripRichText } from '../utils/richText';
 export function BlogSection() {
+  const [posts, setPosts] = useState<Blog[]>([]);
+
+  useEffect(() => {
+    const loadFeatured = async () => {
+      try {
+        const response = await apiService.getFeaturedBlogs();
+        if (response?.success && Array.isArray(response.data)) {
+          setPosts(response.data.filter((post) => post.status === 'published'));
+        }
+      } catch {
+        // Keep UI fallback from static featured posts.
+      }
+    };
+    loadFeatured();
+  }, []);
+
+  const renderPosts = posts.length > 0
+    ? posts.slice(0, 3).map((post) => ({
+        id: post._id,
+        slug: post.slug || post._id,
+        image: post.image,
+        title: post.title,
+        category: post.categoryName || 'General',
+        excerpt: stripRichText(post.details || '').slice(0, 110),
+        date: new Date(post.createdAt || post.createTime || Date.now()).toLocaleDateString(),
+        readTime: post.readingTime || '5 min',
+      }))
+    : featuredPosts;
+
   return <section className="py-24 bg-[#050505]">
     <div className="container mx-auto px-4">
       <div className="flex justify-between items-end mb-12">
@@ -22,7 +55,7 @@ export function BlogSection() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {featuredPosts.map((post, index) => <motion.article key={post.id} initial={{
+        {renderPosts.map((post, index) => <motion.article key={post.id} initial={{
           opacity: 0,
           y: 20
         }} whileInView={{

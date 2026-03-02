@@ -13,9 +13,13 @@ export interface Blog {
     details: string;
     tags: string[];
     image: string;
+    categoryName?: string;
     createdAt: string;
+    createTime?: string;
     updatedAt?: string;
-    slug?: string; // For frontend compatibility if needed
+    slug?: string;
+    status?: 'draft' | 'published';
+    isFeatured?: boolean;
 }
 
 export interface Portfolio {
