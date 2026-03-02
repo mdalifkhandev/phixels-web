@@ -1,20 +1,30 @@
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowRight, Calendar, Clock } from 'lucide-react';
 import { featuredPosts } from '../constants/common';
 import { apiService } from '../services/api';
-import { Blog } from '../types/api';
+import { Blog, ServiceCategory } from '../types/api';
 import { stripRichText } from '../utils/richText';
 export function BlogSection() {
+  const navigate = useNavigate();
   const [posts, setPosts] = useState<Blog[]>([]);
+  const [serviceCategories, setServiceCategories] = useState<ServiceCategory[]>([]);
 
   useEffect(() => {
     const loadFeatured = async () => {
       try {
-        const response = await apiService.getFeaturedBlogs();
+        const [response, categoriesResponse] = await Promise.all([
+          apiService.getFeaturedBlogs(),
+          apiService.getServiceCategories(),
+        ]);
         if (response?.success && Array.isArray(response.data)) {
           setPosts(response.data.filter((post) => post.status === 'published'));
+        }
+        if (categoriesResponse?.success && Array.isArray(categoriesResponse.data)) {
+          setServiceCategories(
+            categoriesResponse.data.filter((service: ServiceCategory) => service.isActive !== false),
+          );
         }
       } catch {
         // Keep UI fallback from static featured posts.
@@ -33,8 +43,14 @@ export function BlogSection() {
         excerpt: stripRichText(post.details || '').slice(0, 110),
         date: new Date(post.createdAt || post.createTime || Date.now()).toLocaleDateString(),
         readTime: post.readingTime || '5 min',
+        serviceId: post.serviceId || '',
       }))
     : featuredPosts;
+
+  const serviceById = useMemo(
+    () => new Map(serviceCategories.map((service) => [service._id, service])),
+    [serviceCategories],
+  );
 
   return <section className="py-24 bg-[#050505]">
     <div className="container mx-auto px-4">
@@ -93,6 +109,20 @@ export function BlogSection() {
                 <Clock size={14} />
                 <span>{post.readTime} read</span>
               </div>
+              {'serviceId' in post && (post as { serviceId?: string }).serviceId && serviceById.get((post as { serviceId?: string }).serviceId || '') && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const related = serviceById.get((post as { serviceId?: string }).serviceId || '');
+                    if (related) navigate(`/services/${related.slug}`);
+                  }}
+                  className="text-[color:var(--neon-yellow)] hover:underline"
+                >
+                  {serviceById.get((post as { serviceId?: string }).serviceId || '')?.name}
+                </button>
+              )}
             </div>
           </Link>
         </motion.article>)}

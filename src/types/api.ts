@@ -20,6 +20,7 @@ export interface Blog {
     slug?: string;
     status?: 'draft' | 'published';
     isFeatured?: boolean;
+    serviceId?: string;
 }
 
 export interface Portfolio {

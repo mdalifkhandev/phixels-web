@@ -1,16 +1,18 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect, useMemo } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { Search, Share2, Calendar, Clock, CheckCircle, X, Loader2, User } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '../components/ui/Button';
 import { apiService } from '../services/api';
-import { Blog } from '../types/api';
+import { Blog, ServiceCategory } from '../types/api';
 import { stripRichText } from '../utils/richText';
 
 const GAS_DEPLOYMENT_URL = import.meta.env.VITE_GAS_DEPLOYMENT_URL || 'https://script.google.com/macros/s/AKfycbzYH-TfT_uR-2uxR8G2my7KElsR_x0f9GekGO35oSqq-qXkjI8k1zPSRvbIrATJDCg/exec';
 
 export function BlogPage() {
+  const navigate = useNavigate();
   const [blogs, setBlogs] = useState<Blog[]>([]);
+  const [serviceCategories, setServiceCategories] = useState<ServiceCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -28,10 +30,16 @@ export function BlogPage() {
       try {
         setLoading(true);
         const response = await apiService.getBlogs();
+        const serviceResponse = await apiService.getServiceCategories();
         if (response.success) {
           setBlogs(response.data.filter((blog) => blog.status === 'published'));
         } else {
           setError(response.message || 'Failed to fetch blogs');
+        }
+        if (serviceResponse.success) {
+          setServiceCategories(
+            serviceResponse.data.filter((service: ServiceCategory) => service.isActive !== false),
+          );
         }
       } catch (err: any) {
         setError(err.message || 'An error occurred while fetching blogs');
@@ -44,6 +52,10 @@ export function BlogPage() {
   }, []);
 
   const categories = ['All', ...new Set(blogs.map((blog) => blog.categoryName || 'General'))];
+  const serviceById = useMemo(
+    () => new Map(serviceCategories.map((service) => [service._id, service])),
+    [serviceCategories],
+  );
 
   const filteredPosts = blogs.filter(post => {
     const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -232,6 +244,19 @@ export function BlogPage() {
                   <span className="flex items-center gap-2">
                     <Clock size={18} /> {featuredPost.readingTime} read
                   </span>
+                  {featuredPost.serviceId && serviceById.get(featuredPost.serviceId) && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        navigate(`/services/${serviceById.get(featuredPost.serviceId!)?.slug}`);
+                      }}
+                      className="text-[color:var(--neon-yellow)] hover:underline text-sm"
+                    >
+                      {serviceById.get(featuredPost.serviceId)?.name}
+                    </button>
+                  )}
                 </div>
               </div>
             </motion.div>
@@ -362,12 +387,27 @@ export function BlogPage() {
                             <span>{new Date(post.createdAt).toLocaleDateString()}</span>
                             <span>{post.readingTime} read</span>
                           </div>
-                          <button
-                            onClick={e => handleShare(e, post.title, post._id)}
-                            className="text-gray-500 hover:text-white transition-colors"
-                          >
-                            <Share2 size={16} />
-                          </button>
+                          <div className="flex items-center gap-3">
+                            {post.serviceId && serviceById.get(post.serviceId) && (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  navigate(`/services/${serviceById.get(post.serviceId!)?.slug}`);
+                                }}
+                                className="text-[11px] text-[color:var(--neon-yellow)] hover:underline"
+                              >
+                                {serviceById.get(post.serviceId)?.name}
+                              </button>
+                            )}
+                            <button
+                              onClick={e => handleShare(e, post.title, post._id)}
+                              className="text-gray-500 hover:text-white transition-colors"
+                            >
+                              <Share2 size={16} />
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </Link>

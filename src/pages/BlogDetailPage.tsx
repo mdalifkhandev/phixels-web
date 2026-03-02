@@ -2,12 +2,13 @@ import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Calendar, User, Clock, Share2, ArrowLeft, Loader2 } from 'lucide-react';
 import { apiService } from '../services/api';
-import { Blog } from '../types/api';
+import { Blog, ServiceCategory } from '../types/api';
 import { renderRichTextToHtml } from '../utils/richText';
 
 export function BlogDetailPage() {
   const { id } = useParams();
   const [blog, setBlog] = useState<Blog | null>(null);
+  const [serviceCategory, setServiceCategory] = useState<ServiceCategory | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -17,12 +18,24 @@ export function BlogDetailPage() {
       try {
         setLoading(true);
         const slugResponse = await apiService.getBlogBySlug(id);
+        const categoriesResponse = await apiService.getServiceCategories();
+        const categories: ServiceCategory[] =
+          categoriesResponse?.success && Array.isArray(categoriesResponse.data)
+            ? categoriesResponse.data
+            : [];
         if (slugResponse.success && slugResponse.data) {
           if (slugResponse.data.status !== 'published') {
             setError('Blog not found');
             return;
           }
           setBlog(slugResponse.data);
+          if (slugResponse.data.serviceId) {
+            setServiceCategory(
+              categories.find((category) => category._id === slugResponse.data.serviceId) || null,
+            );
+          } else {
+            setServiceCategory(null);
+          }
         } else {
           const response = await apiService.getBlogById(id);
           if (response.success) {
@@ -31,6 +44,13 @@ export function BlogDetailPage() {
               return;
             }
             setBlog(response.data);
+            if (response.data.serviceId) {
+              setServiceCategory(
+                categories.find((category) => category._id === response.data.serviceId) || null,
+              );
+            } else {
+              setServiceCategory(null);
+            }
           } else {
             setError(response.message || 'Blog not found');
           }
@@ -88,6 +108,14 @@ export function BlogDetailPage() {
             <div className="flex items-center gap-2">
               <Clock size={16} /> {blog.readingTime} read
             </div>
+            {serviceCategory && (
+              <Link
+                to={`/services/${serviceCategory.slug}`}
+                className="text-[color:var(--neon-yellow)] hover:underline"
+              >
+                {serviceCategory.name}
+              </Link>
+            )}
           </div>
         </header>
 
