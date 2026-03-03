@@ -1,10 +1,21 @@
-import { useParams, Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Button } from '../components/ui/Button';
-import { ExternalLink, Star, Users, Download, ArrowLeft, CheckCircle, Globe, Smartphone, Laptop, Loader2 } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { Product } from '../types/api';
-import { apiService } from '../services/api';
+import { useParams, Link } from "react-router-dom";
+import { motion } from "framer-motion";
+import { Button } from "../components/ui/Button";
+import {
+  ExternalLink,
+  Star,
+  Users,
+  Download,
+  ArrowLeft,
+  CheckCircle,
+  Globe,
+  Smartphone,
+  Laptop,
+  Loader2,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { Product } from "../types/api";
+import { apiService } from "../services/api";
 
 export function ProductDetailPage() {
   const { id } = useParams();
@@ -23,11 +34,11 @@ export function ProductDetailPage() {
         if (response.success) {
           setProduct(response.data);
         } else {
-          setError(response.message || 'Failed to load product');
+          setError(response.message || "Failed to load product");
         }
       } catch (err: any) {
-        console.error('Error fetching product:', err);
-        setError(err.message || 'Failed to load product');
+        console.error("Error fetching product:", err);
+        setError(err.message || "Failed to load product");
       } finally {
         setLoading(false);
       }
@@ -36,16 +47,18 @@ export function ProductDetailPage() {
     fetchProduct();
   }, [id]);
 
-  const getPlatformIcon = (category: string = '') => {
-    if (category.toLowerCase().includes('web')) return Globe;
-    if (category.toLowerCase().includes('mobile')) return Smartphone;
+  const getPlatformIcon = (category: string = "") => {
+    if (category.toLowerCase().includes("web")) return Globe;
+    if (category.toLowerCase().includes("mobile")) return Smartphone;
     return Laptop;
   };
 
-  const getProductColor = (category: string = '') => {
-    if (category.toLowerCase().includes('web')) return 'from-blue-500 to-purple-500';
-    if (category.toLowerCase().includes('mobile')) return 'from-orange-500 to-red-500';
-    return 'from-emerald-500 to-teal-500';
+  const getProductColor = (category: string = "") => {
+    if (category.toLowerCase().includes("web"))
+      return "from-blue-500 to-purple-500";
+    if (category.toLowerCase().includes("mobile"))
+      return "from-orange-500 to-red-500";
+    return "from-emerald-500 to-teal-500";
   };
 
   if (loading) {
@@ -61,8 +74,13 @@ export function ProductDetailPage() {
     return (
       <div className="min-h-screen bg-[#050505] flex items-center justify-center text-white">
         <div className="text-center">
-          <h1 className="text-4xl font-bold mb-4">{error || 'Product Not Found'}</h1>
-          <Link to="/products" className="text-[color:var(--bright-red)] hover:underline">
+          <h1 className="text-4xl font-bold mb-4">
+            {error || "Product Not Found"}
+          </h1>
+          <Link
+            to="/products"
+            className="text-[color:var(--bright-red)] hover:underline"
+          >
             Back to Products
           </Link>
         </div>
@@ -77,7 +95,10 @@ export function ProductDetailPage() {
     <main className="bg-[#050505] min-h-screen pt-40 pb-20">
       <div className="container mx-auto px-4">
         {/* Back Button */}
-        <Link to="/products" className="inline-flex items-center gap-2 text-gray-400 hover:text-white mb-8 transition-colors">
+        <Link
+          to="/products"
+          className="inline-flex items-center gap-2 text-gray-400 hover:text-white mb-8 transition-colors"
+        >
           <ArrowLeft size={16} /> Back to Products
         </Link>
 
@@ -95,21 +116,27 @@ export function ProductDetailPage() {
             <h1 className="text-5xl md:text-6xl font-bold text-white mb-4">
               {product.name}
             </h1>
-            <p className="text-xl text-gray-400 mb-6">{product.tagline || product.description}</p>
+            <p className="text-xl text-gray-400 mb-6">
+              {product.tagline || product.description}
+            </p>
 
             {/* Stats */}
             <div className="flex items-center gap-6 mb-8 pb-8 border-b border-white/10">
               <div className="flex items-center gap-2">
                 <Users size={20} className="text-gray-500" />
                 <span className="text-white font-bold">
-                  {product.userCount != null ? product.userCount.toLocaleString() : 'N/A'}
+                  {product.userCount != null
+                    ? product.userCount.toLocaleString()
+                    : "N/A"}
                 </span>
                 <span className="text-gray-500 text-sm">Users</span>
               </div>
               <div className="flex items-center gap-2">
                 <Star size={20} className="text-yellow-500 fill-yellow-500" />
                 <span className="text-white font-bold">
-                  {product.reviewRating != null ? product.reviewRating.toFixed(1) : 'N/A'}
+                  {product.reviewRating != null
+                    ? product.reviewRating.toFixed(1)
+                    : "N/A"}
                 </span>
                 <span className="text-gray-500 text-sm">Rating</span>
               </div>
@@ -127,17 +154,34 @@ export function ProductDetailPage() {
             {/* CTA */}
             <div className="flex flex-col sm:flex-row gap-4">
               {product.demoLink ? (
-                <a href={product.demoLink} target="_blank" rel="noopener noreferrer" className="flex-1">
-                  <Button variant="primary" glow className="w-full py-4 text-lg">
+                <a
+                  href={product.demoLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1"
+                >
+                  <Button
+                    variant="primary"
+                    glow
+                    className="w-full py-4 text-lg"
+                  >
                     Launch Product <ExternalLink size={20} className="ml-2" />
                   </Button>
                 </a>
               ) : (
-                <Button variant="outline" className="flex-1 py-4 text-lg opacity-60 cursor-not-allowed" disabled>
+                <Button
+                  variant="outline"
+                  className="flex-1 py-4 text-lg opacity-60 cursor-not-allowed"
+                  disabled
+                >
                   Launch Product (Coming Soon)
                 </Button>
               )}
-              <Button variant="outline" triggerPopup className="flex-1 py-4 text-lg">
+              <Button
+                variant="outline"
+                triggerPopup
+                className="flex-1 py-4 text-lg"
+              >
                 Contact Sales
               </Button>
             </div>
@@ -151,29 +195,34 @@ export function ProductDetailPage() {
           >
             <div className="aspect-video rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
               <img
-                src={product.images?.[0] || 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=80'}
+                src={
+                  product.images?.[0] ||
+                  "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=80"
+                }
                 alt={product.name}
                 className="w-full h-full object-cover"
               />
             </div>
-            <div className={`absolute -inset-4 bg-gradient-to-br ${colorClass} opacity-20 blur-3xl -z-10`} />
+            <div
+              className={`absolute -inset-4 bg-gradient-to-br ${colorClass} opacity-20 blur-3xl -z-10`}
+            />
           </motion.div>
         </div>
 
         {/* Description */}
-        <motion.section
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="mb-20"
-        >
-          <h2 className="text-3xl font-bold text-white mb-6">
-            About {product.name}
-          </h2>
-          <p className="text-lg text-gray-400 leading-relaxed max-w-4xl">
-            {product.description}
-          </p>
-        </motion.section>
+        {/* <motion.section
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="mb-20"
+          >
+            <h2 className="text-3xl font-bold text-white mb-6">
+              About {product.name}
+            </h2>
+            <p className="text-lg text-gray-400 leading-relaxed max-w-4xl">
+              {product.description}
+            </p>
+          </motion.section> */}
 
         {/* Features */}
         <motion.section
@@ -193,7 +242,10 @@ export function ProductDetailPage() {
                 transition={{ delay: i * 0.1 }}
                 className="flex items-start gap-4 p-6 rounded-xl bg-white/5 border border-white/10 hover:border-[color:var(--bright-red)] transition-colors"
               >
-                <CheckCircle size={24} className="text-[color:var(--vibrant-green)] shrink-0 mt-1" />
+                <CheckCircle
+                  size={24}
+                  className="text-[color:var(--vibrant-green)] shrink-0 mt-1"
+                />
                 <span className="text-lg text-gray-300">{feature}</span>
               </motion.div>
             ))}
@@ -224,14 +276,26 @@ export function ProductDetailPage() {
               improve their workflow and achieve more.
             </p>
             {product.demoLink ? (
-              <a href={product.demoLink} target="_blank" rel="noopener noreferrer">
-                <Button variant="primary" glow className="text-lg px-10 py-5 rounded-full shadow-xl shadow-[color:var(--bright-red)]/20 hover:shadow-[color:var(--bright-red)]/40 transition-all">
-                  Launch {product.name}{' '}
+              <a
+                href={product.demoLink}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Button
+                  variant="primary"
+                  glow
+                  className="text-lg px-10 py-5 rounded-full shadow-xl shadow-[color:var(--bright-red)]/20 hover:shadow-[color:var(--bright-red)]/40 transition-all"
+                >
+                  Launch {product.name}{" "}
                   <ExternalLink size={20} className="ml-2" />
                 </Button>
               </a>
             ) : (
-              <Button variant="outline" className="text-lg px-10 py-5 rounded-full opacity-60 cursor-not-allowed" disabled>
+              <Button
+                variant="outline"
+                className="text-lg px-10 py-5 rounded-full opacity-60 cursor-not-allowed"
+                disabled
+              >
                 Launch {product.name} (Coming Soon)
               </Button>
             )}
