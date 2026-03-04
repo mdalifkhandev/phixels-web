@@ -72,5 +72,9 @@ export const apiService = {
   // Reviews
   getReviews: () =>
     fetch(`${BASE_URL}/reviews`).then((res) => handleResponse<any>(res)),
+
+  // Authors
+  getAuthors: () =>
+    fetch(`${BASE_URL}/authors`).then((res) => handleResponse<any>(res)),
 };
 

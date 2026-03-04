@@ -1,18 +1,28 @@
-import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { Calendar, User, Clock, Share2, ArrowLeft, Loader2 } from 'lucide-react';
-import { apiService } from '../services/api';
-import { Blog, ServiceCategory } from '../types/api';
-import { renderRichTextToHtml } from '../utils/richText';
+import { useEffect, useState } from "react";
+import { useParams, Link } from "react-router-dom";
+import {
+  Calendar,
+  User,
+  Clock,
+  Share2,
+  ArrowLeft,
+  Loader2,
+} from "lucide-react";
+import { apiService } from "../services/api";
+import { Blog, ServiceCategory, Author } from "../types/api";
+import { renderRichTextToHtml } from "../utils/richText";
 
 export function BlogDetailPage() {
   const { id } = useParams();
   const [blog, setBlog] = useState<Blog | null>(null);
-  const [serviceCategory, setServiceCategory] = useState<ServiceCategory | null>(null);
+  const [serviceCategory, setServiceCategory] =
+    useState<ServiceCategory | null>(null);
+  const [author, setAuthor] = useState<Author | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    0;
     const fetchBlog = async () => {
       if (!id) return;
       try {
@@ -23,15 +33,33 @@ export function BlogDetailPage() {
           categoriesResponse?.success && Array.isArray(categoriesResponse.data)
             ? categoriesResponse.data
             : [];
+
+        const authorsResponse = await apiService.getAuthors();
+        const authors: Author[] =
+          authorsResponse?.success && Array.isArray(authorsResponse.data)
+            ? authorsResponse.data
+            : [];
         if (slugResponse.success && slugResponse.data) {
-          if (slugResponse.data.status !== 'published') {
-            setError('Blog not found');
+          if (slugResponse.data.status !== "published") {
+            setError("Blog not found");
             return;
           }
           setBlog(slugResponse.data);
+
+          if (authors.length > 0) {
+            const foundAuthor = authors.find((a) =>
+              slugResponse.data.authorId
+                ? a._id === slugResponse.data.authorId
+                : a.name === slugResponse.data.writer,
+            );
+            if (foundAuthor) setAuthor(foundAuthor);
+          }
+
           if (slugResponse.data.serviceId) {
             setServiceCategory(
-              categories.find((category) => category._id === slugResponse.data.serviceId) || null,
+              categories.find(
+                (category) => category._id === slugResponse.data.serviceId,
+              ) || null,
             );
           } else {
             setServiceCategory(null);
@@ -39,24 +67,36 @@ export function BlogDetailPage() {
         } else {
           const response = await apiService.getBlogById(id);
           if (response.success) {
-            if (response.data.status !== 'published') {
-              setError('Blog not found');
+            if (response.data.status !== "published") {
+              setError("Blog not found");
               return;
             }
             setBlog(response.data);
+
+            if (authors.length > 0) {
+              const foundAuthor = authors.find((a) =>
+                response.data.authorId
+                  ? a._id === response.data.authorId
+                  : a.name === response.data.writer,
+              );
+              if (foundAuthor) setAuthor(foundAuthor);
+            }
+
             if (response.data.serviceId) {
               setServiceCategory(
-                categories.find((category) => category._id === response.data.serviceId) || null,
+                categories.find(
+                  (category) => category._id === response.data.serviceId,
+                ) || null,
               );
             } else {
               setServiceCategory(null);
             }
           } else {
-            setError(response.message || 'Blog not found');
+            setError(response.message || "Blog not found");
           }
         }
       } catch (err: any) {
-        setError(err.message || 'An error occurred while fetching the blog');
+        setError(err.message || "An error occurred while fetching the blog");
       } finally {
         setLoading(false);
       }
@@ -76,8 +116,13 @@ export function BlogDetailPage() {
   if (error || !blog) {
     return (
       <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center p-4">
-        <h2 className="text-2xl font-bold text-white mb-4">{error || 'Blog not found'}</h2>
-        <Link to="/blog" className="flex items-center gap-2 text-[color:var(--bright-red)] hover:underline">
+        <h2 className="text-2xl font-bold text-white mb-4">
+          {error || "Blog not found"}
+        </h2>
+        <Link
+          to="/blog"
+          className="flex items-center gap-2 text-[color:var(--bright-red)] hover:underline"
+        >
           <ArrowLeft size={20} /> Back to Blog
         </Link>
       </div>
@@ -87,23 +132,44 @@ export function BlogDetailPage() {
   return (
     <main className="bg-[#050505] min-h-screen pt-48 pb-20">
       <article className="container mx-auto px-4 max-w-4xl">
-        <Link to="/blog" className="inline-flex items-center gap-2 text-gray-400 hover:text-white mb-8 transition-colors">
+        <Link
+          to="/blog"
+          className="inline-flex items-center gap-2 text-gray-400 hover:text-white mb-8 transition-colors"
+        >
           <ArrowLeft size={18} /> Back to Blog
         </Link>
 
         <header className="mb-12 text-center">
           <div className="inline-block px-4 py-1 rounded-full bg-[color:var(--bright-red)]/10 text-[color:var(--bright-red)] text-sm font-bold mb-6">
-            {blog.categoryName || (Array.isArray(blog.tags) ? blog.tags[0] : 'Technology')}
+            {blog.categoryName ||
+              (Array.isArray(blog.tags) ? blog.tags[0] : "Technology")}
           </div>
           <h1 className="text-4xl md:text-6xl font-bold text-white mb-8 capitalize leading-tight">
             {blog.title}
           </h1>
           <div className="flex flex-wrap items-center justify-center gap-6 text-gray-400 text-sm">
-            <div className="flex items-center gap-2">
-              <User size={16} /> {blog.writer}
+            <div className="flex items-center gap-3">
+              {author?.profileImage ? (
+                <img
+                  src={author.profileImage}
+                  alt={blog.writer}
+                  className="w-8 h-8 rounded-full object-cover"
+                />
+              ) : (
+                <User size={18} />
+              )}
+              <div>
+                <div className="text-white font-medium">{blog.writer}</div>
+                {author?.role && (
+                  <div className="text-gray-500 text-xs text-left">
+                    {author.role}
+                  </div>
+                )}
+              </div>
             </div>
             <div className="flex items-center gap-2">
-              <Calendar size={16} /> {new Date(blog.createdAt).toLocaleDateString()}
+              <Calendar size={16} />{" "}
+              {new Date(blog.createdAt).toLocaleDateString()}
             </div>
             <div className="flex items-center gap-2">
               <Clock size={16} /> {blog.readingTime} read
@@ -120,12 +186,18 @@ export function BlogDetailPage() {
         </header>
 
         <div className="aspect-video rounded-2xl overflow-hidden mb-12">
-          <img src={blog.image} alt={blog.title} className="w-full h-full object-cover" />
+          <img
+            src={blog.image}
+            alt={blog.title}
+            className="w-full h-full object-cover"
+          />
         </div>
 
         <div
           className="prose prose-invert prose-lg max-w-none [&_span]:text-inherit"
-          dangerouslySetInnerHTML={{ __html: renderRichTextToHtml(blog.details) }}
+          dangerouslySetInnerHTML={{
+            __html: renderRichTextToHtml(blog.details),
+          }}
         />
 
         <div className="mt-12 pt-8 border-t border-white/10 flex justify-between items-center">

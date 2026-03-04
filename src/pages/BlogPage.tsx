@@ -1,28 +1,42 @@
-import { useState, useEffect, useMemo } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Search, Share2, Calendar, Clock, CheckCircle, X, Loader2, User } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Button } from '../components/ui/Button';
-import { apiService } from '../services/api';
-import { Blog, ServiceCategory } from '../types/api';
-import { stripRichText } from '../utils/richText';
+import { useState, useEffect, useMemo } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import {
+  Search,
+  Share2,
+  Calendar,
+  Clock,
+  CheckCircle,
+  X,
+  Loader2,
+  User,
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Button } from "../components/ui/Button";
+import { apiService } from "../services/api";
+import { Blog, ServiceCategory, Author } from "../types/api";
+import { stripRichText } from "../utils/richText";
 
-const GAS_DEPLOYMENT_URL = import.meta.env.VITE_GAS_DEPLOYMENT_URL || 'https://script.google.com/macros/s/AKfycbzYH-TfT_uR-2uxR8G2my7KElsR_x0f9GekGO35oSqq-qXkjI8k1zPSRvbIrATJDCg/exec';
+const GAS_DEPLOYMENT_URL =
+  import.meta.env.VITE_GAS_DEPLOYMENT_URL ||
+  "https://script.google.com/macros/s/AKfycbzYH-TfT_uR-2uxR8G2my7KElsR_x0f9GekGO35oSqq-qXkjI8k1zPSRvbIrATJDCg/exec";
 
 export function BlogPage() {
   const navigate = useNavigate();
   const [blogs, setBlogs] = useState<Blog[]>([]);
-  const [serviceCategories, setServiceCategories] = useState<ServiceCategory[]>([]);
+  const [serviceCategories, setServiceCategories] = useState<ServiceCategory[]>(
+    [],
+  );
+  const [authors, setAuthors] = useState<Author[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
 
   // Newsletter States
-  const [newsletterEmail, setNewsletterEmail] = useState('');
+  const [newsletterEmail, setNewsletterEmail] = useState("");
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [newsletterLoading, setNewsletterLoading] = useState(false);
-  const [newsletterError, setNewsletterError] = useState('');
+  const [newsletterError, setNewsletterError] = useState("");
   const [newsletterSubscribed, setNewsletterSubscribed] = useState(false);
 
   useEffect(() => {
@@ -32,17 +46,26 @@ export function BlogPage() {
         const response = await apiService.getBlogs();
         const serviceResponse = await apiService.getServiceCategories();
         if (response.success) {
-          setBlogs(response.data.filter((blog) => blog.status === 'published'));
+          setBlogs(
+            response.data.filter((blog: Blog) => blog.status === "published"),
+          );
         } else {
-          setError(response.message || 'Failed to fetch blogs');
+          setError(response.message || "Failed to fetch blogs");
         }
         if (serviceResponse.success) {
           setServiceCategories(
-            serviceResponse.data.filter((service: ServiceCategory) => service.isActive !== false),
+            serviceResponse.data.filter(
+              (service: ServiceCategory) => service.isActive !== false,
+            ),
           );
         }
+
+        const authorsResponse = await apiService.getAuthors();
+        if (authorsResponse.success) {
+          setAuthors(authorsResponse.data);
+        }
       } catch (err: any) {
-        setError(err.message || 'An error occurred while fetching blogs');
+        setError(err.message || "An error occurred while fetching blogs");
       } finally {
         setLoading(false);
       }
@@ -51,22 +74,30 @@ export function BlogPage() {
     fetchBlogs();
   }, []);
 
-  const categories = ['All', ...new Set(blogs.map((blog) => blog.categoryName || 'General'))];
+  const categories = [
+    "All",
+    ...new Set(blogs.map((blog) => blog.categoryName || "General")),
+  ];
   const serviceById = useMemo(
     () => new Map(serviceCategories.map((service) => [service._id, service])),
     [serviceCategories],
   );
 
-  const filteredPosts = blogs.filter(post => {
-    const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      stripRichText(post.details).toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredPosts = blogs.filter((post) => {
+    const matchesSearch =
+      post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      stripRichText(post.details)
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
     const matchesCategory =
-      selectedCategory === 'All' || (post.categoryName || 'General') === selectedCategory;
+      selectedCategory === "All" ||
+      (post.categoryName || "General") === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
   const featuredPost =
-    filteredPosts.find((post) => post.isFeatured) || (filteredPosts.length > 0 ? filteredPosts[0] : null);
+    filteredPosts.find((post) => post.isFeatured) ||
+    (filteredPosts.length > 0 ? filteredPosts[0] : null);
 
   const handleNewsletterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,45 +106,47 @@ export function BlogPage() {
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(newsletterEmail)) {
-      setNewsletterError('Please enter a valid email address.');
+      setNewsletterError("Please enter a valid email address.");
       return;
     }
 
     setNewsletterLoading(true);
-    setNewsletterError('');
+    setNewsletterError("");
 
     try {
       const response = await fetch(GAS_DEPLOYMENT_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: new URLSearchParams({
-          formType: 'newsletter',
-          email: newsletterEmail
-        })
+          formType: "newsletter",
+          email: newsletterEmail,
+        }),
       });
 
       const text = await response.text();
 
-      if (text.includes('already_subscribed') || text.toLowerCase().includes('already')) {
-        setNewsletterError('This email is already subscribed.');
+      if (
+        text.includes("already_subscribed") ||
+        text.toLowerCase().includes("already")
+      ) {
+        setNewsletterError("This email is already subscribed.");
         setNewsletterLoading(false);
         return;
       }
 
       setShowSuccessModal(true);
       setNewsletterSubscribed(true);
-      setNewsletterEmail('');
+      setNewsletterEmail("");
 
       setTimeout(() => {
         setShowSuccessModal(false);
       }, 3000);
-
     } catch (error) {
       console.error(error);
       // Falling back to success modal as per the user's logic (similar to Footer)
       setShowSuccessModal(true);
       setNewsletterSubscribed(true);
-      setNewsletterEmail('');
+      setNewsletterEmail("");
 
       setTimeout(() => {
         setShowSuccessModal(false);
@@ -123,18 +156,22 @@ export function BlogPage() {
     }
   };
 
-  const handleShare = async (e: React.MouseEvent, title: string, id: string) => {
+  const handleShare = async (
+    e: React.MouseEvent,
+    title: string,
+    id: string,
+  ) => {
     e.preventDefault();
     const url = `${window.location.origin}/blog/${id}`;
     if (navigator.share) {
       try {
         await navigator.share({ title, url });
       } catch (err) {
-        console.error('Error sharing:', err);
+        console.error("Error sharing:", err);
       }
     } else {
       await navigator.clipboard.writeText(url);
-      // Note: User's UI didn't have a specific "Copied!" tooltip in this version, 
+      // Note: User's UI didn't have a specific "Copied!" tooltip in this version,
       // but I'll keep the logic simple or just rely on the native share.
     }
   };
@@ -174,10 +211,13 @@ export function BlogPage() {
               initial={{ scale: 0.9, y: 20 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.9, y: 20 }}
-              onClick={e => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
               className="bg-[#0A0A0A] border border-white/10 rounded-2xl p-8 max-w-md w-full text-center relative"
             >
-              <button onClick={() => setShowSuccessModal(false)} className="absolute top-4 right-4 p-2 hover:bg-white/10 rounded-full transition-colors">
+              <button
+                onClick={() => setShowSuccessModal(false)}
+                className="absolute top-4 right-4 p-2 hover:bg-white/10 rounded-full transition-colors"
+              >
                 <X size={20} className="text-gray-400" />
               </button>
 
@@ -186,7 +226,8 @@ export function BlogPage() {
               </div>
               <h3 className="text-2xl font-bold text-white mb-2">Thank You!</h3>
               <p className="text-gray-400">
-                You've successfully subscribed to our newsletter. Stay tuned for the latest updates!
+                You've successfully subscribed to our newsletter. Stay tuned for
+                the latest updates!
               </p>
             </motion.div>
           </motion.div>
@@ -212,7 +253,7 @@ export function BlogPage() {
         </div>
 
         {/* Featured Post */}
-        {selectedCategory === 'All' && !searchTerm && featuredPost && (
+        {selectedCategory === "All" && !searchTerm && featuredPost && (
           <Link to={`/blog/${featuredPost.slug || featuredPost._id}`}>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -239,24 +280,28 @@ export function BlogPage() {
                 </p>
                 <div className="flex items-center gap-6 text-gray-400">
                   <span className="flex items-center gap-2">
-                    <Calendar size={18} /> {new Date(featuredPost.createdAt).toLocaleDateString()}
+                    <Calendar size={18} />{" "}
+                    {new Date(featuredPost.createdAt).toLocaleDateString()}
                   </span>
                   <span className="flex items-center gap-2">
                     <Clock size={18} /> {featuredPost.readingTime} read
                   </span>
-                  {featuredPost.serviceId && serviceById.get(featuredPost.serviceId) && (
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        navigate(`/services/${serviceById.get(featuredPost.serviceId!)?.slug}`);
-                      }}
-                      className="text-[color:var(--neon-yellow)] hover:underline text-sm"
-                    >
-                      {serviceById.get(featuredPost.serviceId)?.name}
-                    </button>
-                  )}
+                  {featuredPost.serviceId &&
+                    serviceById.get(featuredPost.serviceId) && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          navigate(
+                            `/services/${serviceById.get(featuredPost.serviceId!)?.slug}`,
+                          );
+                        }}
+                        className="text-[color:var(--neon-yellow)] hover:underline text-sm"
+                      >
+                        {serviceById.get(featuredPost.serviceId)?.name}
+                      </button>
+                    )}
                 </div>
               </div>
             </motion.div>
@@ -273,10 +318,13 @@ export function BlogPage() {
                   type="text"
                   placeholder="Search articles..."
                   value={searchTerm}
-                  onChange={e => setSearchTerm(e.target.value)}
+                  onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full bg-black border border-white/20 rounded-lg pl-10 pr-4 py-3 text-white focus:border-[color:var(--bright-red)] focus:outline-none transition-colors"
                 />
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
+                <Search
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"
+                  size={18}
+                />
               </div>
             </div>
 
@@ -284,16 +332,20 @@ export function BlogPage() {
             <div className="bg-white/5 p-6 rounded-2xl border border-white/10">
               <h3 className="text-lg font-bold text-white mb-4">Categories</h3>
               <ul className="space-y-2">
-                {categories.map(cat => (
+                {categories.map((cat) => (
                   <li
                     key={cat}
                     onClick={() => setSelectedCategory(cat)}
-                    className={`cursor-pointer flex justify-between items-center p-2 rounded-lg transition-colors ${selectedCategory === cat ? 'bg-[color:var(--bright-red)] text-white' : 'text-gray-400 hover:bg-white/5 hover:text-white'}`}
+                    className={`cursor-pointer flex justify-between items-center p-2 rounded-lg transition-colors ${selectedCategory === cat ? "bg-[color:var(--bright-red)] text-white" : "text-gray-400 hover:bg-white/5 hover:text-white"}`}
                   >
                     <span>{cat}</span>
-                    {cat !== 'All' && (
+                    {cat !== "All" && (
                       <span className="text-xs bg-black/20 px-2 py-1 rounded">
-                        {blogs.filter(p => (p.categoryName || 'General') === cat).length}
+                        {
+                          blogs.filter(
+                            (p) => (p.categoryName || "General") === cat,
+                          ).length
+                        }
                       </span>
                     )}
                   </li>
@@ -312,9 +364,9 @@ export function BlogPage() {
                 <input
                   type="email"
                   value={newsletterEmail}
-                  onChange={e => {
+                  onChange={(e) => {
                     setNewsletterEmail(e.target.value);
-                    setNewsletterError('');
+                    setNewsletterError("");
                   }}
                   placeholder="Enter your email"
                   className="w-full bg-black/50 border border-white/20 rounded-lg px-4 py-2 text-white mb-2 focus:outline-none focus:border-[color:var(--bright-red)] disabled:opacity-50 disabled:cursor-not-allowed"
@@ -322,7 +374,9 @@ export function BlogPage() {
                   disabled={newsletterSubscribed}
                 />
 
-                {newsletterError && <p className="text-red-400 text-sm mb-2">{newsletterError}</p>}
+                {newsletterError && (
+                  <p className="text-red-400 text-sm mb-2">{newsletterError}</p>
+                )}
 
                 <Button
                   type="submit"
@@ -331,10 +385,10 @@ export function BlogPage() {
                   disabled={newsletterLoading || newsletterSubscribed}
                 >
                   {newsletterSubscribed
-                    ? 'Subscribed'
+                    ? "Subscribed"
                     : newsletterLoading
-                      ? 'Subscribing...'
-                      : 'Subscribe'}
+                      ? "Subscribing..."
+                      : "Subscribe"}
                 </Button>
               </form>
             </div>
@@ -344,7 +398,7 @@ export function BlogPage() {
           <div className="lg:col-span-3">
             <AnimatePresence mode="popLayout">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {filteredPosts.map(post => (
+                {filteredPosts.map((post) => (
                   <motion.article
                     layout
                     initial={{ opacity: 0, scale: 0.9 }}
@@ -353,7 +407,10 @@ export function BlogPage() {
                     key={post._id}
                     className="group bg-white/5 rounded-2xl border border-white/10 overflow-hidden hover:border-[color:var(--bright-red)] transition-all duration-300 flex flex-col"
                   >
-                    <Link to={`/blog/${post.slug || post._id}`} className="flex-1 flex flex-col">
+                    <Link
+                      to={`/blog/${post.slug || post._id}`}
+                      className="flex-1 flex flex-col"
+                    >
                       <div className="relative aspect-video overflow-hidden bg-gray-800">
                         <img
                           src={post.image}
@@ -363,17 +420,45 @@ export function BlogPage() {
                         />
                         <div className="absolute top-4 left-4">
                           <span className="px-3 py-1 rounded-full bg-black/70 backdrop-blur-md text-white text-xs font-bold border border-white/10">
-                            {post.categoryName || post.tags[0] || 'Article'}
+                            {post.categoryName || post.tags[0] || "Article"}
                           </span>
                         </div>
                       </div>
 
                       <div className="p-6 flex-1 flex flex-col">
                         <div className="flex items-center gap-3 mb-4">
-                          <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center border border-white/10">
-                            <User size={16} className="text-gray-400" />
-                          </div>
-                          <span className="text-gray-300 text-sm">{post.writer}</span>
+                          {(() => {
+                            const author = authors.find((a) =>
+                              post.authorId
+                                ? a._id === post.authorId
+                                : a.name === post.writer,
+                            );
+                            return (
+                              <>
+                                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center border border-white/10 overflow-hidden flex-shrink-0">
+                                  {author?.profileImage ? (
+                                    <img
+                                      src={author.profileImage}
+                                      alt={post.writer}
+                                      className="w-full h-full object-cover"
+                                    />
+                                  ) : (
+                                    <User size={16} className="text-gray-400" />
+                                  )}
+                                </div>
+                                <div>
+                                  <div className="text-gray-300 text-sm font-medium">
+                                    {post.writer}
+                                  </div>
+                                  {author?.role && (
+                                    <div className="text-gray-500 text-xs">
+                                      {author.role}
+                                    </div>
+                                  )}
+                                </div>
+                              </>
+                            );
+                          })()}
                         </div>
                         <h2 className="text-xl font-bold text-white mb-3 group-hover:text-[color:var(--neon-yellow)] transition-colors line-clamp-2">
                           {post.title}
@@ -384,25 +469,32 @@ export function BlogPage() {
 
                         <div className="flex items-center justify-between pt-4 border-t border-white/5 mt-auto">
                           <div className="flex items-center gap-4 text-xs text-gray-500">
-                            <span>{new Date(post.createdAt).toLocaleDateString()}</span>
+                            <span>
+                              {new Date(post.createdAt).toLocaleDateString()}
+                            </span>
                             <span>{post.readingTime} read</span>
                           </div>
                           <div className="flex items-center gap-3">
-                            {post.serviceId && serviceById.get(post.serviceId) && (
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  e.stopPropagation();
-                                  navigate(`/services/${serviceById.get(post.serviceId!)?.slug}`);
-                                }}
-                                className="text-[11px] text-[color:var(--neon-yellow)] hover:underline"
-                              >
-                                {serviceById.get(post.serviceId)?.name}
-                              </button>
-                            )}
+                            {post.serviceId &&
+                              serviceById.get(post.serviceId) && (
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    navigate(
+                                      `/services/${serviceById.get(post.serviceId!)?.slug}`,
+                                    );
+                                  }}
+                                  className="text-[11px] text-[color:var(--neon-yellow)] hover:underline"
+                                >
+                                  {serviceById.get(post.serviceId)?.name}
+                                </button>
+                              )}
                             <button
-                              onClick={e => handleShare(e, post.title, post._id)}
+                              onClick={(e) =>
+                                handleShare(e, post.title, post._id)
+                              }
                               className="text-gray-500 hover:text-white transition-colors"
                             >
                               <Share2 size={16} />
@@ -427,4 +519,3 @@ export function BlogPage() {
     </main>
   );
 }
-

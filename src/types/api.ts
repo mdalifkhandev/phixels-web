@@ -21,6 +21,14 @@ export interface Blog {
     status?: 'draft' | 'published';
     isFeatured?: boolean;
     serviceId?: string;
+    authorId?: string;
+}
+
+export interface Author {
+    _id: string;
+    name: string;
+    role: string;
+    profileImage?: string;
 }
 
 export interface Portfolio {
