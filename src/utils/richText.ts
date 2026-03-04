@@ -33,6 +33,12 @@ const applyInlineFormatting = (raw: string) => {
 export const renderRichTextToHtml = (input: string) => {
   if (!input?.trim()) return '';
 
+  // If the content is already HTML (from the Tiptap WYSIWYG editor), return it directly.
+  // We detect HTML by checking if the trimmed string starts with '<'.
+  if (input.trimStart().startsWith('<')) {
+    return input;
+  }
+
   const lines = input.replace(/\r\n/g, '\n').split('\n');
   const html: string[] = [];
   let listItems: string[] = [];

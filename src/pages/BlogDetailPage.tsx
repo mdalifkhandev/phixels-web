@@ -194,7 +194,41 @@ export function BlogDetailPage() {
         </div>
 
         <div
-          className="prose prose-invert prose-lg max-w-none [&_span]:text-inherit"
+          className={[
+            // base
+            "text-gray-300 text-base leading-7",
+            // headings
+            "[&_h1]:text-4xl [&_h1]:font-bold [&_h1]:text-white [&_h1]:mt-8 [&_h1]:mb-4 [&_h1]:leading-tight",
+            "[&_h2]:text-3xl [&_h2]:font-bold [&_h2]:text-white [&_h2]:mt-7 [&_h2]:mb-3",
+            "[&_h3]:text-2xl [&_h3]:font-semibold [&_h3]:text-white [&_h3]:mt-6 [&_h3]:mb-3",
+            "[&_h4]:text-xl [&_h4]:font-semibold [&_h4]:text-white [&_h4]:mt-5 [&_h4]:mb-2",
+            // paragraph
+            "[&_p]:mb-4 [&_p]:leading-7",
+            // lists
+            "[&_ul]:list-disc [&_ul]:pl-6 [&_ul]:mb-4",
+            "[&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:mb-4",
+            "[&_li]:mb-1 [&_li]:leading-7",
+            // blockquote
+            "[&_blockquote]:border-l-4 [&_blockquote]:border-[color:var(--bright-red)] [&_blockquote]:pl-5 [&_blockquote]:italic [&_blockquote]:text-gray-400 [&_blockquote]:my-6",
+            // inline code
+            "[&_:not(pre)>code]:bg-white/10 [&_:not(pre)>code]:text-pink-300 [&_:not(pre)>code]:px-1.5 [&_:not(pre)>code]:py-0.5 [&_:not(pre)>code]:rounded [&_:not(pre)>code]:text-sm [&_:not(pre)>code]:font-mono",
+            // code block
+            "[&_pre]:bg-[#0a0a0a] [&_pre]:border [&_pre]:border-white/10 [&_pre]:rounded-xl [&_pre]:p-5 [&_pre]:my-6 [&_pre]:overflow-x-auto",
+            "[&_pre_code]:bg-transparent [&_pre_code]:text-green-300 [&_pre_code]:p-0 [&_pre_code]:text-sm",
+            // horizontal rule
+            "[&_hr]:border-white/10 [&_hr]:my-8",
+            // images
+            "[&_img]:rounded-xl [&_img]:max-w-full [&_img]:my-6 [&_img]:mx-auto [&_img]:block [&_img]:shadow-xl",
+            // links
+            "[&_a]:text-blue-400 [&_a]:underline [&_a]:underline-offset-2 [&_a]:hover:text-blue-300 [&_a]:transition-colors",
+            // inline text styles
+            "[&_strong]:text-white [&_strong]:font-bold",
+            "[&_em]:italic",
+            "[&_u]:underline",
+            "[&_s]:line-through",
+            // text align
+            "[&_.text-left]:text-left [&_.text-center]:text-center [&_.text-right]:text-right",
+          ].join(" ")}
           dangerouslySetInnerHTML={{
             __html: renderRichTextToHtml(blog.details),
           }}
