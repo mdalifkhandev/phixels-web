@@ -1,138 +1,124 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { ArrowRight, Calendar, Clock } from 'lucide-react';
-import { featuredPosts } from '../constants/common';
-import { apiService } from '../services/api';
-import { Blog, ServiceCategory } from '../types/api';
-import { stripRichText } from '../utils/richText';
+import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
+import { ArrowRight } from "lucide-react";
+import { BlogCard } from "./BlogCard";
+import { apiService } from "../services/api";
+import { Blog, ServiceCategory, Author } from "../types/api";
 export function BlogSection() {
-  const navigate = useNavigate();
   const [posts, setPosts] = useState<Blog[]>([]);
-  const [serviceCategories, setServiceCategories] = useState<ServiceCategory[]>([]);
+  const [authors, setAuthors] = useState<Author[]>([]);
+  const [serviceCategories, setServiceCategories] = useState<ServiceCategory[]>(
+    [],
+  );
 
   useEffect(() => {
-    const loadFeatured = async () => {
+    const loadBlogs = async () => {
       try {
-        const [response, categoriesResponse] = await Promise.all([
-          apiService.getFeaturedBlogs(),
-          apiService.getServiceCategories(),
-        ]);
+        const [response, categoriesResponse, authorsResponse] =
+          await Promise.all([
+            apiService.getBlogs(),
+            apiService.getServiceCategories(),
+            apiService.getAuthors(),
+          ]);
         if (response?.success && Array.isArray(response.data)) {
-          setPosts(response.data.filter((post) => post.status === 'published'));
-        }
-        if (categoriesResponse?.success && Array.isArray(categoriesResponse.data)) {
-          setServiceCategories(
-            categoriesResponse.data.filter((service: ServiceCategory) => service.isActive !== false),
+          setPosts(
+            response.data.filter((post: Blog) => post.status === "published"),
           );
+        }
+        if (
+          categoriesResponse?.success &&
+          Array.isArray(categoriesResponse.data)
+        ) {
+          setServiceCategories(
+            categoriesResponse.data.filter(
+              (service: ServiceCategory) => service.isActive !== false,
+            ),
+          );
+        }
+        if (authorsResponse?.success && Array.isArray(authorsResponse.data)) {
+          setAuthors(authorsResponse.data);
         }
       } catch {
         // Keep UI fallback from static featured posts.
       }
     };
-    loadFeatured();
+    loadBlogs();
   }, []);
 
-  const renderPosts = posts.length > 0
-    ? posts.slice(0, 3).map((post) => ({
-        id: post._id,
-        slug: post.slug || post._id,
-        image: post.image,
-        title: post.title,
-        category: post.categoryName || 'General',
-        excerpt: stripRichText(post.details || '').slice(0, 110),
-        date: new Date(post.createdAt || post.createTime || Date.now()).toLocaleDateString(),
-        readTime: post.readingTime || '5 min',
-        serviceId: post.serviceId || '',
-      }))
-    : featuredPosts;
+  const handleShare = async (
+    e: React.MouseEvent,
+    title: string,
+    id: string,
+  ) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const url = `${window.location.origin}/blog/${id}`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title, url });
+      } catch (err) {
+        console.error("Error sharing:", err);
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(url);
+      } catch (err) {
+        console.error("Error copying to clipboard:", err);
+      }
+    }
+  };
 
   const serviceById = useMemo(
     () => new Map(serviceCategories.map((service) => [service._id, service])),
     [serviceCategories],
   );
 
-  return <section className="py-24 bg-[#050505]">
-    <div className="container mx-auto px-4">
-      <div className="flex justify-between items-end mb-12">
-        <div>
-          <h2 className="text-4xl md:text-5xl font-bold mb-4">
-            Latest Insights
-          </h2>
-          <p className="text-gray-400 max-w-2xl">
-            Stay updated with the latest trends, tutorials, and insights from
-            our engineering team.
-          </p>
-        </div>
-        <Link to="/blog" className="hidden md:flex items-center gap-2 text-[color:var(--bright-red)] font-bold hover:gap-4 transition-all group">
-          View All Posts{' '}
-          <ArrowRight className="group-hover:translate-x-1 transition-transform" />
-        </Link>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {renderPosts.map((post, index) => <motion.article key={post.id} initial={{
-          opacity: 0,
-          y: 20
-        }} whileInView={{
-          opacity: 1,
-          y: 0
-        }} viewport={{
-          once: true
-        }} transition={{
-          delay: index * 0.1
-        }} className="group h-full">
-          <Link to={`/blog/${post.slug}`} className="block h-full p-4 rounded-2xl border border-white/5 bg-white/5 hover:border-[color:var(--neon-yellow)] transition-all duration-300 hover:-translate-y-1">
-            <div className="relative overflow-hidden rounded-xl mb-4 aspect-video">
-              <img src={post.image} alt={post.title} className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-              <div className="absolute top-4 left-4">
-                <span className="px-3 py-1 rounded-full bg-[color:var(--bright-red)] text-white text-xs font-bold">
-                  {post.category}
-                </span>
-              </div>
-            </div>
-
-            <h3 className="text-xl font-bold text-white mb-3 group-hover:text-[color:var(--neon-yellow)] transition-colors line-clamp-2">
-              {post.title}
-            </h3>
-            <p className="text-gray-400 text-sm mb-4 line-clamp-2">
-              {post.excerpt}
+  return (
+    <section className="py-24 bg-[#050505]">
+      <div className="container mx-auto px-4">
+        <div className="flex justify-between items-end mb-12">
+          <div>
+            <h2 className="text-4xl md:text-5xl font-bold mb-4">
+              Latest Insights
+            </h2>
+            <p className="text-gray-400 max-w-2xl">
+              Stay updated with the latest trends, tutorials, and insights from
+              our engineering team.
             </p>
-
-            <div className="flex items-center gap-4 text-xs text-gray-500 mt-auto pt-4 border-t border-white/10">
-              <div className="flex items-center gap-1">
-                <Calendar size={14} />
-                <span>{post.date}</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <Clock size={14} />
-                <span>{post.readTime} read</span>
-              </div>
-              {'serviceId' in post && (post as { serviceId?: string }).serviceId && serviceById.get((post as { serviceId?: string }).serviceId || '') && (
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    const related = serviceById.get((post as { serviceId?: string }).serviceId || '');
-                    if (related) navigate(`/services/${related.slug}`);
-                  }}
-                  className="text-[color:var(--neon-yellow)] hover:underline"
-                >
-                  {serviceById.get((post as { serviceId?: string }).serviceId || '')?.name}
-                </button>
-              )}
-            </div>
+          </div>
+          <Link
+            to="/blog"
+            className="hidden md:flex items-center gap-2 text-[color:var(--bright-red)] font-bold hover:gap-4 transition-all group"
+          >
+            View All Posts{" "}
+            <ArrowRight className="group-hover:translate-x-1 transition-transform" />
           </Link>
-        </motion.article>)}
-      </div>
+        </div>
 
-      <div className="mt-12 text-center md:hidden">
-        <Link to="/blog" className="inline-flex items-center gap-2 text-[color:var(--bright-red)] font-bold hover:gap-4 transition-all">
-          View All Posts <ArrowRight />
-        </Link>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {posts.slice(0, 3).map((post, index) => (
+            <BlogCard
+              key={post._id}
+              post={post}
+              authors={authors}
+              serviceById={serviceById}
+              handleShare={handleShare}
+              index={index}
+            />
+          ))}
+        </div>
+
+        <div className="mt-12 text-center md:hidden">
+          <Link
+            to="/blog"
+            className="inline-flex items-center gap-2 text-[color:var(--bright-red)] font-bold hover:gap-4 transition-all"
+          >
+            View All Posts <ArrowRight />
+          </Link>
+        </div>
       </div>
-    </div>
-  </section>;
+    </section>
+  );
 }

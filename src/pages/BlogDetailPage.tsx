@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import {
   Calendar,
@@ -11,89 +11,139 @@ import {
 import { apiService } from "../services/api";
 import { Blog, ServiceCategory, Author } from "../types/api";
 import { renderRichTextToHtml } from "../utils/richText";
+import { BlogCard } from "../components/BlogCard";
+import { AnimatePresence } from "framer-motion";
 
 export function BlogDetailPage() {
   const { id } = useParams();
   const [blog, setBlog] = useState<Blog | null>(null);
-  const [serviceCategory, setServiceCategory] =
-    useState<ServiceCategory | null>(null);
-  const [author, setAuthor] = useState<Author | null>(null);
+  const [allBlogs, setAllBlogs] = useState<Blog[]>([]);
+  const [authors, setAuthors] = useState<Author[]>([]);
+  const [serviceCategories, setServiceCategories] = useState<ServiceCategory[]>(
+    [],
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Derived Values - Hooks must always be at the top level
+  const serviceById = useMemo(
+    () => new Map(serviceCategories.map((s) => [s._id, s])),
+    [serviceCategories],
+  );
+
+  const serviceCategory = useMemo(() => {
+    if (!blog?.serviceId) return null;
+    return serviceById.get(blog.serviceId) || null;
+  }, [blog, serviceById]);
+
+  const author = useMemo(() => {
+    if (!blog) return null;
+    return (
+      authors.find((a) =>
+        blog.authorId ? a._id === blog.authorId : a.name === blog.writer,
+      ) || null
+    );
+  }, [blog, authors]);
+
+  const relatedBlogs = useMemo(() => {
+    if (!blog || allBlogs.length === 0) return [];
+
+    // 1. Same category or service
+    const related = allBlogs.filter(
+      (b) =>
+        b._id !== blog._id &&
+        ((blog.serviceId && b.serviceId === blog.serviceId) ||
+          (blog.categoryName && b.categoryName === blog.categoryName)),
+    );
+
+    let displayed = related.slice(0, 3);
+
+    // 2. Fallback to latest (top positioned) if < 3
+    if (displayed.length < 3) {
+      const others = allBlogs
+        .filter(
+          (b) => b._id !== blog._id && !displayed.find((d) => d._id === b._id),
+        )
+        .slice(0, 3 - displayed.length);
+      displayed = [...displayed, ...others];
+    }
+
+    return displayed;
+  }, [blog, allBlogs]);
+
   useEffect(() => {
-    0;
-    const fetchBlog = async () => {
+    const fetchBlogData = async () => {
       if (!id) return;
       try {
         setLoading(true);
-        const slugResponse = await apiService.getBlogBySlug(id);
-        const categoriesResponse = await apiService.getServiceCategories();
-        const categories: ServiceCategory[] =
-          categoriesResponse?.success && Array.isArray(categoriesResponse.data)
-            ? categoriesResponse.data
-            : [];
+        setError(null);
 
-        const authorsResponse = await apiService.getAuthors();
-        const authors: Author[] =
-          authorsResponse?.success && Array.isArray(authorsResponse.data)
-            ? authorsResponse.data
-            : [];
-        if (slugResponse.success && slugResponse.data) {
-          if (slugResponse.data.status !== "published") {
-            setError("Blog not found");
-            return;
+        // 1. Try to fetch the main blog by slug first
+        let mainBlog: Blog | null = null;
+        try {
+          const slugResponse = await apiService.getBlogBySlug(id);
+          if (slugResponse.success && slugResponse.data) {
+            mainBlog = slugResponse.data;
           }
-          setBlog(slugResponse.data);
+        } catch (err) {
+          // Slug lookup failed, which is expected if 'id' is a real MongoDB ID
+          console.log("Slug lookup failed, trying ID...");
+        }
 
-          if (authors.length > 0) {
-            const foundAuthor = authors.find((a) =>
-              slugResponse.data.authorId
-                ? a._id === slugResponse.data.authorId
-                : a.name === slugResponse.data.writer,
+        // 2. If slug fetch failed or returned nothing, try by ID
+        if (!mainBlog) {
+          try {
+            const idResponse = await apiService.getBlogById(id);
+            if (idResponse.success && idResponse.data) {
+              mainBlog = idResponse.data;
+            }
+          } catch (err) {
+            console.error("ID lookup also failed:", err);
+          }
+        }
+
+        if (!mainBlog) {
+          setError("Blog not found");
+          setLoading(false);
+          return;
+        }
+
+        // 3. We have the blog! Check status
+        if (mainBlog.status !== "published") {
+          setError("Blog not found");
+          setLoading(false);
+          return;
+        }
+
+        setBlog(mainBlog);
+
+        // 4. Fetch related data in parallel without blocking the main content display
+        try {
+          const [blogsResponse, categoriesResponse, authorsResponse] =
+            await Promise.all([
+              apiService.getBlogs().catch(() => null),
+              apiService.getServiceCategories().catch(() => null),
+              apiService.getAuthors().catch(() => null),
+            ]);
+
+          if (
+            categoriesResponse?.success &&
+            Array.isArray(categoriesResponse.data)
+          ) {
+            setServiceCategories(categoriesResponse.data);
+          }
+
+          if (authorsResponse?.success && Array.isArray(authorsResponse.data)) {
+            setAuthors(authorsResponse.data);
+          }
+
+          if (blogsResponse?.success && Array.isArray(blogsResponse.data)) {
+            setAllBlogs(
+              blogsResponse.data.filter((b: Blog) => b.status === "published"),
             );
-            if (foundAuthor) setAuthor(foundAuthor);
           }
-
-          if (slugResponse.data.serviceId) {
-            setServiceCategory(
-              categories.find(
-                (category) => category._id === slugResponse.data.serviceId,
-              ) || null,
-            );
-          } else {
-            setServiceCategory(null);
-          }
-        } else {
-          const response = await apiService.getBlogById(id);
-          if (response.success) {
-            if (response.data.status !== "published") {
-              setError("Blog not found");
-              return;
-            }
-            setBlog(response.data);
-
-            if (authors.length > 0) {
-              const foundAuthor = authors.find((a) =>
-                response.data.authorId
-                  ? a._id === response.data.authorId
-                  : a.name === response.data.writer,
-              );
-              if (foundAuthor) setAuthor(foundAuthor);
-            }
-
-            if (response.data.serviceId) {
-              setServiceCategory(
-                categories.find(
-                  (category) => category._id === response.data.serviceId,
-                ) || null,
-              );
-            } else {
-              setServiceCategory(null);
-            }
-          } else {
-            setError(response.message || "Blog not found");
-          }
+        } catch (err) {
+          console.error("Error fetching secondary data:", err);
         }
       } catch (err: any) {
         setError(err.message || "An error occurred while fetching the blog");
@@ -102,7 +152,7 @@ export function BlogDetailPage() {
       }
     };
 
-    fetchBlog();
+    fetchBlogData();
   }, [id]);
 
   if (loading) {
@@ -129,10 +179,22 @@ export function BlogDetailPage() {
     );
   }
 
-  const handleShare = async () => {
-    if (!blog) return;
-    const url = window.location.href;
-    const title = blog.title;
+  const handleShare = async (
+    e?: React.MouseEvent,
+    shareTitle?: string,
+    shareId?: string,
+  ) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    if (!blog && !shareId) return;
+
+    const url = shareId
+      ? `${window.location.origin}/blog/${shareId}`
+      : window.location.href;
+    const title = shareTitle || blog?.title || "";
 
     if (navigator.share) {
       try {
@@ -143,7 +205,6 @@ export function BlogDetailPage() {
     } else {
       try {
         await navigator.clipboard.writeText(url);
-        // We could add a toast here if available, but staying consistent with BlogPage.tsx
       } catch (err) {
         console.error("Error copying to clipboard:", err);
       }
@@ -259,7 +320,7 @@ export function BlogDetailPage() {
           <div className="text-white font-bold">Share this article:</div>
           <div className="flex gap-4">
             <button
-              onClick={handleShare}
+              onClick={(e) => handleShare(e)}
               className="p-2 rounded-full bg-white/5 hover:bg-white/10 text-white transition-colors"
               title="Share Article"
             >
@@ -268,6 +329,30 @@ export function BlogDetailPage() {
           </div>
         </div>
       </article>
+
+      {relatedBlogs.length > 0 && (
+        <section className="container mx-auto px-4 py-20 mt-20 border-t border-white/5">
+          <div className="max-w-6xl mx-auto">
+            <h2 className="text-3xl font-bold text-white mb-10">
+              Related Articles
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <AnimatePresence mode="popLayout">
+                {relatedBlogs.map((post, index) => (
+                  <BlogCard
+                    key={post._id}
+                    post={post}
+                    authors={authors}
+                    serviceById={serviceById}
+                    handleShare={handleShare}
+                    index={index}
+                  />
+                ))}
+              </AnimatePresence>
+            </div>
+          </div>
+        </section>
+      )}
     </main>
   );
 }
