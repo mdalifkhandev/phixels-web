@@ -129,6 +129,27 @@ export function BlogDetailPage() {
     );
   }
 
+  const handleShare = async () => {
+    if (!blog) return;
+    const url = window.location.href;
+    const title = blog.title;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title, url });
+      } catch (err) {
+        console.error("Error sharing:", err);
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(url);
+        // We could add a toast here if available, but staying consistent with BlogPage.tsx
+      } catch (err) {
+        console.error("Error copying to clipboard:", err);
+      }
+    }
+  };
+
   return (
     <main className="bg-[#050505] min-h-screen pt-48 pb-20">
       <article className="container mx-auto px-4 max-w-4xl">
@@ -237,7 +258,11 @@ export function BlogDetailPage() {
         <div className="mt-12 pt-8 border-t border-white/10 flex justify-between items-center">
           <div className="text-white font-bold">Share this article:</div>
           <div className="flex gap-4">
-            <button className="p-2 rounded-full bg-white/5 hover:bg-white/10 text-white">
+            <button
+              onClick={handleShare}
+              className="p-2 rounded-full bg-white/5 hover:bg-white/10 text-white transition-colors"
+              title="Share Article"
+            >
               <Share2 size={20} />
             </button>
           </div>
