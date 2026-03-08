@@ -1,11 +1,19 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { Button } from '../components/ui/Button';
-import { MapPin, Clock, DollarSign, CheckCircle, ArrowLeft, Loader2 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import confetti from 'canvas-confetti';
-import { apiService } from '../services/api';
-import { Career } from '../types/api';
+import React, { useState, useEffect } from "react";
+import { useParams, Link } from "react-router-dom";
+import { Button } from "../components/ui/Button";
+import {
+  MapPin,
+  Clock,
+  DollarSign,
+  CheckCircle,
+  ArrowLeft,
+  Loader2,
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import confetti from "canvas-confetti";
+import { apiService } from "../services/api";
+import { Career } from "../types/api";
+import { renderRichTextToHtml } from "../utils/richText";
 
 export function JobDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -15,9 +23,11 @@ export function JobDetailPage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [resumeFile, setResumeFile] = useState<File | null>(null);
-  const [modalType, setModalType] = useState<'success' | 'error' | null>(null);
+  const [modalType, setModalType] = useState<"success" | "error" | null>(null);
 
-  const GAS_DEPLOYMENT_URL = import.meta.env.VITE_GAS_DEPLOYMENT_URL || 'https://script.google.com/macros/s/AKfycbzYH-TfT_uR-2uxR8G2my7KElsR_x0f9GekGO35oSqq-qXkjI8k1zPSRvbIrATJDCg/exec';
+  const GAS_DEPLOYMENT_URL =
+    import.meta.env.VITE_GAS_DEPLOYMENT_URL ||
+    "https://script.google.com/macros/s/AKfycbzYH-TfT_uR-2uxR8G2my7KElsR_x0f9GekGO35oSqq-qXkjI8k1zPSRvbIrATJDCg/exec";
 
   useEffect(() => {
     const fetchJob = async () => {
@@ -28,10 +38,10 @@ export function JobDetailPage() {
         if (response.success) {
           setJobData(response.data);
         } else {
-          setError(response.message || 'Failed to fetch job details');
+          setError(response.message || "Failed to fetch job details");
         }
       } catch (err: any) {
-        setError(err.message || 'An error occurred while fetching job details');
+        setError(err.message || "An error occurred while fetching job details");
       } finally {
         setLoading(false);
       }
@@ -52,11 +62,12 @@ export function JobDetailPage() {
 
     setSubmitting(true);
     const form = e.target as HTMLFormElement;
-    const name = (form.elements.namedItem('name') as HTMLInputElement).value;
-    const email = (form.elements.namedItem('email') as HTMLInputElement).value;
-    const portfolio = (form.elements.namedItem('portfolio') as HTMLInputElement).value;
+    const name = (form.elements.namedItem("name") as HTMLInputElement).value;
+    const email = (form.elements.namedItem("email") as HTMLInputElement).value;
+    const portfolio = (form.elements.namedItem("portfolio") as HTMLInputElement)
+      .value;
 
-    let resumeBase64 = '';
+    let resumeBase64 = "";
     if (resumeFile) {
       resumeBase64 = await new Promise<string>((resolve) => {
         const reader = new FileReader();
@@ -67,32 +78,31 @@ export function JobDetailPage() {
 
     try {
       await fetch(GAS_DEPLOYMENT_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: new URLSearchParams({
-          formType: 'job',
+          formType: "job",
           name,
           email,
           portfolio,
           jobTitle: jobData.jobTitle,
-          file: resumeBase64
-        })
+          file: resumeBase64,
+        }),
       });
 
       setSubmitted(true);
-      setModalType('success');
+      setModalType("success");
       confetti({
         particleCount: 150,
         spread: 70,
-        origin: { y: 0.6 }
+        origin: { y: 0.6 },
       });
       form.reset();
       setResumeFile(null);
-
     } catch (err) {
-      console.error('Submission error:', err);
+      console.error("Submission error:", err);
       setSubmitted(true);
-      setModalType('success');
+      setModalType("success");
     } finally {
       setSubmitting(false);
     }
@@ -112,7 +122,7 @@ export function JobDetailPage() {
       <div className="bg-[#050505] min-h-screen pt-40 px-4">
         <div className="max-w-md mx-auto text-center py-12 px-8 rounded-2xl border border-red-500/20 bg-red-500/10">
           <h2 className="text-2xl font-bold text-red-500 mb-4">Error</h2>
-          <p className="text-gray-400 mb-8">{error || 'Job not found'}</p>
+          <p className="text-gray-400 mb-8">{error || "Job not found"}</p>
           <Link to="/career">
             <Button variant="outline">Back to Careers</Button>
           </Link>
@@ -125,7 +135,10 @@ export function JobDetailPage() {
     <>
       <main className="bg-[#050505] min-h-screen pt-32 pb-20">
         <div className="container mx-auto px-4 max-w-5xl">
-          <Link to="/career" className="inline-flex items-center gap-2 text-gray-400 hover:text-white mb-8 transition-colors">
+          <Link
+            to="/career"
+            className="inline-flex items-center gap-2 text-gray-400 hover:text-white mb-8 transition-colors"
+          >
             <ArrowLeft size={16} /> Back to Careers
           </Link>
 
@@ -138,13 +151,19 @@ export function JobDetailPage() {
             </h1>
             <div className="flex flex-wrap gap-6 text-gray-400">
               <div className="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-full">
-                <MapPin size={18} className="text-[color:var(--bright-red)]" /> {jobData.location}
+                <MapPin size={18} className="text-[color:var(--bright-red)]" />{" "}
+                {jobData.location}
               </div>
               <div className="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-full">
-                <Clock size={18} className="text-[color:var(--neon-yellow)]" /> Full Time
+                <Clock size={18} className="text-[color:var(--neon-yellow)]" />{" "}
+                Full Time
               </div>
               <div className="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-full">
-                <DollarSign size={18} className="text-[color:var(--vibrant-green)]" /> {jobData.salaryRange}
+                <DollarSign
+                  size={18}
+                  className="text-[color:var(--vibrant-green)]"
+                />{" "}
+                {jobData.salaryRange}
               </div>
             </div>
           </div>
@@ -152,17 +171,55 @@ export function JobDetailPage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
             <div className="lg:col-span-2 space-y-12">
               <section>
-                <h2 className="text-2xl font-bold text-white mb-4">About the Role</h2>
-                <div className="text-gray-300 leading-relaxed text-lg whitespace-pre-line">{jobData.description}</div>
+                <h2 className="text-2xl font-bold text-white mb-4">
+                  About the Role
+                </h2>
+                <div
+                  className={[
+                    "text-gray-300 text-lg leading-relaxed",
+                    // headings
+                    "[&_h1]:text-3xl [&_h1]:font-bold [&_h1]:text-white [&_h1]:mt-6 [&_h1]:mb-3 [&_h1]:leading-tight",
+                    "[&_h2]:text-2xl [&_h2]:font-bold [&_h2]:text-white [&_h2]:mt-5 [&_h2]:mb-2",
+                    "[&_h3]:text-xl [&_h3]:font-semibold [&_h3]:text-white [&_h3]:mt-4 [&_h3]:mb-2",
+                    // paragraph
+                    "[&_p]:mb-4 [&_p]:leading-7",
+                    // lists
+                    "[&_ul]:list-disc [&_ul]:pl-6 [&_ul]:mb-4",
+                    "[&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:mb-4",
+                    "[&_li]:mb-1 [&_li]:leading-7",
+                    // blockquote
+                    "[&_blockquote]:border-l-4 [&_blockquote]:border-[color:var(--bright-red)] [&_blockquote]:pl-5 [&_blockquote]:italic [&_blockquote]:text-gray-400 [&_blockquote]:my-6",
+                    // links
+                    "[&_a]:text-blue-400 [&_a]:underline [&_a]:underline-offset-2 [&_a]:hover:text-blue-300 [&_a]:transition-colors",
+                    // inline text styles
+                    "[&_strong]:text-white [&_strong]:font-bold",
+                    "[&_em]:italic",
+                    "[&_u]:underline",
+                    "[&_s]:line-through",
+                    // text align
+                    "[&_.text-left]:text-left [&_.text-center]:text-center [&_.text-right]:text-right",
+                  ].join(" ")}
+                  dangerouslySetInnerHTML={{
+                    __html: renderRichTextToHtml(jobData.description),
+                  }}
+                />
               </section>
 
               {jobData.requirements && jobData.requirements.length > 0 && (
                 <section>
-                  <h2 className="text-2xl font-bold text-white mb-4">Requirements</h2>
+                  <h2 className="text-2xl font-bold text-white mb-4">
+                    Requirements
+                  </h2>
                   <ul className="space-y-4">
                     {jobData.requirements.map((item, i) => (
-                      <li key={i} className="flex items-start gap-3 text-gray-300">
-                        <CheckCircle size={20} className="text-[color:var(--bright-red)] shrink-0 mt-1" />
+                      <li
+                        key={i}
+                        className="flex items-start gap-3 text-gray-300"
+                      >
+                        <CheckCircle
+                          size={20}
+                          className="text-[color:var(--bright-red)] shrink-0 mt-1"
+                        />
                         {item}
                       </li>
                     ))}
@@ -170,58 +227,114 @@ export function JobDetailPage() {
                 </section>
               )}
 
-              {jobData.responsibilities && jobData.responsibilities.length > 0 && (
-                <section>
-                  <h2 className="text-2xl font-bold text-white mb-4">Responsibilities</h2>
-                  <ul className="space-y-4">
-                    {jobData.responsibilities.map((item, i) => (
-                      <li key={i} className="flex items-start gap-3 text-gray-300">
-                        <CheckCircle size={20} className="text-[color:var(--vibrant-green)] shrink-0 mt-1" />
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-                </section>
-              )}
+              {jobData.responsibilities &&
+                jobData.responsibilities.length > 0 && (
+                  <section>
+                    <h2 className="text-2xl font-bold text-white mb-4">
+                      Responsibilities
+                    </h2>
+                    <ul className="space-y-4">
+                      {jobData.responsibilities.map((item, i) => (
+                        <li
+                          key={i}
+                          className="flex items-start gap-3 text-gray-300"
+                        >
+                          <CheckCircle
+                            size={20}
+                            className="text-[color:var(--vibrant-green)] shrink-0 mt-1"
+                          />
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+                  </section>
+                )}
             </div>
 
             <div className="lg:col-span-1">
               <div className="bg-white/5 rounded-2xl p-8 border border-white/10 sticky top-32 backdrop-blur-sm">
-                <h3 className="text-2xl font-bold text-white mb-2">Apply Now</h3>
-                <p className="text-gray-400 mb-6 text-sm">Join our team and build the future.</p>
+                <h3 className="text-2xl font-bold text-white mb-2">
+                  Apply Now
+                </h3>
+                <p className="text-gray-400 mb-6 text-sm">
+                  Join our team and build the future.
+                </p>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
-                    <label className="text-xs text-gray-500 uppercase font-bold mb-1 block">Full Name</label>
-                    <input type="text" required name="name" className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-[color:var(--bright-red)] focus:outline-none transition-colors" placeholder="John Doe" />
+                    <label className="text-xs text-gray-500 uppercase font-bold mb-1 block">
+                      Full Name
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      name="name"
+                      className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-[color:var(--bright-red)] focus:outline-none transition-colors"
+                      placeholder="John Doe"
+                    />
                   </div>
                   <div>
-                    <label className="text-xs text-gray-500 uppercase font-bold mb-1 block">Email</label>
-                    <input type="email" required name="email" className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-[color:var(--bright-red)] focus:outline-none transition-colors" placeholder="john@example.com" />
+                    <label className="text-xs text-gray-500 uppercase font-bold mb-1 block">
+                      Email
+                    </label>
+                    <input
+                      type="email"
+                      required
+                      name="email"
+                      className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-[color:var(--bright-red)] focus:outline-none transition-colors"
+                      placeholder="john@example.com"
+                    />
                   </div>
                   <div>
-                    <label className="text-xs text-gray-500 uppercase font-bold mb-1 block">Portfolio / GitHub</label>
-                    <input type="url" required name="portfolio" className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-[color:var(--bright-red)] focus:outline-none transition-colors" placeholder="https://github.com/johndoe" />
+                    <label className="text-xs text-gray-500 uppercase font-bold mb-1 block">
+                      Portfolio / GitHub
+                    </label>
+                    <input
+                      type="url"
+                      required
+                      name="portfolio"
+                      className="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-[color:var(--bright-red)] focus:outline-none transition-colors"
+                      placeholder="https://github.com/johndoe"
+                    />
                   </div>
 
                   <div>
-                    <label className="text-xs text-gray-500 uppercase font-bold mb-1 block">Upload Resume (PDF)</label>
-                    <input type="file" accept=".pdf" onChange={handleFileChange} className="hidden" id="resume-upload" />
-                    <label htmlFor="resume-upload" className="block border-2 border-dashed border-white/10 rounded-lg p-6 text-center hover:border-[color:var(--bright-red)]/50 hover:bg-white/5 transition-all cursor-pointer group">
+                    <label className="text-xs text-gray-500 uppercase font-bold mb-1 block">
+                      Upload Resume (PDF)
+                    </label>
+                    <input
+                      type="file"
+                      accept=".pdf"
+                      onChange={handleFileChange}
+                      className="hidden"
+                      id="resume-upload"
+                    />
+                    <label
+                      htmlFor="resume-upload"
+                      className="block border-2 border-dashed border-white/10 rounded-lg p-6 text-center hover:border-[color:var(--bright-red)]/50 hover:bg-white/5 transition-all cursor-pointer group"
+                    >
                       <div className="text-sm text-gray-400 group-hover:text-white truncate max-w-full">
-                        {resumeFile ? (resumeFile.name.length > 25 ? resumeFile.name.substring(0, 22) + '...' : resumeFile.name) : 'Upload Resume (PDF)'}
+                        {resumeFile
+                          ? resumeFile.name.length > 25
+                            ? resumeFile.name.substring(0, 22) + "..."
+                            : resumeFile.name
+                          : "Upload Resume (PDF)"}
                       </div>
                     </label>
                   </div>
 
                   <Button
                     type="submit"
-                    className={`w-full mt-4 ${(submitting || submitted) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    className={`w-full mt-4 ${submitting || submitted ? "opacity-50 cursor-not-allowed" : ""}`}
                     variant="primary"
                     glow
                     disabled={submitting || submitted}
                   >
-                    {submitted ? 'Submitted' : submitting ? 'Sending...' : 'Submit Application'}
+                    {submitted
+                      ? "Submitted"
+                      : submitting
+                        ? "Sending..."
+                        : "Submit Application"}
                   </Button>
                 </form>
               </div>
@@ -231,15 +344,40 @@ export function JobDetailPage() {
       </main>
 
       <AnimatePresence>
-        {modalType === 'success' && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={() => setModalType(null)}>
-            <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }} onClick={(e) => e.stopPropagation()} className="bg-[#0A0A0A] border border-white/10 rounded-2xl p-8 max-w-md w-full text-center relative">
+        {modalType === "success" && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+            onClick={() => setModalType(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-[#0A0A0A] border border-white/10 rounded-2xl p-8 max-w-md w-full text-center relative"
+            >
               <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[color:var(--vibrant-green)]/20 flex items-center justify-center">
-                <CheckCircle size={32} className="text-[color:var(--vibrant-green)]" />
+                <CheckCircle
+                  size={32}
+                  className="text-[color:var(--vibrant-green)]"
+                />
               </div>
-              <h3 className="text-2xl font-bold text-white mb-2">Application Sent!</h3>
-              <p className="text-gray-400">Thanks for applying. We'll review your application and get back to you shortly.</p>
-              <button onClick={() => setModalType(null)} className="mt-6 w-full py-3 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors">Close</button>
+              <h3 className="text-2xl font-bold text-white mb-2">
+                Application Sent!
+              </h3>
+              <p className="text-gray-400">
+                Thanks for applying. We'll review your application and get back
+                to you shortly.
+              </p>
+              <button
+                onClick={() => setModalType(null)}
+                className="mt-6 w-full py-3 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors"
+              >
+                Close
+              </button>
             </motion.div>
           </motion.div>
         )}
@@ -247,4 +385,3 @@ export function JobDetailPage() {
     </>
   );
 }
-
