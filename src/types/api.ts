@@ -167,3 +167,41 @@ export interface Review {
     createdAt?: string;
     updatedAt?: string;
 }
+
+export interface AboutMetric {
+    label: string;
+    value: number;
+    suffix: string;
+}
+
+export interface AboutPhilosophy {
+    heading: string;
+    description: string;
+    image?: string;
+}
+
+export interface AboutContent {
+    _id?: string;
+    metrics: AboutMetric[];
+    philosophy: AboutPhilosophy;
+    createdAt?: string;
+    updatedAt?: string;
+}
+
+export interface TeamMemberSocialLinks {
+    linkedin?: string;
+    twitter?: string;
+    github?: string;
+}
+
+export interface TeamMember {
+    _id: string;
+    name: string;
+    role: string;
+    image?: string;
+    socialLinks?: TeamMemberSocialLinks;
+    sortOrder?: number;
+    isActive?: boolean;
+    createdAt?: string;
+    updatedAt?: string;
+}
