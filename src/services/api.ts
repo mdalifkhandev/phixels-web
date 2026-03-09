@@ -80,5 +80,7 @@ export const apiService = {
     fetch(`${BASE_URL}/about-content`).then((res) => handleResponse<any>(res)),
   getTeamMembers: () =>
     fetch(`${BASE_URL}/team-members`).then((res) => handleResponse<any>(res)),
+  getPageMetrics: () =>
+    fetch(`${BASE_URL}/page-metrics`).then((res) => handleResponse<any>(res)),
 };
 

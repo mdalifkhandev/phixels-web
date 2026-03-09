@@ -9,6 +9,14 @@ import {
 import { Link } from "react-router-dom";
 import { Button } from "./ui/Button";
 import { ArrowRight, Play } from "lucide-react";
+import { apiService } from "../services/api";
+import type { PageMetric } from "../types/api";
+
+const fallbackHomeHeroMetrics: [PageMetric, PageMetric] = [
+  { label: "Revenue Growth", value: 420, suffix: "%" },
+  { label: "Active Users", value: 1.2, suffix: "M+" },
+];
+
 function Counter({ value, suffix = "" }: { value: number; suffix?: string }) {
   const ref = useRef(null);
   const isInView = useInView(ref, {
@@ -39,6 +47,24 @@ export function Hero() {
   const { scrollY } = useScroll();
   const y1 = useTransform(scrollY, [0, 500], [0, 200]);
   const y2 = useTransform(scrollY, [0, 500], [0, -150]);
+  const [metrics, setMetrics] =
+    useState<[PageMetric, PageMetric]>(fallbackHomeHeroMetrics);
+
+  useEffect(() => {
+    const fetchPageMetrics = async () => {
+      try {
+        const response = await apiService.getPageMetrics();
+        if (response.success && response.data?.homeHeroMetrics?.length === 2) {
+          setMetrics(response.data.homeHeroMetrics);
+        }
+      } catch {
+        setMetrics(fallbackHomeHeroMetrics);
+      }
+    };
+
+    void fetchPageMetrics();
+  }, []);
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
       <div className="absolute inset-0 z-0">
@@ -108,9 +134,10 @@ export function Hero() {
           }}
         >
           <div className="glass-panel p-5 rounded-xl border-l-4 border-[color:var(--bright-red)] shadow-[0_0_20px_rgba(237,31,36,0.2)] hover:shadow-[0_0_30px_rgba(237,31,36,0.4)] transition-shadow duration-300">
-            <div className="text-xs text-gray-400 mb-1">Revenue Growth</div>
+            <div className="text-xs text-gray-400 mb-1">{metrics[0].label}</div>
             <div className="text-3xl font-bold text-white flex items-center gap-1">
-              +<Counter value={420} suffix="%" />
+              {metrics[0].suffix.startsWith("+") ? null : metrics[0].suffix === "%" ? "+" : null}
+              <Counter value={metrics[0].value} suffix={metrics[0].suffix} />
             </div>
           </div>
         </motion.div>
@@ -126,9 +153,9 @@ export function Hero() {
           }}
         >
           <div className="glass-panel p-5 rounded-xl border-l-4 border-[color:var(--vibrant-green)] shadow-[0_0_20px_rgba(0,205,73,0.2)] hover:shadow-[0_0_30px_rgba(0,205,73,0.4)] transition-shadow duration-300">
-            <div className="text-xs text-gray-400 mb-1">Active Users</div>
+            <div className="text-xs text-gray-400 mb-1">{metrics[1].label}</div>
             <div className="text-3xl font-bold text-white">
-              <Counter value={1.2} suffix="M+" />
+              <Counter value={metrics[1].value} suffix={metrics[1].suffix} />
             </div>
           </div>
         </motion.div>

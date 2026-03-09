@@ -24,7 +24,7 @@ import { ProfessionalReviewCarousel } from "../components/ProfessionalReviewCaro
 import { PageHeader } from "../components/ui/PageHeader";
 import { CallToAction } from "../components/ui/CallToAction";
 import { apiService } from "../services/api";
-import { ServiceMenuCategory } from "../types/api";
+import { PageMetric, ServiceMenuCategory } from "../types/api";
 
 const iconMap: Record<string, any> = {
   code: Code,
@@ -41,8 +41,19 @@ const iconMap: Record<string, any> = {
   brain: Brain,
 };
 
+const fallbackServicesPageMetrics: [PageMetric, PageMetric, PageMetric, PageMetric] =
+  [
+    { label: "Projects Delivered", value: 500, suffix: "+" },
+    { label: "Happy Clients", value: 300, suffix: "+" },
+    { label: "Expert Developers", value: 50, suffix: "+" },
+    { label: "Countries Served", value: 25, suffix: "+" },
+  ];
+
 export function ServicesPage() {
   const [services, setServices] = useState<ServiceMenuCategory[]>([]);
+  const [metrics, setMetrics] = useState<
+    [PageMetric, PageMetric, PageMetric, PageMetric]
+  >(fallbackServicesPageMetrics);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [expandedService, setExpandedService] = useState<string | null>(null);
@@ -51,14 +62,24 @@ export function ServicesPage() {
     const fetchServices = async () => {
       try {
         setLoading(true);
-        const response = await apiService.getServiceMenu();
+        const [response, pageMetricsResponse] = await Promise.all([
+          apiService.getServiceMenu(),
+          apiService.getPageMetrics(),
+        ]);
         if (response.success) {
           setServices(response.data);
         } else {
           setError(response.message || "Failed to fetch services");
         }
+        if (
+          pageMetricsResponse.success &&
+          pageMetricsResponse.data?.servicesPageMetrics?.length === 4
+        ) {
+          setMetrics(pageMetricsResponse.data.servicesPageMetrics);
+        }
       } catch (err: any) {
         setError(err.message || "An error occurred while fetching services");
+        setMetrics(fallbackServicesPageMetrics);
       } finally {
         setLoading(false);
       }
@@ -246,28 +267,7 @@ export function ServicesPage() {
       {/* Stats Section */}
       <section className="container mx-auto px-4 mb-24">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {[
-            {
-              label: "Projects Delivered",
-              value: 500,
-              suffix: "+",
-            },
-            {
-              label: "Happy Clients",
-              value: 300,
-              suffix: "+",
-            },
-            {
-              label: "Expert Developers",
-              value: 50,
-              suffix: "+",
-            },
-            {
-              label: "Countries Served",
-              value: 25,
-              suffix: "+",
-            },
-          ].map((stat, i) => (
+          {metrics.map((stat, i) => (
             <motion.div
               key={i}
               initial={{

@@ -16,10 +16,28 @@ import {
 import { Button } from "../components/ui/Button";
 import { CountUpStats } from "../components/CountUpStats";
 import { apiService } from "../services/api";
-import { Product } from "../types/api";
+import { PageMetric, Product } from "../types/api";
+
+const productMetricIconMap = {
+  users: Users,
+  download: Download,
+  star: Star,
+  "trending-up": TrendingUp,
+} as const;
+
+const fallbackProductsPageMetrics: [PageMetric, PageMetric, PageMetric, PageMetric] =
+  [
+    { label: "Active Users", value: 1.2, suffix: "M+", iconKey: "users" },
+    { label: "Total Downloads", value: 2.5, suffix: "M+", iconKey: "download" },
+    { label: "Average Rating", value: 4.8, suffix: "", iconKey: "star" },
+    { label: "Growth Rate", value: 150, suffix: "%", iconKey: "trending-up" },
+  ];
 
 export function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [metrics, setMetrics] = useState<
+    [PageMetric, PageMetric, PageMetric, PageMetric]
+  >(fallbackProductsPageMetrics);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -28,14 +46,24 @@ export function ProductsPage() {
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        const response = await apiService.getProducts();
+        const [response, pageMetricsResponse] = await Promise.all([
+          apiService.getProducts(),
+          apiService.getPageMetrics(),
+        ]);
         if (response.success) {
           setProducts(response.data);
         } else {
           setError(response.message || "Failed to fetch products");
         }
+        if (
+          pageMetricsResponse.success &&
+          pageMetricsResponse.data?.productsPageMetrics?.length === 4
+        ) {
+          setMetrics(pageMetricsResponse.data.productsPageMetrics);
+        }
       } catch (err: any) {
         setError(err.message || "An error occurred while fetching products");
+        setMetrics(fallbackProductsPageMetrics);
       } finally {
         setLoading(false);
       }
@@ -120,32 +148,11 @@ export function ProductsPage() {
           transition={{ delay: 0.2 }}
           className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16"
         >
-          {[
-            {
-              icon: Users,
-              label: "Active Users",
-              value: 1.2,
-              suffix: "M+",
-            },
-            {
-              icon: Download,
-              label: "Total Downloads",
-              value: 2.5,
-              suffix: "M+",
-            },
-            {
-              icon: Star,
-              label: "Average Rating",
-              value: 4.8,
-              suffix: "",
-            },
-            {
-              icon: TrendingUp,
-              label: "Growth Rate",
-              value: 150,
-              suffix: "%",
-            },
-          ].map((stat, i) => (
+          {metrics.map((stat, i) => {
+            const Icon =
+              productMetricIconMap[stat.iconKey || "users"] || Users;
+
+            return (
             <motion.div
               key={i}
               initial={{
@@ -162,14 +169,15 @@ export function ProductsPage() {
               className="p-6 rounded-2xl bg-white/5 border border-white/10 text-center hover:border-white/20 transition-colors"
             >
               <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-[color:var(--bright-red)]/20 flex items-center justify-center">
-                <stat.icon className="w-6 h-6 text-[color:var(--bright-red)]" />
+                <Icon className="w-6 h-6 text-[color:var(--bright-red)]" />
               </div>
               <div className="text-3xl font-bold text-white mb-1">
                 <CountUpStats end={stat.value} suffix={stat.suffix} />
               </div>
               <div className="text-sm text-gray-400">{stat.label}</div>
             </motion.div>
-          ))}
+            );
+          })}
         </motion.div>
         {/* Category Filter */}
         {!loading && !error && (
