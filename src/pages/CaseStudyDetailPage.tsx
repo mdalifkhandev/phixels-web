@@ -6,6 +6,8 @@ import { Button } from '../components/ui/Button';
 import { ProfessionalReviewCarousel } from '../components/ProfessionalReviewCarousel';
 import { apiService } from '../services/api';
 import { CaseStudy } from '../types/api';
+import { renderRichTextToHtml } from '../utils/richText';
+import { CaseStudyImage } from '../components/CaseStudyImage';
 
 function Counter({
   value,
@@ -168,7 +170,11 @@ export function CaseStudyDetailPage() {
 
         <div className="relative">
           <div className="aspect-video rounded-2xl overflow-hidden border border-white/10 relative z-10 w-full">
-            <img src={caseStudy.heroImage || "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80"} alt={caseStudy.title} className="w-full h-full object-cover" />
+            <CaseStudyImage
+              src={caseStudy.heroImage}
+              alt={caseStudy.title}
+              className="w-full h-full"
+            />
           </div>
           <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-[color:var(--bright-red)] rounded-full blur-[100px] opacity-30" />
         </div>
@@ -184,7 +190,7 @@ export function CaseStudyDetailPage() {
           </h2>
           <div 
             className="text-lg text-gray-300 mb-8 leading-relaxed prose prose-invert prose-p:my-0 prose-headings:my-0 prose-ol:my-0 prose-ul:my-0 max-w-none"
-            dangerouslySetInnerHTML={{ __html: caseStudy.challenge.description || "" }} 
+            dangerouslySetInnerHTML={{ __html: renderRichTextToHtml(caseStudy.challenge.description || "") }} 
           />
         </div>
       </div>
@@ -198,7 +204,7 @@ export function CaseStudyDetailPage() {
         </h2>
         <div 
           className="text-lg text-gray-300 mb-8 leading-relaxed prose prose-invert prose-p:my-0 prose-headings:my-0 prose-ol:my-0 prose-ul:my-0 max-w-none"
-          dangerouslySetInnerHTML={{ __html: caseStudy.solution.description || "" }}
+          dangerouslySetInnerHTML={{ __html: renderRichTextToHtml(caseStudy.solution.description || "") }}
         />
 
         <div>

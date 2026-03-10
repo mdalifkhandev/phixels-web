@@ -4,6 +4,8 @@ import { Link } from "react-router-dom";
 import { ArrowRight, BarChart, Loader2 } from "lucide-react";
 import { apiService } from "../services/api";
 import { CaseStudy } from "../types/api";
+import { stripRichText } from "../utils/richText";
+import { CaseStudyImage } from "../components/CaseStudyImage";
 
 export function CaseStudiesPage() {
   const [cases, setCases] = useState<CaseStudy[]>([]);
@@ -109,13 +111,14 @@ export function CaseStudiesPage() {
                   className="flex flex-col lg:flex-row"
                 >
                   <div className="lg:w-1/2 relative overflow-hidden bg-gray-800 lg:order-first">
-                    <img
-                      src={study.image || "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80"}
-                      alt={study.title}
-                      className="absolute inset-0 w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700"
-                      loading="lazy"
-                    />
-                    <div className="absolute inset-0 bg-black/30" />
+                    <div className="aspect-[4/3] lg:aspect-auto lg:min-h-[420px]">
+                      <CaseStudyImage
+                        src={study.image}
+                        alt={study.title}
+                        className="w-full h-full"
+                        overlayClassName="bg-black/30"
+                      />
+                    </div>
                     <div className="absolute top-6 left-6">
                       <span className="px-3 py-1 rounded-full bg-[color:var(--vibrant-green)] text-black text-xs font-bold shadow-lg">
                         {resolveName(study.category)}
@@ -140,7 +143,7 @@ export function CaseStudiesPage() {
                           Challenge
                         </h3>
                         <div 
-                          className="text-gray-300 text-sm line-clamp-3 prose prose-invert prose-p:my-0 prose-headings:my-0 prose-ol:my-0 prose-ul:my-0"
+                          className="text-gray-300 text-sm line-clamp-3 leading-6 prose prose-invert prose-p:my-0 prose-headings:my-0 prose-ol:my-0 prose-ul:my-0"
                           dangerouslySetInnerHTML={{ __html: study.challenge || "" }}
                         />
                       </div>
@@ -149,23 +152,29 @@ export function CaseStudiesPage() {
                           Solution
                         </h3>
                         <div 
-                          className="text-gray-300 text-sm line-clamp-3 prose prose-invert prose-p:my-0 prose-headings:my-0 prose-ol:my-0 prose-ul:my-0"
+                          className="text-gray-300 text-sm line-clamp-3 leading-6 prose prose-invert prose-p:my-0 prose-headings:my-0 prose-ol:my-0 prose-ul:my-0"
                           dangerouslySetInnerHTML={{ __html: study.solution || "" }}
                         />
                       </div>
                     </div>
 
                     <div className="flex items-center justify-between pt-6 border-t border-white/10">
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-start gap-3 min-w-0">
                         <BarChart
                           className="text-[color:var(--vibrant-green)]"
                           size={24}
                         />
-                        <div className="text-2xl font-bold text-white">
-                          {study.result}
+                        <div className="min-w-0">
+                          <div className="text-xs uppercase tracking-wider text-gray-500 mb-1">
+                            Result
+                          </div>
+                          <div 
+                            className="text-base font-semibold text-white line-clamp-3 leading-6 prose prose-invert prose-p:my-0 prose-headings:my-0 prose-ol:my-0 prose-ul:my-0"
+                            dangerouslySetInnerHTML={{ __html: study.result || "" }}
+                          />
                         </div>
                       </div>
-                      <div className="flex items-center gap-2 text-[color:var(--vibrant-green)] font-bold group-hover:gap-4 transition-all">
+                      <div className="flex items-center gap-2 text-[color:var(--vibrant-green)] font-bold group-hover:gap-4 transition-all shrink-0">
                         Read Full Story{" "}
                         <ArrowRight className="group-hover:translate-x-1 transition-transform" />
                       </div>
