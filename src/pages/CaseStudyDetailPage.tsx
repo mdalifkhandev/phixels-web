@@ -56,9 +56,19 @@ export function CaseStudyDetailPage() {
       if (!id) return;
       try {
         setLoading(true);
-        const response = await apiService.getCaseStudyById(id);
+        const [response, catsRes] = await Promise.all([
+          apiService.getCaseStudyById(id),
+          apiService.getServiceCategories()
+        ]);
         if (response.success) {
-          setStudy(response.data);
+          let resolvedCategory = response.data.category;
+          if (catsRes.success && Array.isArray(catsRes.data)) {
+            const category = catsRes.data.find((c: any) => c._id === resolvedCategory);
+            if (category) {
+              resolvedCategory = category.name;
+            }
+          }
+          setStudy({ ...response.data, category: resolvedCategory });
         } else {
           setError(response.message || 'Case study not found');
         }
