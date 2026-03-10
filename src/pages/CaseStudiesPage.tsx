@@ -4,8 +4,6 @@ import { Link } from "react-router-dom";
 import { ArrowRight, BarChart, Loader2 } from "lucide-react";
 import { apiService } from "../services/api";
 import { CaseStudy } from "../types/api";
-import { stripRichText } from "../utils/richText";
-import { CaseStudyImage } from "../components/CaseStudyImage";
 
 export function CaseStudiesPage() {
   const [cases, setCases] = useState<CaseStudy[]>([]);
@@ -111,14 +109,13 @@ export function CaseStudiesPage() {
                   className="flex flex-col lg:flex-row"
                 >
                   <div className="lg:w-1/2 relative overflow-hidden bg-gray-800 lg:order-first">
-                    <div className="aspect-[4/3] lg:aspect-auto lg:min-h-[420px]">
-                      <CaseStudyImage
-                        src={study.image}
-                        alt={study.title}
-                        className="w-full h-full"
-                        overlayClassName="bg-black/30"
-                      />
-                    </div>
+                    <img
+                      src={study.image || "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80"}
+                      alt={study.title}
+                      className="absolute inset-0 w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700"
+                      loading="lazy"
+                    />
+                    <div className="absolute inset-0 bg-black/30" />
                     <div className="absolute top-6 left-6">
                       <span className="px-3 py-1 rounded-full bg-[color:var(--vibrant-green)] text-black text-xs font-bold shadow-lg">
                         {resolveName(study.category)}
