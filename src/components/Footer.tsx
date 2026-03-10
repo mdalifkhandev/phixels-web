@@ -9,6 +9,8 @@ import {
 } from "lucide-react";
 import { Button } from "./ui/Button";
 import { motion, AnimatePresence } from "framer-motion";
+import { apiService } from "../services/api";
+import { AboutContent } from "../types/api";
 
 export function Footer() {
   const location = useLocation();
@@ -20,6 +22,17 @@ export function Footer() {
   const [modalType, setModalType] = useState<
     "success" | "already-subscribed" | "error" | null
   >(null);
+  const [about, setAbout] = useState<AboutContent | null>(null);
+
+  useEffect(() => {
+    apiService.getAboutContent().then(res => {
+      if (res.success && res.data) {
+        setAbout(res.data);
+      }
+    }).catch(err => console.error("Error fetching about content for footer:", err));
+  }, []);
+
+  const contact = about?.contactInfo;
 
   const GAS_DEPLOYMENT_URL =
     import.meta.env.VITE_GAS_DEPLOYMENT_URL || 'https://script.google.com/macros/s/AKfycbzYH-TfT_uR-2uxR8G2my7KElsR_x0f9GekGO35oSqq-qXkjI8k1zPSRvbIrATJDCg/exec';
@@ -267,28 +280,26 @@ export function Footer() {
               Contact
             </h4>
             <div className="space-y-6">
-              <a href="mailto:phixels.io@gmail.com" className="block group">
+              <a href={`mailto:${contact?.email || "phixels.io@gmail.com"}`} className="block group">
                 <div className="text-gray-400 text-sm mb-1 group-hover:text-[color:var(--bright-red)] transition-colors">
                   Email Us
                 </div>
                 <div className="text-xl md:text-2xl font-bold text-white">
-                  phixels.io@gmail.com
+                  {contact?.email || "phixels.io@gmail.com"}
                 </div>
               </a>
-              <a href="https://wa.me/8801723289090" className="block group">
+              <a href={contact?.whatsapp ? `https://wa.me/${contact.whatsapp.replace(/\+/g, '').replace(/\s/g, '')}` : "https://wa.me/8801723289090"} className="block group">
                 <div className="text-gray-400 text-sm mb-1 group-hover:text-[color:var(--vibrant-green)] transition-colors">
                   WhatsApp
                 </div>
                 <div className="text-xl md:text-2xl font-bold text-white">
-                  +880 1723 289090
+                  {contact?.whatsapp || "+880 1723 289090"}
                 </div>
               </a>
               <div className="block">
                 <div className="text-gray-400 text-sm mb-1">Visit HQ</div>
-                <div className="text-xl font-bold text-white">
-                  112/2 Mohakhali,
-                  <br />
-                  Dhaka, Bangladesh
+                <div className="text-xl font-bold text-white whitespace-pre-line">
+                  {contact?.address || "112/2 Mohakhali,\nDhaka, Bangladesh"}
                 </div>
               </div>
             </div>
@@ -304,28 +315,28 @@ export function Footer() {
                 {[
                   {
                     icon: "/Linkedin.svg",
-                    href: "https://www.linkedin.com/company/106724193",
+                    href: contact?.linkedin || "https://www.linkedin.com/company/106724193",
                     alt: "LinkedIn",
                   },
                   {
                     icon: "/WhatsApp.svg",
-                    href: "https://wa.me/8801723289090",
+                    href: contact?.whatsapp ? `https://wa.me/${contact.whatsapp.replace(/\+/g, '').replace(/\s/g, '')}` : "https://wa.me/8801723289090",
                     alt: "WhatsApp",
                   },
                   {
                     icon: "/mail.svg",
-                    href: "mailto:phixels.io@gmail.com",
+                    href: `mailto:${contact?.email || "phixels.io@gmail.com"}`,
                     alt: "Email",
                   },
                   {
                     icon: "/Behance.svg",
-                    href: "https://www.behance.net/phixelsio",
+                    href: contact?.behance || "https://www.behance.net/phixelsio",
                     alt: "Behance",
                     filter: "brightness(0) invert(1)",
                   },
                   {
                     icon: "/Facebook.svg",
-                    href: "https://www.facebook.com/Phixels.agency",
+                    href: contact?.facebook || "https://www.facebook.com/Phixels.agency",
                     alt: "Facebook",
                   },
                 ].map((social, i) => (

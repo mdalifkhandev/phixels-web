@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Phone, MapPin, Clock, Send, ArrowRight, CheckCircle, Sparkles, ChevronDown, X } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { COUNTRY_CODES } from '../constants/common';
+import { apiService } from '../services/api';
+import { AboutContent } from '../types/api';
 
 // Google Apps Script URL
 const GAS_DEPLOYMENT_URL = import.meta.env.VITE_GAS_DEPLOYMENT_URL || 'https://script.google.com/macros/s/AKfycbzYH-TfT_uR-2uxR8G2my7KElsR_x0f9GekGO35oSqq-qXkjI8k1zPSRvbIrATJDCg/exec';
@@ -28,11 +30,17 @@ export function ContactPage() {
   const [countrySearch, setCountrySearch] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const countryDropdownRef = useRef<HTMLDivElement>(null);
+  const [about, setAbout] = useState<AboutContent | null>(null);
 
-  const filteredCountries = COUNTRY_CODES.filter(country =>
-    country.name.toLowerCase().includes(countrySearch.toLowerCase()) ||
-    country.code.includes(countrySearch)
-  );
+  useEffect(() => {
+    apiService.getAboutContent().then(res => {
+      if (res.success && res.data) {
+        setAbout(res.data);
+      }
+    }).catch(err => console.error("Error fetching about content for contact page:", err));
+  }, []);
+
+  const contact = about?.contactInfo;
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -349,29 +357,29 @@ export function ContactPage() {
             {[{
               icon: Mail,
               label: 'Email Us',
-              value: 'phixels.io@gmail.com',
-              href: 'mailto:phixels.io@gmail.com',
+              value: contact?.email || 'phixels.io@gmail.com',
+              href: `mailto:${contact?.email || 'phixels.io@gmail.com'}`,
               color: 'text-[color:var(--bright-red)]',
               bgColor: 'bg-[color:var(--bright-red)]/10'
             }, {
               icon: Phone,
               label: 'Call Us',
-              value: '+880 1723 289090',
-              href: 'tel:+8801723289090',
+              value: contact?.phone || '+880 1723 289090',
+              href: `tel:${(contact?.phone || '+8801723289090').replace(/\s/g, '')}`,
               color: 'text-[color:var(--vibrant-green)]',
               bgColor: 'bg-[color:var(--vibrant-green)]/10'
             }, {
               icon: null,
               imageIcon: "/WhatsApp.svg",
               label: 'WhatsApp',
-              value: '+880 1723 289090',
-              href: 'https://wa.me/8801723289090',
+              value: contact?.whatsapp || '+880 1723 289090',
+              href: contact?.whatsapp ? `https://wa.me/${contact.whatsapp.replace(/\+/g, '').replace(/\s/g, '')}` : 'https://wa.me/8801723289090',
               color: 'text-[#25D366]',
               bgColor: 'bg-[#25D366]/10'
             }, {
               icon: MapPin,
               label: 'Visit Us',
-              value: '112/2 Mohakhali, Dhaka, Bangladesh',
+              value: contact?.address || '112/2 Mohakhali, Dhaka, Bangladesh',
               href: '#',
               color: 'text-[color:var(--neon-yellow)]',
               bgColor: 'bg-[color:var(--neon-yellow)]/10'
@@ -391,7 +399,7 @@ export function ContactPage() {
                 <div className="text-sm text-gray-400 mb-1">
                   {item.label}
                 </div>
-                <div className="text-lg font-semibold text-white group-hover:text-[color:var(--bright-red)] transition-colors">
+                <div className="text-lg font-semibold text-white group-hover:text-[color:var(--bright-red)] transition-colors whitespace-pre-line">
                   {item.value}
                 </div>
               </div>
@@ -449,24 +457,24 @@ export function ContactPage() {
             <div className="flex flex-wrap gap-6">
               {[{
                 icon: "/Linkedin.svg",
-                href: 'https://www.linkedin.com/company/106724193',
+                href: contact?.linkedin || 'https://www.linkedin.com/company/106724193',
                 alt: 'LinkedIn'
               }, {
                 icon: "/WhatsApp.svg",
-                href: 'https://wa.me/8801723289090',
+                href: contact?.whatsapp ? `https://wa.me/${contact.whatsapp.replace(/\+/g, '').replace(/\s/g, '')}` : 'https://wa.me/8801723289090',
                 alt: 'WhatsApp'
               }, {
                 icon: "/mail.svg",
-                href: 'mailto:phixels.io@gmail.com',
+                href: `mailto:${contact?.email || 'phixels.io@gmail.com'}`,
                 alt: 'Email'
               }, {
                 icon: "/Behance.svg",
-                href: 'https://www.behance.net/phixelsio',
+                href: contact?.behance || 'https://www.behance.net/phixelsio',
                 alt: 'Behance',
                 filter: 'brightness(0) invert(1)'
               }, {
                 icon: "/Facebook.svg",
-                href: 'https://www.facebook.com/Phixels.agency',
+                href: contact?.facebook || 'https://www.facebook.com/Phixels.agency',
                 alt: 'Facebook'
               }].map((social, i) => <motion.a key={i} href={social.href} target="_blank" rel="noopener noreferrer" className="group" initial={{
                 opacity: 0,
