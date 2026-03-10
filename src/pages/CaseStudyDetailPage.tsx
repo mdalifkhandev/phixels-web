@@ -167,8 +167,8 @@ export function CaseStudyDetailPage() {
         </div>
 
         <div className="relative">
-          <div className="aspect-video rounded-2xl overflow-hidden border border-white/10">
-            <img src={caseStudy.heroImage} alt={caseStudy.title} className="w-full h-full object-cover" />
+          <div className="aspect-video rounded-2xl overflow-hidden border border-white/10 relative z-10 w-full">
+            <img src={caseStudy.heroImage || "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80"} alt={caseStudy.title} className="w-full h-full object-cover" />
           </div>
           <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-[color:var(--bright-red)] rounded-full blur-[100px] opacity-30" />
         </div>
@@ -182,9 +182,10 @@ export function CaseStudyDetailPage() {
           <h2 className="text-3xl font-bold mb-6 text-[color:var(--bright-red)]">
             {caseStudy.challenge.title}
           </h2>
-          <p className="text-lg text-gray-300 mb-8 leading-relaxed whitespace-pre-line">
-            {caseStudy.challenge.description}
-          </p>
+          <div 
+            className="text-lg text-gray-300 mb-8 leading-relaxed prose prose-invert prose-p:my-0 prose-headings:my-0 prose-ol:my-0 prose-ul:my-0 max-w-none"
+            dangerouslySetInnerHTML={{ __html: caseStudy.challenge.description || "" }} 
+          />
         </div>
       </div>
     </section>
@@ -195,9 +196,10 @@ export function CaseStudyDetailPage() {
         <h2 className="text-3xl font-bold mb-6 text-[color:var(--vibrant-green)]">
           {caseStudy.solution.title}
         </h2>
-        <p className="text-lg text-gray-300 mb-8 leading-relaxed whitespace-pre-line">
-          {caseStudy.solution.description}
-        </p>
+        <div 
+          className="text-lg text-gray-300 mb-8 leading-relaxed prose prose-invert prose-p:my-0 prose-headings:my-0 prose-ol:my-0 prose-ul:my-0 max-w-none"
+          dangerouslySetInnerHTML={{ __html: caseStudy.solution.description || "" }}
+        />
 
         <div>
           <h3 className="text-xl font-bold mb-4">Technologies Used</h3>

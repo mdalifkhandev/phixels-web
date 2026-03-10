@@ -108,23 +108,23 @@ export function CaseStudiesPage() {
                   to={`/case-studies/${study._id}`}
                   className="flex flex-col lg:flex-row"
                 >
-                  <div className="lg:w-1/2 h-64 lg:h-auto relative overflow-hidden bg-gray-800">
+                  <div className="lg:w-1/2 relative overflow-hidden bg-gray-800 lg:order-first">
                     <img
-                      src={study.image}
+                      src={study.image || "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80"}
                       alt={study.title}
                       className="absolute inset-0 w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700"
                       loading="lazy"
                     />
                     <div className="absolute inset-0 bg-black/30" />
                     <div className="absolute top-6 left-6">
-                      <span className="px-3 py-1 rounded-full bg-[color:var(--vibrant-green)] text-black text-xs font-bold">
+                      <span className="px-3 py-1 rounded-full bg-[color:var(--vibrant-green)] text-black text-xs font-bold shadow-lg">
                         {resolveName(study.category)}
                       </span>
                     </div>
                   </div>
 
                   <div className="lg:w-1/2 p-8 lg:p-12 flex flex-col justify-center">
-                    <h2 className="text-3xl font-bold text-white mb-4 group-hover:text-[color:var(--vibrant-green)] transition-colors">
+                    <h2 className="text-3xl font-bold text-white mb-4 group-hover:text-[color:var(--vibrant-green)] transition-colors line-clamp-2">
                       {study.title}
                     </h2>
                     <p className="text-gray-400 text-sm mb-2">
@@ -139,17 +139,19 @@ export function CaseStudiesPage() {
                         <h3 className="text-gray-400 text-xs uppercase font-bold mb-1">
                           Challenge
                         </h3>
-                        <p className="text-gray-300 text-sm line-clamp-2">
-                          {study.challenge}
-                        </p>
+                        <div 
+                          className="text-gray-300 text-sm line-clamp-3 prose prose-invert prose-p:my-0 prose-headings:my-0 prose-ol:my-0 prose-ul:my-0"
+                          dangerouslySetInnerHTML={{ __html: study.challenge || "" }}
+                        />
                       </div>
                       <div>
                         <h3 className="text-gray-400 text-xs uppercase font-bold mb-1">
                           Solution
                         </h3>
-                        <p className="text-gray-300 text-sm line-clamp-2">
-                          {study.solution}
-                        </p>
+                        <div 
+                          className="text-gray-300 text-sm line-clamp-3 prose prose-invert prose-p:my-0 prose-headings:my-0 prose-ol:my-0 prose-ul:my-0"
+                          dangerouslySetInnerHTML={{ __html: study.solution || "" }}
+                        />
                       </div>
                     </div>
 
