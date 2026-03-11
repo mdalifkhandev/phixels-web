@@ -7,6 +7,8 @@ import { ReviewCarousel } from './ReviewCarousel';
 import { FileUpload } from './FileUpload';
 import confetti from 'canvas-confetti';
 import { BOOKED_SLOTS, COUNTRY_CODES } from '../constants/common';
+import { apiService } from '../services/api';
+import type { AboutContent } from '../types/api';
 
 // Google Apps Script URL
 const GAS_DEPLOYMENT_URL = import.meta.env.VITE_GAS_DEPLOYMENT_URL || 'https://script.google.com/macros/s/AKfycbzYH-TfT_uR-2uxR8G2my7KElsR_x0f9GekGO35oSqq-qXkjI8k1zPSRvbIrATJDCg/exec';
@@ -78,6 +80,7 @@ export function MasterPopup() {
     time: '',
     overview: ''
   });
+  const [aboutContent, setAboutContent] = useState<AboutContent | null>(null);
 
   // Filtered countries based on search
   const filteredCountries = COUNTRY_CODES.filter(country =>
@@ -101,6 +104,15 @@ export function MasterPopup() {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
+
+  // Fetch about content for logos
+  useEffect(() => {
+    if (isOpen && !aboutContent) {
+      apiService.getAboutContent().then(res => {
+        if (res.data) setAboutContent(res.data);
+      }).catch(err => console.error("Failed to fetch about content", err));
+    }
+  }, [isOpen, aboutContent]);
 
   // Reset state when closed
   useEffect(() => {
@@ -354,26 +366,57 @@ export function MasterPopup() {
                 <ReviewCarousel />
               </div>
 
-              <div className="pt-6 border-t border-white/10 mt-auto">
+              <div className="pt-6 border-t border-white/10 mt-auto overflow-hidden">
                 <p className="text-[10px] uppercase tracking-widest text-gray-500 mb-4 text-center">
                   Trusted By Industry Leaders
                 </p>
-                <div className="grid grid-cols-3 gap-3">
-                  {[
-                    { name: 'TechCorp', color: '--ice-grey' },
-                    { name: 'DataFlow', color: '--ice-grey' },
-                    { name: 'CloudSync', color: '--ice-grey' },
-                    { name: 'NexGen', color: '--ice-grey' },
-                    { name: 'ByteWave', color: '--ice-grey' },
-                    { name: 'CodeLabs', color: '--ice-grey' }
-                  ].map((brand, i) => (
-                    <div key={i} className="h-10 bg-white/5 rounded flex items-center justify-center hover:bg-white/10 transition-colors group cursor-default">
-                      <span className="text-[12px] font-bold text-white/70" style={{ color: brand.color }}>
-                        {brand.name}
-                      </span>
+                {aboutContent?.clients && aboutContent.clients.length > 0 ? (
+                  aboutContent.clients.length > 6 ? (
+                    <div className="flex overflow-hidden relative group">
+                      <motion.div
+                        className="flex gap-4 shrink-0"
+                        animate={{ x: ["0%", "-50%"] }}
+                        transition={{
+                          repeat: Infinity,
+                          ease: "linear",
+                          duration: Math.max(20, aboutContent.clients.length * 3), // Dynamic duration based on count
+                        }}
+                      >
+                        {/* Double the array for seamless infinite scrolling */}
+                        {[...aboutContent.clients, ...aboutContent.clients].map((client, i) => (
+                          <div key={i} className="h-10 w-24 bg-white/5 rounded flex items-center justify-center shrink-0 border border-white/5 hover:bg-white/10 transition-colors">
+                            <img src={client.logo} alt={client.name} title={client.name} className="max-h-6 max-w-[80%] object-contain opacity-70 hover:opacity-100 transition-opacity" />
+                          </div>
+                        ))}
+                      </motion.div>
                     </div>
-                  ))}
-                </div>
+                  ) : (
+                    <div className="grid grid-cols-3 gap-3">
+                      {aboutContent.clients.map((client, i) => (
+                        <div key={i} className="h-10 bg-white/5 rounded flex items-center justify-center hover:bg-white/10 transition-colors group cursor-default shadow-sm border border-transparent hover:border-white/10">
+                          <img src={client.logo} alt={client.name} className="max-h-6 max-w-[80%] object-contain opacity-70 group-hover:opacity-100 transition-opacity" title={client.name} />
+                        </div>
+                      ))}
+                    </div>
+                  )
+                ) : (
+                  <div className="grid grid-cols-3 gap-3">
+                    {[
+                      { name: 'TechCorp', color: 'var(--ice-grey)' },
+                      { name: 'DataFlow', color: 'var(--ice-grey)' },
+                      { name: 'CloudSync', color: 'var(--ice-grey)' },
+                      { name: 'NexGen', color: 'var(--ice-grey)' },
+                      { name: 'ByteWave', color: 'var(--ice-grey)' },
+                      { name: 'CodeLabs', color: 'var(--ice-grey)' }
+                    ].map((brand, i) => (
+                      <div key={i} className="h-10 bg-white/5 rounded flex items-center justify-center hover:bg-white/10 transition-colors group cursor-default">
+                        <span className="text-[12px] font-bold text-white/70" style={{ color: brand.color }}>
+                          {brand.name}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>

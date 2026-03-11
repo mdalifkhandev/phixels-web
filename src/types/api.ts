@@ -196,6 +196,7 @@ export interface AboutContent {
     metrics: AboutMetric[];
     philosophy: AboutPhilosophy;
     contactInfo: AboutContactInfo;
+    clients: { name: string; logo: string }[];
     createdAt?: string;
     updatedAt?: string;
 }
