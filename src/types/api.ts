@@ -235,3 +235,14 @@ export interface PageMetricsContent {
     createdAt?: string;
     updatedAt?: string;
 }
+
+export interface LegalSection {
+    title: string;
+    content: string;
+}
+
+export interface LegalContent {
+    privacyPolicy: LegalSection[];
+    termsConditions: LegalSection[];
+    updatedAt?: string;
+}

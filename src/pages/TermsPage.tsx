@@ -1,6 +1,29 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { FileText, Scale, DollarSign, XCircle, AlertTriangle, ArrowRight, Shield } from 'lucide-react';
+import { Scale, ArrowRight, Loader2 } from 'lucide-react';
+import { apiService } from '../services/api';
+import { LegalContent } from '../types/api';
+
 export function TermsPage() {
+  const [content, setContent] = useState<LegalContent | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchContent = async () => {
+      try {
+        const response = await apiService.getLegalContent();
+        if (response.success) {
+          setContent(response.data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch terms & conditions:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchContent();
+  }, []);
+
   return <main className="bg-[#050505] min-h-screen pt-40 pb-20">
     {/* Background Effects */}
     <div className="fixed inset-0 pointer-events-none">
@@ -38,218 +61,82 @@ export function TermsPage() {
 
       {/* Content */}
       <div className="max-w-4xl mx-auto">
-        <motion.div initial={{
-          opacity: 0,
-          y: 20
-        }} animate={{
-          opacity: 1,
-          y: 0
-        }} transition={{
-          delay: 0.2
-        }} className="space-y-12">
-          {/* Introduction */}
-          <div className="p-8 rounded-2xl bg-white/5 border border-white/10">
-            <p className="text-gray-300 leading-relaxed">
-              Welcome to Phixels! These terms and conditions outline the rules
-              and regulations for the use of Phixels's Website and services.
-              By accessing this website, we assume you accept these terms and
-              conditions. Do not continue to use Phixels if you do not agree
-              to all of the terms and conditions stated on this page.
-            </p>
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-20 text-gray-400 gap-4">
+            <Loader2 className="w-10 h-10 animate-spin text-[color:var(--bright-red)]" />
+            <p>Loading terms & conditions...</p>
           </div>
-
-          {/* Intellectual Property */}
+        ) : content?.termsConditions && content.termsConditions.length > 0 ? (
           <motion.div initial={{
             opacity: 0,
             y: 20
-          }} whileInView={{
+          }} animate={{
             opacity: 1,
             y: 0
-          }} viewport={{
-            once: true
-          }}>
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 rounded-xl bg-[color:var(--bright-red)]/20 flex items-center justify-center">
-                <FileText className="w-6 h-6 text-[color:var(--bright-red)]" />
+          }} transition={{
+            delay: 0.2
+          }} className="space-y-12">
+            {content.termsConditions.map((section, index) => (
+              <motion.div 
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="group"
+              >
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:border-[color:var(--neon-yellow)]/30 transition-colors">
+                    <span className="text-xl font-bold text-[color:var(--neon-yellow)]">{index + 1}</span>
+                  </div>
+                  <h2 className="text-3xl font-bold text-white">
+                    {section.title}
+                  </h2>
+                </div>
+                <div className="p-8 rounded-2xl bg-white/5 border border-white/10 group-hover:bg-white/[0.07] transition-all">
+                  <div 
+                    className="text-gray-300 leading-relaxed rich-text-content"
+                    dangerouslySetInnerHTML={{ __html: section.content }}
+                  />
+                </div>
+              </motion.div>
+            ))}
+
+            {/* Contact Card */}
+            <motion.div initial={{
+              opacity: 0,
+              y: 20
+            }} whileInView={{
+              opacity: 1,
+              y: 0
+            }} viewport={{
+              once: true
+            }} className="p-8 rounded-2xl bg-gradient-to-br from-[color:var(--bright-red)]/10 to-transparent border border-white/10 text-center mt-20">
+              <h3 className="text-2xl font-bold text-white mb-4">
+                Questions About Our Terms?
+              </h3>
+              <p className="text-gray-400 mb-6">
+                If you have any questions about these Terms & Conditions, please
+                contact us.
+              </p>
+              <a href="mailto:phixels.io@gmail.com" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[color:var(--bright-red)] text-white font-bold hover:bg-[color:var(--bright-red)]/90 transition-colors">
+                Contact Us <ArrowRight size={18} />
+              </a>
+            </motion.div>
+
+            {content.updatedAt && (
+              <div className="text-center text-sm text-gray-500 pt-8 border-t border-white/10">
+                Last Updated: {new Date(content.updatedAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
               </div>
-              <h2 className="text-3xl font-bold text-white">
-                Intellectual Property Rights
-              </h2>
-            </div>
-            <div className="p-8 rounded-2xl bg-white/5 border border-white/10">
-              <p className="text-gray-300 mb-4">
-                Unless otherwise stated, Phixels and/or its licensors own the
-                intellectual property rights for all material on Phixels. All
-                intellectual property rights are reserved.
-              </p>
-              <p className="text-gray-400 text-sm">
-                You may access this from Phixels for your own personal use
-                subjected to restrictions set in these terms and conditions.
-              </p>
-            </div>
+            )}
           </motion.div>
-
-          {/* User Obligations */}
-          <motion.div initial={{
-            opacity: 0,
-            y: 20
-          }} whileInView={{
-            opacity: 1,
-            y: 0
-          }} viewport={{
-            once: true
-          }}>
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 rounded-xl bg-[color:var(--neon-yellow)]/20 flex items-center justify-center">
-                <AlertTriangle className="w-6 h-6 text-[color:var(--neon-yellow)]" />
-              </div>
-              <h2 className="text-3xl font-bold text-white">
-                User Obligations
-              </h2>
-            </div>
-            <div className="p-8 rounded-2xl bg-white/5 border border-white/10">
-              <p className="text-gray-300 mb-6">You must not:</p>
-              <ul className="space-y-3 text-gray-400">
-                <li className="flex items-start gap-3">
-                  <XCircle size={18} className="text-red-500 shrink-0 mt-1" />
-                  <span>
-                    Republish material from Phixels without permission
-                  </span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <XCircle size={18} className="text-red-500 shrink-0 mt-1" />
-                  <span>
-                    Sell, rent, or sub-license material from this site
-                  </span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <XCircle size={18} className="text-red-500 shrink-0 mt-1" />
-                  <span>
-                    Reproduce, duplicate, or copy material from Phixels
-                  </span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <XCircle size={18} className="text-red-500 shrink-0 mt-1" />
-                  <span>Redistribute content from Phixels</span>
-                </li>
-              </ul>
-            </div>
-          </motion.div>
-
-          {/* Project Payments */}
-          <motion.div initial={{
-            opacity: 0,
-            y: 20
-          }} whileInView={{
-            opacity: 1,
-            y: 0
-          }} viewport={{
-            once: true
-          }}>
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 rounded-xl bg-[color:var(--vibrant-green)]/20 flex items-center justify-center">
-                <DollarSign className="w-6 h-6 text-[color:var(--vibrant-green)]" />
-              </div>
-              <h2 className="text-3xl font-bold text-white">
-                Project Payments
-              </h2>
-            </div>
-            <div className="p-8 rounded-2xl bg-white/5 border border-white/10">
-              <p className="text-gray-300">
-                For development services, payments must be made according to
-                the agreed milestones as outlined in the project proposal.
-                Payment terms include:
-              </p>
-              <ul className="mt-4 space-y-2 text-gray-400">
-                <li>• Initial deposit upon project commencement</li>
-                <li>• Milestone-based payments as per agreement</li>
-                <li>• Final payment upon project completion and approval</li>
-                <li>• Late payments may incur additional fees</li>
-              </ul>
-            </div>
-          </motion.div>
-
-          {/* Limitation of Liability */}
-          <motion.div initial={{
-            opacity: 0,
-            y: 20
-          }} whileInView={{
-            opacity: 1,
-            y: 0
-          }} viewport={{
-            once: true
-          }}>
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 rounded-xl bg-[color:var(--deep-navy)]/40 flex items-center justify-center">
-                <Shield className="w-6 h-6 text-blue-400" />
-              </div>
-              <h2 className="text-3xl font-bold text-white">
-                Limitation of Liability
-              </h2>
-            </div>
-            <div className="p-8 rounded-2xl bg-white/5 border border-white/10">
-              <p className="text-gray-300">
-                In no event shall Phixels be held liable for anything arising
-                out of or in any way connected with your use of this website
-                or our services, whether such liability is under contract,
-                tort, or otherwise. Phixels shall not be held liable for any
-                indirect, consequential, or special liability arising out of
-                or in any way related to your use of this website.
-              </p>
-            </div>
-          </motion.div>
-
-          {/* Termination */}
-          <motion.div initial={{
-            opacity: 0,
-            y: 20
-          }} whileInView={{
-            opacity: 1,
-            y: 0
-          }} viewport={{
-            once: true
-          }}>
-            <h2 className="text-3xl font-bold text-white mb-6">
-              Termination
-            </h2>
-            <div className="p-8 rounded-2xl bg-white/5 border border-white/10">
-              <p className="text-gray-300">
-                We may terminate or suspend access to our service immediately,
-                without prior notice or liability, for any reason whatsoever,
-                including without limitation if you breach the Terms. All
-                provisions of the Terms which by their nature should survive
-                termination shall survive termination.
-              </p>
-            </div>
-          </motion.div>
-
-          {/* Contact */}
-          <motion.div initial={{
-            opacity: 0,
-            y: 20
-          }} whileInView={{
-            opacity: 1,
-            y: 0
-          }} viewport={{
-            once: true
-          }} className="p-8 rounded-2xl bg-gradient-to-br from-[color:var(--bright-red)]/10 to-transparent border border-white/10 text-center">
-            <h3 className="text-2xl font-bold text-white mb-4">
-              Questions About Our Terms?
-            </h3>
-            <p className="text-gray-400 mb-6">
-              If you have any questions about these Terms & Conditions, please
-              contact us.
-            </p>
-            <a href="mailto:phixels.io@gmail.com" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[color:var(--bright-red)] text-white font-bold hover:bg-[color:var(--bright-red)]/90 transition-colors">
-              Contact Us <ArrowRight size={18} />
-            </a>
-          </motion.div>
-
-          {/* Last Updated */}
-          <div className="text-center text-sm text-gray-500 pt-8 border-t border-white/10">
-            Last Updated: January 2025
+        ) : (
+          /* Fallback static content/message */
+          <div className="text-center py-20 bg-white/5 border border-white/10 rounded-2xl">
+            <Scale className="w-12 h-12 text-gray-500 mx-auto mb-4" />
+            <h3 className="text-xl font-medium text-white mb-2">Terms Currently Updating</h3>
+            <p className="text-gray-400">Please check back soon or contact us for details.</p>
           </div>
-        </motion.div>
+        )}
       </div>
     </div>
   </main>;

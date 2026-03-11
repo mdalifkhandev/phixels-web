@@ -57,6 +57,11 @@ export function ContactPage() {
 
   const [error, setError] = useState('');
 
+  const filteredCountries = COUNTRY_CODES.filter(country => 
+    country.name.toLowerCase().includes(countrySearch.toLowerCase()) || 
+    country.code.includes(countrySearch)
+  );
+
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
     if (!formData.name.trim()) newErrors.name = 'Full Name is required';
