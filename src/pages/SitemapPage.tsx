@@ -32,9 +32,9 @@ export function SitemapPage() {
           apiService.getCaseStudies(),
         ]);
 
-        const categories = categoriesRes?.data || (Array.isArray(categoriesRes) ? categoriesRes : []);
-        const products = productsRes?.data || (Array.isArray(productsRes) ? productsRes : []);
-        const caseStudies = caseStudiesRes?.data || (Array.isArray(caseStudiesRes) ? caseStudiesRes : []);
+        const allServices = categoriesRes?.data || (Array.isArray(categoriesRes) ? categoriesRes : []);
+        const allProducts = productsRes?.data || (Array.isArray(productsRes) ? productsRes : []);
+        const allCaseStudies = caseStudiesRes?.data || (Array.isArray(caseStudiesRes) ? caseStudiesRes : []);
 
         const sections = navLinks.map((nav) => {
           let links: any[] = [];
@@ -45,24 +45,24 @@ export function SitemapPage() {
             case "services":
               icon = Code;
               color = "from-[color:var(--bright-red)] to-orange-500";
-              links = [
-                { name: "All Services", path: "/services" },
-                categories.map((cat: any) => ({
+              links.push({ name: "All Services", path: "/services" });
+              allServices.forEach((cat: any) => {
+                links.push({
                   name: cat.name,
                   path: `/services/${cat.slug}`,
-                })),
-              ];
+                });
+              });
               break;
             case "products":
               icon = ShoppingBag;
               color = "from-[color:var(--neon-yellow)] to-yellow-600";
-              links = [
-                { name: "All Products", path: "/products" },
-                products.map((prod: any) => ({
+              links.push({ name: "All Products", path: "/products" });
+              allProducts.forEach((prod: any) => {
+                links.push({
                   name: prod.name,
                   path: `/products/${prod._id || prod.id}`,
-                })),
-              ];
+                });
+              });
               break;
             case "works":
               icon = Layout;
@@ -71,12 +71,12 @@ export function SitemapPage() {
                 name: wc.title,
                 path: wc.link,
               }));
-              links.push(
-                ...caseStudies.map((cs: any) => ({
+              allCaseStudies.forEach((cs: any) => {
+                links.push({
                   name: cs.title,
                   path: `/case-studies/${cs._id}`,
-                })),
-              );
+                });
+              });
               break;
             case "about":
               icon = Info;
