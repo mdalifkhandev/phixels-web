@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Shield, ArrowRight, Loader2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { apiService } from '../services/api';
 import { LegalContent } from '../types/api';
 
@@ -118,9 +119,9 @@ export function PrivacyPage() {
                 If you have any questions or concerns about our privacy
                 practices, please don't hesitate to contact us.
               </p>
-              <a href="mailto:phixels.io@gmail.com" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[color:var(--bright-red)] text-white font-bold hover:bg-[color:var(--bright-red)]/90 transition-colors">
+              <Link to="/contact" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[color:var(--bright-red)] text-white font-bold hover:bg-[color:var(--bright-red)]/90 transition-colors">
                 Contact Us <ArrowRight size={18} />
-              </a>
+              </Link>
             </motion.div>
 
             {content.updatedAt && (
