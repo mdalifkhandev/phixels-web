@@ -2,6 +2,9 @@
 
 Phixels.io Web is the public-facing flagship platform of the Phixels ecosystem. It is a high-fidelity, modern web application designed to showcase premium engineering services with stunning aesthetics and seamless interactivity.
 
+- **Live Demo**: [phixels-web-xi.vercel.app](https://phixels-web-xi.vercel.app)
+- **Production Domain**: [phixels.agency](https://phixels.agency)
+
 ---
 
 ## 🎯 Purpose and Vision
