@@ -5,7 +5,17 @@ import { Link } from "react-router-dom";
 import { apiService } from "../services/api";
 import { LegalContent } from "../types/api";
 
+import { usePageContent } from "../hooks/usePageContent";
+
 export function TermsPage() {
+  const { getSection } = usePageContent('terms');
+
+  const heroSection = getSection('hero', {
+    head: 'Terms & <span class="text-transparent bg-clip-text bg-gradient-to-r from-[color:var(--bright-red)] to-[color:var(--neon-yellow)]">Conditions</span>',
+    caption: 'Legal Agreement',
+    description: "Welcome to Phixels! These terms outline the rules and regulations for using our services."
+  });
+
   const [content, setContent] = useState<LegalContent | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -53,19 +63,15 @@ export function TermsPage() {
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 mb-6">
             <Scale className="w-4 h-4 text-[color:var(--neon-yellow)]" />
-            <span className="text-sm text-gray-300">Legal Agreement</span>
+            <span className="text-sm text-gray-300">{heroSection.caption}</span>
           </div>
 
-          <h1 className="text-5xl md:text-7xl font-bold mb-6">
-            Terms &{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[color:var(--bright-red)] to-[color:var(--neon-yellow)]">
-              Conditions
-            </span>
-          </h1>
-          <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-            Welcome to Phixels! These terms outline the rules and regulations
-            for using our services.
-          </p>
+          <h2 className="text-5xl md:text-7xl font-bold mb-6"
+              dangerouslySetInnerHTML={{ __html: heroSection.head }}
+          />
+          <p className="text-xl text-gray-400 max-w-2xl mx-auto"
+             dangerouslySetInnerHTML={{ __html: heroSection.description }}
+          />
         </motion.div>
 
         {/* Content */}

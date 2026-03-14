@@ -16,7 +16,17 @@ const validatePhone = (phone: string, countryCode: string) => {
   return cleaned.length >= minLength && cleaned.length <= maxLength && /^\d+$/.test(cleaned);
 };
 
+import { usePageContent } from "../hooks/usePageContent";
+
 export function ContactPage() {
+  const { getSection } = usePageContent('contact');
+
+  const heroSection = getSection('hero', {
+    head: 'Get in <span class="text-transparent bg-clip-text bg-gradient-to-r from-[color:var(--bright-red)] via-[color:var(--neon-yellow)] to-[color:var(--vibrant-green)] animate-gradient bg-300%">Touch</span>',
+    caption: "Let's Create Something Amazing",
+    description: "Ready to transform your vision into reality? We're here to help you build something extraordinary. Let's start the conversation."
+  });
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -178,20 +188,16 @@ export function ContactPage() {
         }} className="inline-flex items-center gap-2 mb-6 px-4 py-2 rounded-full bg-white/5 border border-white/10">
           <Sparkles className="w-4 h-4 text-[color:var(--neon-yellow)]" />
           <span className="text-sm text-gray-300">
-            Let's Create Something Amazing
+            {heroSection.caption}
           </span>
         </motion.div>
 
-        <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-8 tracking-tight">
-          Get in{' '}
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-[color:var(--bright-red)] via-[color:var(--neon-yellow)] to-[color:var(--vibrant-green)] animate-gradient bg-300%">
-            Touch
-          </span>
-        </h1>
-        <p className="text-xl text-gray-400 max-w-2xl mx-auto leading-relaxed">
-          Ready to transform your vision into reality? We're here to help you
-          build something extraordinary. Let's start the conversation.
-        </p>
+        <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-8 tracking-tight"
+            dangerouslySetInnerHTML={{ __html: heroSection.head }}
+        />
+        <p className="text-xl text-gray-400 max-w-2xl mx-auto leading-relaxed"
+           dangerouslySetInnerHTML={{ __html: heroSection.description }}
+        />
       </motion.div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 max-w-7xl mx-auto">

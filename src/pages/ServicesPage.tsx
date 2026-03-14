@@ -25,6 +25,7 @@ import { PageHeader } from "../components/ui/PageHeader";
 import { CallToAction } from "../components/ui/CallToAction";
 import { apiService } from "../services/api";
 import { PageMetric, ServiceMenuCategory } from "../types/api";
+import { usePageContent } from "../hooks/usePageContent";
 
 const iconMap: Record<string, any> = {
   code: Code,
@@ -50,6 +51,20 @@ const fallbackServicesPageMetrics: [PageMetric, PageMetric, PageMetric, PageMetr
   ];
 
 export function ServicesPage() {
+  const { getSection } = usePageContent('services');
+
+  const heroSection = getSection('hero', {
+    head: 'Services That <br /> <span class="text-transparent bg-clip-text bg-gradient-to-r from-[color:var(--bright-red)] via-[color:var(--neon-yellow)] to-[color:var(--vibrant-green)] animate-gradient bg-300%">Scale & Succeed</span>',
+    caption: 'Our Services',
+    description: "From mobile apps to AI solutions, we deliver cutting-edge technology services that transform businesses and drive growth."
+  });
+
+  const ctaSection = getSection('cta', {
+    head: 'Ready to Start Your Project?',
+    description: "Let's discuss your requirements and build something extraordinary together.",
+    buttonText: 'Get Free Consultation'
+  });
+
   const [services, setServices] = useState<ServiceMenuCategory[]>([]);
   const [metrics, setMetrics] = useState<
     [PageMetric, PageMetric, PageMetric, PageMetric]
@@ -103,17 +118,10 @@ export function ServicesPage() {
       {/* Hero Section */}
       <section className="container mx-auto px-4 mb-24">
         <PageHeader
-          badgeText="Our Services"
+          badgeText={heroSection.caption}
           badgeIcon={Sparkles}
-          title={
-            <>
-              Services That <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[color:var(--bright-red)] via-[color:var(--neon-yellow)] to-[color:var(--vibrant-green)] animate-gradient bg-300%">
-                Scale & Succeed
-              </span>
-            </>
-          }
-          description="From mobile apps to AI solutions, we deliver cutting-edge technology services that transform businesses and drive growth."
+          title={<span dangerouslySetInnerHTML={{ __html: heroSection.head }} />}
+          description={<span dangerouslySetInnerHTML={{ __html: heroSection.description }} />}
         />
       </section>
 
@@ -298,9 +306,9 @@ export function ServicesPage() {
       {/* CTA Section */}
       <section className="container mx-auto px-4">
         <CallToAction
-          title="Ready to Start Your Project?"
-          description="Let's discuss your requirements and build something extraordinary together."
-          buttonText="Get Free Consultation"
+          title={ctaSection.head}
+          description={ctaSection.description}
+          buttonText={ctaSection.buttonText}
           backgroundImage="https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1200&q=80"
         />
       </section>

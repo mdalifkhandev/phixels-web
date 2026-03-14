@@ -12,7 +12,17 @@ const GAS_DEPLOYMENT_URL =
   import.meta.env.VITE_GAS_DEPLOYMENT_URL ||
   "https://script.google.com/macros/s/AKfycbzYH-TfT_uR-2uxR8G2my7KElsR_x0f9GekGO35oSqq-qXkjI8k1zPSRvbIrATJDCg/exec";
 
+import { usePageContent } from "../hooks/usePageContent";
+
 export function BlogPage() {
+  const { getSection } = usePageContent('blog');
+
+  const heroSection = getSection('hero', {
+    head: 'Insights & <span class="text-gradient">Thoughts</span>',
+    caption: 'Our Blog',
+    description: "Deep dives into engineering, design, and the future of technology."
+  });
+
   const navigate = useNavigate();
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [serviceCategories, setServiceCategories] = useState<ServiceCategory[]>(
@@ -234,14 +244,14 @@ export function BlogPage() {
             animate={{ opacity: 1, scale: 1 }}
             className="inline-block mb-6 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm text-[color:var(--bright-red)] font-mono"
           >
-            Our Blog
+            {heroSection.caption}
           </motion.div>
-          <h1 className="text-5xl md:text-7xl font-bold mb-6">
-            Insights & <span className="text-gradient">Thoughts</span>
-          </h1>
-          <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-            Deep dives into engineering, design, and the future of technology.
-          </p>
+          <h1 className="text-5xl md:text-7xl font-bold mb-6"
+              dangerouslySetInnerHTML={{ __html: heroSection.head }}
+          />
+          <p className="text-xl text-gray-400 max-w-2xl mx-auto"
+             dangerouslySetInnerHTML={{ __html: heroSection.description }}
+          />
         </div>
 
         {/* Featured Post */}

@@ -5,7 +5,17 @@ import { Link } from 'react-router-dom';
 import { apiService } from '../services/api';
 import { LegalContent } from '../types/api';
 
+import { usePageContent } from "../hooks/usePageContent";
+
 export function PrivacyPage() {
+  const { getSection } = usePageContent('privacy');
+
+  const heroSection = getSection('hero', {
+    head: 'Privacy <span class="text-transparent bg-clip-text bg-gradient-to-r from-[color:var(--bright-red)] to-[color:var(--vibrant-green)]">Policy</span>',
+    caption: 'Your Privacy Matters',
+    description: "At Phixels, your privacy is our priority. Learn how we collect, use, and protect your information."
+  });
+
   const [content, setContent] = useState<LegalContent | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -45,19 +55,15 @@ export function PrivacyPage() {
       }} className="text-center mb-20">
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 mb-6">
           <Shield className="w-4 h-4 text-[color:var(--vibrant-green)]" />
-          <span className="text-sm text-gray-300">Your Privacy Matters</span>
+          <span className="text-sm text-gray-300">{heroSection.caption}</span>
         </div>
 
-        <h1 className="text-5xl md:text-7xl font-bold mb-6">
-          Privacy{' '}
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-[color:var(--bright-red)] to-[color:var(--vibrant-green)]">
-            Policy
-          </span>
-        </h1>
-        <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-          At Phixels, your privacy is our priority. Learn how we collect, use,
-          and protect your information.
-        </p>
+        <h2 className="text-5xl md:text-7xl font-bold mb-6"
+            dangerouslySetInnerHTML={{ __html: heroSection.head }}
+        />
+        <p className="text-xl text-gray-400 max-w-2xl mx-auto"
+           dangerouslySetInnerHTML={{ __html: heroSection.description }}
+        />
       </motion.div>
 
       {/* Content */}

@@ -1,16 +1,21 @@
 import { motion } from 'framer-motion';
 import { steps } from '../constants/common';
-export function ProcessSection() {
+interface ProcessSectionProps {
+  head?: string;
+  description?: string;
+}
+
+export function ProcessSection({ head, description }: ProcessSectionProps) {
   return <section className="py-24 bg-[#020202]">
     <div className="container mx-auto px-4">
       <div className="flex flex-col md:flex-row items-end justify-between mb-16">
         <div>
-          <h2 className="text-4xl md:text-5xl font-bold mb-4">
-            How We Build
-          </h2>
-          <p className="text-gray-400 max-w-xl">
-            100% Transparency, Weekly Sprints, Post-Launch Support.
-          </p>
+          <h2 className="text-4xl md:text-5xl font-bold mb-4"
+              dangerouslySetInnerHTML={{ __html: head || "How We Build" }}
+          />
+          <p className="text-gray-400 max-w-xl"
+             dangerouslySetInnerHTML={{ __html: description || "100% Transparency, Weekly Sprints, Post-Launch Support." }}
+          />
         </div>
       </div>
 

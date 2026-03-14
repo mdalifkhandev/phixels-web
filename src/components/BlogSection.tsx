@@ -4,7 +4,12 @@ import { ArrowRight } from "lucide-react";
 import { BlogCard } from "./BlogCard";
 import { apiService } from "../services/api";
 import { Blog, ServiceCategory, Author } from "../types/api";
-export function BlogSection() {
+interface BlogSectionProps {
+  head?: string;
+  description?: string;
+}
+
+export function BlogSection({ head, description }: BlogSectionProps) {
   const [posts, setPosts] = useState<Blog[]>([]);
   const [authors, setAuthors] = useState<Author[]>([]);
   const [serviceCategories, setServiceCategories] = useState<ServiceCategory[]>(
@@ -80,13 +85,12 @@ export function BlogSection() {
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-end mb-12">
           <div>
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">
-              Latest Insights
-            </h2>
-            <p className="text-gray-400 max-w-2xl">
-              Stay updated with the latest trends, tutorials, and insights from
-              our engineering team.
-            </p>
+            <h2 className="text-4xl md:text-5xl font-bold mb-4"
+                dangerouslySetInnerHTML={{ __html: head || "Latest Insights" }}
+            />
+            <p className="text-gray-400 max-w-2xl"
+               dangerouslySetInnerHTML={{ __html: description || "Stay updated with the latest trends, tutorials, and insights from our engineering team." }}
+            />
           </div>
           <Link
             to="/blog"
