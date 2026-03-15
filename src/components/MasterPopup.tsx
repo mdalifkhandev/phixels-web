@@ -237,7 +237,13 @@ export function MasterPopup() {
     await submitData(formDataPayload);
 
     // Track funnel events
-    trackEvent('lead_submitted', { email: formData.email, name: formData.name });
+    trackEvent('lead_submitted', { 
+      email: formData.email, 
+      name: formData.name,
+      phone: `${selectedCountry.code.replace('+', '')} ${formData.phone}`,
+      budget: formData.budget,
+      description: formData.overview
+    });
     trackEvent('meeting_started');
 
     await new Promise(resolve => setTimeout(resolve, 1500));
@@ -286,8 +292,12 @@ export function MasterPopup() {
     // Track funnel conversion
     trackEvent('meeting_booked', { 
       email: formData.email, 
-      date: formData.date, 
-      time: formData.time 
+      name: formData.name,
+      phone: `${selectedCountry.code.replace('+', '')} ${formData.phone}`,
+      budget: formData.budget,
+      description: formData.overview,
+      meetingDate: formData.date, 
+      meetingTime: formData.time 
     });
 
     await new Promise(resolve => setTimeout(resolve, 2000));
