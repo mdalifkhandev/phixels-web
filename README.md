@@ -7,27 +7,22 @@ Phixels.io Web is the public-facing flagship platform of the Phixels ecosystem. 
 
 ---
 
-## 🎯 Purpose and Vision
-This project was built to bridge the gap between high-end digital design and enterprise-grade performance. The goal was to create a website that not only looks like a premium digital agency but also performs with ultra-fast load times and fully dynamic content management, allowing for instantaneous marketing updates without touching a single line of code.
-
----
-
 ## 🚀 Key Features
 
 ### 💎 Premium User Experience (UX)
-- **Fluid Animations**: Leveraging `Framer Motion` for smooth entry animations, parallax effects, and interactive hover states that make the site feel "alive".
-- **Glassmorphism Design**: A sophisticated dark theme using modern glassmorphism principles, custom gradients, and high-contrast typography.
-- **Micro-interactions**: Subtle visual feedbacks on buttons, cards, and navigation to enhance engagement.
+- **Fluid Animations**: Leveraging `Framer Motion` for smooth entry animations, parallax effects, and interactive hover states that bring the brand to life.
+- **Glassmorphism Design**: A sophisticated dark-themed interface built on modern UI principles with custom gradients and high-contrast typography.
+- **High-Fidelity Interactivity**: Micro-interactions and visual feedback across all navigation and call-to-action elements.
 
-### ⚡ Dynamic Content Rendering
-- **CMS Integration**: The frontend is fully decoupled and fetches its content (headings, descriptions, metrics, etc.) from a dedicated API.
-- **Rich Text Support**: Renders complex formatted text, including custom gradients and solid colors directly from the admin dashboard.
-- **Fallback Resilience**: Robust fallback logic ensure the site remains functional and beautiful even if the API is unreachable.
+### ⚡ Dynamic Content & Styling Engine
+- **Rich HTML Injection**: Advanced rendering logic that safely injects complex content from the CMS, supporting rich text, links, and custom formatting.
+- **Inherited Styling Logic**: A specialized CSS architecture that ensures CMS-defined colors and gradients correctly override global defaults while maintaining typography standards.
+- **Real-Time Updates**: The frontend reacts instantly to changes committed via the admin dashboard without requiring new builds.
 
-### 📱 Performance & SEO
-- **Vite Powered**: Built on Vite for lightning-fast development and optimized production bundles.
-- **Semantic HTML**: Uses proper H1-H6 hierarchy and ARIA labels for accessibility and SEO ranking.
-- **Responsive Architecture**: A mobile-first approach ensuring a flawless experience on smartphones, tablets, and desktops.
+### 📱 Performance & SEO Excellence
+- **Vite Powered**: Optimized production bundles and ultra-fast load times.
+- **Semantic Architecture**: Uses proper H1-H6 hierarchy and ARIA labels for maximum accessibility and search engine ranking.
+- **Fully Responsive**: A mobile-first design that scales flawlessly from compact smartphones to ultra-wide desktop monitors.
 
 ---
 
@@ -43,10 +38,10 @@ This project was built to bridge the gap between high-end digital design and ent
 
 ## ⚙️ How It Works
 
-1.  **Bootstrapping**: Upon load, the application initializes the `usePageContent` hook.
-2.  **Data Fetching**: The hook makes an asynchronous request to the `phixels.io-backend` to retrieve section data based on the current page key.
-3.  **State Management**: Fetched content is stored in local React state and passed down to functional components like `Hero`, `ServicesGrid`, and `PortfolioTeaser`.
-4.  **Safe Injection**: Content is injected using `dangerouslySetInnerHTML` to support the rich formatting provided by the CMS, with strict CSS encapsulation to prevent style leakage.
+1.  **Bootstrapping**: The application initializes the `usePageContent` hook upon initial load.
+2.  **Dynamic Fetching**: Content is retrieved asynchronously from the backend based on page-specific keys.
+3.  **Stateful Distribution**: Fetched data is distributed through React state to specialized components like `Hero` and `ServicesGrid`.
+4.  **Safe Rendering**: Rich content is rendered using optimized injection methods, ensuring that custom brand styling (like text gradients) is applied with 100% accuracy.
 
 ---
 
@@ -60,7 +55,8 @@ cd phixels-web
 # Install dependencies
 npm install
 
-# Run development server
+# Setup environment
+# Refer to .env.example for required keys
 npm run dev
 ```
 

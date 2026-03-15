@@ -1,10 +1,12 @@
 import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { PopupProvider } from './context/PopupContext';
+import { trackEvent } from './services/analytics';
 import { TopMarquee } from './components/TopMarquee';
 import { Navigation } from './components/Navigation';
 import { Footer } from './components/Footer';
 import { MasterPopup } from './components/MasterPopup';
+
 // Pages
 import { HomePage } from './pages/HomePage';
 import { AboutPage } from './pages/AboutPage';
@@ -24,6 +26,27 @@ import { ContactPage } from './pages/ContactPage';
 import { ProductsPage } from './pages/ProductsPage';
 import { ProductDetailPage } from './pages/ProductDetailPage';
 import { SitemapPage } from './pages/SitemapPage';
+
+function AnalyticsTracker() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    // Track page view on every route change
+    trackEvent('page_view');
+  }, [pathname]);
+
+  useEffect(() => {
+    // Start heartbeat to keep user active in dashboard
+    const interval = setInterval(() => {
+      trackEvent('heartbeat');
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  return null;
+}
+
 function ScrollToTop() {
   const {
     pathname
@@ -36,6 +59,7 @@ function ScrollToTop() {
 export function App() {
   return <PopupProvider>
     <Router>
+      <AnalyticsTracker />
       <ScrollToTop />
       <div className="min-h-screen bg-[color:var(--pure-black)] text-white font-sans selection:bg-[color:var(--bright-red)] selection:text-white">
         <TopMarquee />
@@ -80,4 +104,4 @@ export function App() {
       </div>
     </Router>
   </PopupProvider>;
-}
+}
