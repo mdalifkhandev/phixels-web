@@ -9,10 +9,13 @@ import { ServiceInlineForm } from '../components/ServiceInlineForm';
 import { apiService } from '../services/api';
 import { ServiceSubcategoryDetail } from '../types/api';
 
+import { trackEvent } from '../services/analytics';
+
 export function ServiceDetailPage() {
   const { category, subcategory } = useParams<{ category: string; subcategory: string }>();
   const [serviceDetail, setServiceDetail] = useState<ServiceSubcategoryDetail | null>(null);
   const [loading, setLoading] = useState(true);
+  const [viewTracked, setViewTracked] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -38,6 +41,17 @@ export function ServiceDetailPage() {
 
     fetchService();
   }, [category, subcategory]);
+
+  useEffect(() => {
+    if (serviceDetail && !viewTracked) {
+      trackEvent('service_view', {
+        category: category,
+        subcategory: subcategory,
+        title: serviceDetail.subcategory.name
+      });
+      setViewTracked(true);
+    }
+  }, [serviceDetail, viewTracked, category, subcategory]);
 
   if (loading) {
     return (

@@ -402,15 +402,27 @@ export function ContactPage() {
               href: '#',
               color: 'text-[color:var(--neon-yellow)]',
               bgColor: 'bg-[color:var(--neon-yellow)]/10'
-            }].map((item, i) => <motion.a key={i} href={item.href} target={item.href.startsWith('http') ? '_blank' : undefined} rel={item.href.startsWith('http') ? 'noopener noreferrer' : undefined} initial={{
-              opacity: 0,
-              y: 20
-            }} animate={{
-              opacity: 1,
-              y: 0
-            }} transition={{
-              delay: 0.5 + i * 0.1
-            }} className="group flex items-center gap-5 p-6 bg-white/5 rounded-2xl border border-white/10 hover:border-white/20 transition-all duration-300">
+            }].map((item, i) => <motion.a 
+                key={i} 
+                href={item.href} 
+                target={item.href.startsWith('http') ? '_blank' : undefined} 
+                rel={item.href.startsWith('http') ? 'noopener noreferrer' : undefined} 
+                onClick={() => {
+                  const channel = item.label.toLowerCase().includes('whatsapp') ? 'whatsapp' : item.label.toLowerCase().includes('email') ? 'gmail' : item.label.toLowerCase().includes('call') ? 'phone' : '';
+                  if (channel) trackEvent('click', { channel });
+                }}
+                initial={{
+                  opacity: 0,
+                  y: 20
+                }} 
+                animate={{
+                  opacity: 1,
+                  y: 0
+                }} 
+                transition={{
+                  delay: 0.5 + i * 0.1
+                }} 
+                className="group flex items-center gap-5 p-6 bg-white/5 rounded-2xl border border-white/10 hover:border-white/20 transition-all duration-300">
               <div className={`w-14 h-14 rounded-xl ${item.bgColor} flex items-center justify-center ${item.color} group-hover:scale-110 transition-transform`}>
                 {item.icon ? <item.icon className="w-6 h-6" /> : <img src={item.imageIcon} alt={item.label} className="w-8 h-8" />}
               </div>
@@ -507,9 +519,15 @@ export function ContactPage() {
                 scale: 1.1,
                 y: -2
               }}>
-                <img src={social.icon} alt={social.alt} className="w-8 h-8 opacity-70 group-hover:opacity-100 transition-opacity" style={{
-                  filter: social.filter || 'none'
-                }} />
+                <img 
+                  src={social.icon} 
+                  alt={social.alt} 
+                  className="w-8 h-8 opacity-70 group-hover:opacity-100 transition-opacity" 
+                  onClick={() => trackEvent('click', { channel: social.alt.toLowerCase() })}
+                  style={{
+                    filter: social.filter || 'none'
+                  }} 
+                />
               </motion.a>)}
             </div>
           </motion.div>
