@@ -4,6 +4,7 @@ import { Mail, Phone, MapPin, Clock, Send, ArrowRight, CheckCircle, Sparkles, Ch
 import { Button } from '../components/ui/Button';
 import { COUNTRY_CODES } from '../constants/common';
 import { apiService } from '../services/api';
+import { trackEvent } from '../services/analytics';
 import { AboutContent } from '../types/api';
 
 // Google Apps Script URL
@@ -111,6 +112,13 @@ export function ContactPage() {
 
       const data = await response.json();
       if (data.success) {
+        trackEvent('contact_submitted', {
+          name: formData.name,
+          email: formData.email,
+          phone: phone,
+          message: formData.message,
+          country: selectedCountry.name
+        });
         setShowSuccessModal(true);
         setFormData({
           name: '',

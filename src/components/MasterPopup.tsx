@@ -9,6 +9,7 @@ import { usePageContent } from '../hooks/usePageContent';
 import confetti from 'canvas-confetti';
 import { BOOKED_SLOTS, COUNTRY_CODES } from '../constants/common';
 import { apiService } from '../services/api';
+import { trackEvent } from '../services/analytics';
 import type { AboutContent } from '../types/api';
 
 // Google Apps Script URL
@@ -126,6 +127,13 @@ export function MasterPopup() {
     }
   }, [isOpen, aboutContent]);
 
+  // Track popup open
+  useEffect(() => {
+    if (isOpen) {
+      trackEvent('popup_open');
+    }
+  }, [isOpen]);
+
   // Reset state when closed
   useEffect(() => {
     if (!isOpen) {
@@ -228,6 +236,10 @@ export function MasterPopup() {
     // Submit to Google Sheets
     await submitData(formDataPayload);
 
+    // Track funnel events
+    trackEvent('lead_submitted', { email: formData.email, name: formData.name });
+    trackEvent('meeting_started');
+
     await new Promise(resolve => setTimeout(resolve, 1500));
     setIsSubmitting(false);
     setShowIntermediateSuccess(true);
@@ -270,6 +282,13 @@ export function MasterPopup() {
 
     // Submit to Google Sheets
     await submitData(formDataPayload);
+
+    // Track funnel conversion
+    trackEvent('meeting_booked', { 
+      email: formData.email, 
+      date: formData.date, 
+      time: formData.time 
+    });
 
     await new Promise(resolve => setTimeout(resolve, 2000));
     setIsSubmitting(false);

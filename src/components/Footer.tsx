@@ -10,6 +10,7 @@ import {
 import { Button } from "./ui/Button";
 import { motion, AnimatePresence } from "framer-motion";
 import { apiService } from "../services/api";
+import { trackEvent } from "../services/analytics";
 import { AboutContent } from "../types/api";
 
 export function Footer() {
@@ -81,6 +82,8 @@ export function Footer() {
         setEmail("");
         return;
       }
+
+      trackEvent('newsletter_subscribed', { email: email });
 
       setModalType("success");
       setSubmitted(true);
