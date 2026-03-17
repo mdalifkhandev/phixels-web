@@ -84,5 +84,15 @@ export const apiService = {
     fetch(`${BASE_URL}/page-metrics`).then((res) => handleResponse<any>(res)),
   getLegalContent: () =>
     fetch(`${BASE_URL}/legal-content`).then((res) => handleResponse<any>(res)),
+
+  // Upload
+  uploadFiles: (files: File[]) => {
+    const formData = new FormData();
+    files.forEach((file) => formData.append("files", file));
+    return fetch(`${BASE_URL}/upload`, {
+      method: "POST",
+      body: formData,
+    }).then((res) => handleResponse<any>(res));
+  },
 };
 

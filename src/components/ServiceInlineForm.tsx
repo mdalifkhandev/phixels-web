@@ -4,6 +4,8 @@ import { motion } from 'framer-motion';
 import { BOOKED_SLOTS, COUNTRY_CODES } from '../constants/common';
 import { FileUpload } from './FileUpload';
 import { Button } from './ui/Button';
+import { trackEvent } from '../services/analytics';
+import { apiService } from '../services/api';
 
 const GAS_DEPLOYMENT_URL =
   import.meta.env.VITE_GAS_DEPLOYMENT_URL || 'https://script.google.com/macros/s/AKfycbzYH-TfT_uR-2uxR8G2my7KElsR_x0f9GekGO35oSqq-qXkjI8k1zPSRvbIrATJDCg/exec';
@@ -23,14 +25,6 @@ const validatePhone = (phone: string, countryCode: string) => {
   const maxLength = countryCode === '+1' ? 10 : 15;
   return cleaned.length >= minLength && cleaned.length <= maxLength && /^\d+$/.test(cleaned);
 };
-
-const fileToBase64 = (file: File): Promise<string> =>
-  new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = (error) => reject(error);
-  });
 
 async function submitData(formDataPayload: Record<string, string>) {
   const params = new URLSearchParams();
@@ -165,16 +159,17 @@ export function ServiceInlineForm({ serviceTitle }: { serviceTitle: string }) {
       const newRequestId = crypto.randomUUID();
       setRequestId(newRequestId);
 
-      const allFilesData = await Promise.all(
-        files.map(async (file) => {
-          const base64 = await fileToBase64(file);
-          return {
-            name: file.name,
-            type: file.type,
-            data: base64,
-          };
-        }),
-      );
+      let uploadedFiles: any[] = [];
+      if (files.length > 0) {
+        try {
+          const uploadResult = await apiService.uploadFiles(files);
+          if (uploadResult.success) {
+            uploadedFiles = uploadResult.data;
+          }
+        } catch (error) {
+          console.error('File upload failed:', error);
+        }
+      }
 
       const payload = {
         formType: 'service-inline',
@@ -184,12 +179,26 @@ export function ServiceInlineForm({ serviceTitle }: { serviceTitle: string }) {
         country: selectedCountry.name,
         budget: formData.budget,
         description: `[${serviceTitle}] ${formData.overview}`,
-        filesData: JSON.stringify(allFilesData),
+        filesData: JSON.stringify(uploadedFiles),
         requestId: newRequestId,
         isFinal: 'false',
       };
 
-      await submitData(payload);
+      const result = await submitData(payload);
+
+      // Track analytics event (Step 1)
+      void trackEvent('lead_submitted', {
+        name: formData.name,
+        email: formData.email,
+        phone: `${selectedCountry.code.replace('+', '')} ${formData.phone}`,
+        country: selectedCountry.name,
+        budget: formData.budget,
+        description: `[${serviceTitle}] ${formData.overview}`,
+        requestId: newRequestId,
+        folderUrl: result?.folderUrl || '#',
+        files: uploadedFiles
+      });
+
       setStep(2);
     } catch (error) {
       setSuccessMessage('Submission failed. Please try again.');
@@ -201,16 +210,17 @@ export function ServiceInlineForm({ serviceTitle }: { serviceTitle: string }) {
   const handleFinalSubmit = async () => {
     setIsSubmitting(true);
     try {
-      const allFilesData = await Promise.all(
-        files.map(async (file) => {
-          const base64 = await fileToBase64(file);
-          return {
-            name: file.name,
-            type: file.type,
-            data: base64,
-          };
-        }),
-      );
+      let uploadedFiles: any[] = [];
+      if (files.length > 0) {
+        try {
+          const uploadResult = await apiService.uploadFiles(files);
+          if (uploadResult.success) {
+            uploadedFiles = uploadResult.data;
+          }
+        } catch (error) {
+          console.error('File upload failed:', error);
+        }
+      }
 
       const payload = {
         formType: 'service-inline',
@@ -220,15 +230,32 @@ export function ServiceInlineForm({ serviceTitle }: { serviceTitle: string }) {
         country: selectedCountry.name,
         budget: formData.budget,
         description: `[${serviceTitle}] ${formData.overview}`,
-        filesData: JSON.stringify(allFilesData),
+        filesData: JSON.stringify(uploadedFiles),
         meetingDate: formData.date,
         meetingTime: formData.time,
         requestId: requestId || crypto.randomUUID(),
         isFinal: 'true',
       };
 
-      await submitData(payload);
+      const result = await submitData(payload);
+
+      // Track analytics event (Final)
+      void trackEvent('meeting_booked', {
+        name: formData.name,
+        email: formData.email,
+        phone: `${selectedCountry.code.replace('+', '')} ${formData.phone}`,
+        country: selectedCountry.name,
+        budget: formData.budget,
+        description: `[${serviceTitle}] ${formData.overview}`,
+        meetingDate: formData.date,
+        meetingTime: formData.time,
+        requestId: requestId || crypto.randomUUID(),
+        folderUrl: result?.folderUrl || '#',
+        files: uploadedFiles
+      });
+
       setSuccessMessage('Your booking has been submitted successfully.');
+      setFiles([]); // Clear files after final success
     } catch (error) {
       setSuccessMessage('Submission failed. Please try again.');
     } finally {

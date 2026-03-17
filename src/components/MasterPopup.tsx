@@ -9,9 +9,10 @@ import confetti from 'canvas-confetti';
 import { BOOKED_SLOTS, COUNTRY_CODES } from '../constants/common';
 import { apiService } from '../services/api';
 import type { AboutContent } from '../types/api';
+import { trackEvent } from '../services/analytics';
 
 // Google Apps Script URL
-const GAS_DEPLOYMENT_URL = import.meta.env.VITE_GAS_DEPLOYMENT_URL || 'https://script.google.com/macros/s/AKfycbzYH-TfT_uR-2uxR8G2my7KElsR_x0f9GekGO35oSqq-qXkjI8k1zPSRvbIrATJDCg/exec';
+const GAS_DEPLOYMENT_URL = import.meta.env.VITE_GAS_DEPLOYMENT_URL || 'https://script.google.com/macros/s/AKfycbzYH-TfT_uR-2uxR8G2my7KEls_x0f9GekGO35oSqq-qXkjI8k1zPSRvbIrATJDCg/exec';
 const validatePhone = (phone: string, countryCode: string) => {
   const cleaned = phone.replace(/\D/g, '');
   const minLength = countryCode === '+1' ? 10 : 7;
@@ -48,14 +49,6 @@ async function submitData(formDataPayload: Record<string, string>) {
 }
 
 // Helper to convert file to Base64
-const fileToBase64 = (file: File): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = error => reject(error);
-  });
-};
 
 export function MasterPopup() {
   const { isOpen, closePopup } = usePopup();
@@ -189,15 +182,18 @@ export function MasterPopup() {
     const newRequestId = crypto.randomUUID();
     setRequestId(newRequestId);
 
-    // Convert ALL files to Base64 (Updated Logic for Multiple Files)
-    const allFilesData = await Promise.all(files.map(async (file) => {
-      const base64 = await fileToBase64(file);
-      return {
-        name: file.name,
-        type: file.type,
-        data: base64
-      };
-    }));
+    // Upload files to Cloudinary (Step 1 - Lead)
+    let uploadedFiles: any[] = [];
+    if (files.length > 0) {
+      try {
+        const uploadResult = await apiService.uploadFiles(files);
+        if (uploadResult.success) {
+          uploadedFiles = uploadResult.data;
+        }
+      } catch (error) {
+        console.error('File upload failed:', error);
+      }
+    }
 
     // Prepare data for Google Apps Script (Step 1 - Lead)
     const formDataPayload = {
@@ -208,13 +204,26 @@ export function MasterPopup() {
       country: selectedCountry.name,
       budget: formData.budget,
       description: formData.overview,
-      filesData: JSON.stringify(allFilesData), // Changed from 'file' to 'filesData' JSON string
+      filesData: JSON.stringify(uploadedFiles), // Contains Cloudinary URLs
       requestId: newRequestId,
       isFinal: 'false'
     };
 
     // Submit to Google Sheets
-    await submitData(formDataPayload);
+    const result = await submitData(formDataPayload);
+
+    // Track analytics event (Step 1)
+    void trackEvent('lead_submitted', {
+      name: formData.name,
+      email: formData.email,
+      phone: `${selectedCountry.code.replace('+', '')} ${formData.phone}`,
+      country: selectedCountry.name,
+      budget: formData.budget,
+      description: formData.overview,
+      requestId: newRequestId,
+      folderUrl: result?.folderUrl || '#',
+      files: uploadedFiles // Now contains proper URLs
+    });
 
     await new Promise(resolve => setTimeout(resolve, 1500));
     setIsSubmitting(false);
@@ -230,15 +239,18 @@ export function MasterPopup() {
   const handleFinalSubmit = async () => {
     setIsSubmitting(true);
 
-    // Convert ALL files to Base64 (Updated Logic for Multiple Files)
-    const allFilesData = await Promise.all(files.map(async (file) => {
-      const base64 = await fileToBase64(file);
-      return {
-        name: file.name,
-        type: file.type,
-        data: base64
-      };
-    }));
+    // Upload files to Cloudinary (Step 4 - Booking Confirmed)
+    let uploadedFiles: any[] = [];
+    if (files.length > 0) {
+      try {
+        const uploadResult = await apiService.uploadFiles(files);
+        if (uploadResult.success) {
+          uploadedFiles = uploadResult.data;
+        }
+      } catch (error) {
+        console.error('File upload failed:', error);
+      }
+    }
 
     // Prepare data for Google Apps Script (Step 4 - Booking Confirmed)
     const formDataPayload = {
@@ -249,7 +261,7 @@ export function MasterPopup() {
       country: selectedCountry.name,
       budget: formData.budget,
       description: formData.overview,
-      filesData: JSON.stringify(allFilesData), // Changed from 'file' to 'filesData' JSON string
+      filesData: JSON.stringify(uploadedFiles), // Contains Cloudinary URLs
       meetingDate: formData.date,
       meetingTime: formData.time,
       requestId: requestId,
@@ -257,11 +269,27 @@ export function MasterPopup() {
     };
 
     // Submit to Google Sheets
-    await submitData(formDataPayload);
+    const result = await submitData(formDataPayload);
+
+    // Track analytics event (Final)
+    void trackEvent('meeting_booked', {
+      name: formData.name,
+      email: formData.email,
+      phone: `${selectedCountry.code.replace('+', '')} ${formData.phone}`,
+      country: selectedCountry.name,
+      budget: formData.budget,
+      description: formData.overview,
+      meetingDate: formData.date,
+      meetingTime: formData.time,
+      requestId: requestId,
+      folderUrl: result?.folderUrl || '#',
+      files: uploadedFiles // Added Cloudinary URLs to final event
+    });
 
     await new Promise(resolve => setTimeout(resolve, 2000));
     setIsSubmitting(false);
     setStep(5); // Success step
+    setFiles([]); // Clear files after final success
 
     // Trigger confetti
     confetti({

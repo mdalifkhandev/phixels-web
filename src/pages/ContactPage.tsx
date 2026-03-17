@@ -3,8 +3,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Phone, MapPin, Clock, Send, ArrowRight, CheckCircle, Sparkles, ChevronDown, X } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { COUNTRY_CODES } from '../constants/common';
+import { FileUpload } from '../components/FileUpload';
 import { apiService } from '../services/api';
 import { AboutContent } from '../types/api';
+import { trackEvent } from '../services/analytics';
 
 // Google Apps Script URL
 const GAS_DEPLOYMENT_URL = import.meta.env.VITE_GAS_DEPLOYMENT_URL || 'https://script.google.com/macros/s/AKfycbzYH-TfT_uR-2uxR8G2my7KElsR_x0f9GekGO35oSqq-qXkjI8k1zPSRvbIrATJDCg/exec';
@@ -28,6 +30,7 @@ export function ContactPage() {
   const [selectedCountry, setSelectedCountry] = useState(COUNTRY_CODES.find(c => c.country === 'US') || COUNTRY_CODES[0]); // US default
   const [showCountryDropdown, setShowCountryDropdown] = useState(false);
   const [countrySearch, setCountrySearch] = useState('');
+  const [files, setFiles] = useState<File[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const countryDropdownRef = useRef<HTMLDivElement>(null);
   const [about, setAbout] = useState<AboutContent | null>(null);
@@ -78,6 +81,20 @@ export function ContactPage() {
     if (!validateForm()) return;
     setSubmitting(true);
     setError('');
+
+    // Upload files to Cloudinary
+    let uploadedFiles: any[] = [];
+    if (files.length > 0) {
+      try {
+        const uploadResult = await apiService.uploadFiles(files);
+        if (uploadResult.success) {
+          uploadedFiles = uploadResult.data;
+        }
+      } catch (err) {
+        console.error('File upload failed:', err);
+      }
+    }
+
     const phone = selectedCountry.code + formData.phone;
     try {
       const response = await fetch(GAS_DEPLOYMENT_URL, {
@@ -91,7 +108,8 @@ export function ContactPage() {
           email: formData.email,
           phone: phone,
           country: selectedCountry.name,
-          message: formData.message
+          message: formData.message,
+          filesData: JSON.stringify(uploadedFiles) // Cloudinary URLs
         })
       });
 
@@ -101,6 +119,16 @@ export function ContactPage() {
 
       const data = await response.json();
       if (data.success) {
+        // Track analytics event
+        void trackEvent('contact_submitted', {
+          name: formData.name,
+          email: formData.email,
+          phone: phone,
+          country: selectedCountry.name,
+          message: formData.message,
+          files: uploadedFiles
+        });
+
         setShowSuccessModal(true);
         setFormData({
           name: '',
@@ -108,6 +136,7 @@ export function ContactPage() {
           phone: '',
           message: ''
         });
+        setFiles([]);
       } else {
         setError(data.error || 'Something went wrong.');
       }
@@ -328,6 +357,18 @@ export function ContactPage() {
                       <span>⚠️</span> {errors.message}
                     </p>
                   )}
+                </div>
+
+                <div className="space-y-4">
+                  <label className="text-sm text-gray-400">
+                    Attachments (Optional)
+                  </label>
+                  <FileUpload 
+                    files={files} 
+                    onFilesChange={setFiles} 
+                    maxSizeMB={10}
+                    compact={true}
+                  />
                 </div>
 
                 {error && (
