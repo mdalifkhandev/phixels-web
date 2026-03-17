@@ -43,14 +43,7 @@ function Counter({ value, suffix = "" }: { value: number; suffix?: string }) {
     </span>
   );
 }
-
-interface HeroProps {
-  head?: string;
-  caption?: string;
-  description?: string;
-}
-
-export function Hero({ head, caption, description }: HeroProps) {
+export function Hero() {
   const { scrollY } = useScroll();
   const y1 = useTransform(scrollY, [0, 500], [0, 200]);
   const y2 = useTransform(scrollY, [0, 500], [0, -150]);
@@ -99,16 +92,18 @@ export function Hero({ head, caption, description }: HeroProps) {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-yellow-500"></span>
             </span>
-            {caption || "Accepting New Enterprise Projects for Q4"}
+            Accepting New Enterprise Projects for Q4
           </div>
 
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tighter mb-6 leading-tight"
-              dangerouslySetInnerHTML={{ __html: head || "Transforming Visionary Concepts <br /> <span class=\"text-gradient\">into Digital Dominance</span>" }}
-          />
+          <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tighter mb-6 leading-tight">
+            Transforming Visionary Concepts <br />
+            <span className="text-gradient">into Digital Dominance</span>
+          </h1>
 
-          <p className="text-xl text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed"
-             dangerouslySetInnerHTML={{ __html: description || "We build scalable, secure, and future-proof mobile apps for startups and Fortune 500s. From AI integration to blockchain architecture." }}
-          />
+          <p className="text-xl text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed">
+            We build scalable, secure, and future-proof mobile apps for startups
+            and Fortune 500s. From AI integration to blockchain architecture.
+          </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Button

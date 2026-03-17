@@ -17,7 +17,6 @@ import { Button } from "../components/ui/Button";
 import { CountUpStats } from "../components/CountUpStats";
 import { apiService } from "../services/api";
 import { PageMetric, Product } from "../types/api";
-import { usePageContent } from "../hooks/usePageContent";
 
 const productMetricIconMap = {
   users: Users,
@@ -35,20 +34,6 @@ const fallbackProductsPageMetrics: [PageMetric, PageMetric, PageMetric, PageMetr
   ];
 
 export function ProductsPage() {
-  const { getSection } = usePageContent('products');
-
-  const heroSection = getSection('hero', {
-    head: 'Digital Products That <br /> <span class="text-gradient">Scale & Succeed</span>',
-    caption: 'Our Product Portfolio',
-    description: "Innovative solutions built by our team, trusted by thousands of users worldwide. From concept to market leader."
-  });
-
-  const ctaSection = getSection('cta', {
-    head: 'Have a Product Idea?',
-    description: "Let's build the next big thing together. Our team specializes in turning ideas into successful digital products.",
-    buttonText: 'Start Your Project'
-  });
-
   const [products, setProducts] = useState<Product[]>([]);
   const [metrics, setMetrics] = useState<
     [PageMetric, PageMetric, PageMetric, PageMetric]
@@ -110,6 +95,7 @@ export function ProductsPage() {
 
   return (
     <main className="bg-[#050505] min-h-screen pt-40 pb-20 overflow-hidden relative">
+      {/* Hero-like Background Effects */}
       <div className="absolute inset-0 z-0 pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[color:var(--deep-navy)] rounded-full mix-blend-screen filter blur-[100px] opacity-30 animate-pulse" />
         <div
@@ -122,6 +108,7 @@ export function ProductsPage() {
       </div>
 
       <div className="container mx-auto px-4 relative z-10">
+        {/* Hero Section */}
         <motion.div
           className="text-center mb-20"
           initial={{
@@ -141,17 +128,20 @@ export function ProductsPage() {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-yellow-500"></span>
             </span>
-            {heroSection.caption}
+            Our Product Portfolio
           </div>
 
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tighter mb-6 leading-tight"
-              dangerouslySetInnerHTML={{ __html: heroSection.head }}
-          />
-          <p className="text-xl text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed"
-             dangerouslySetInnerHTML={{ __html: heroSection.description }}
-          />
+          <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tighter mb-6 leading-tight">
+            Digital Products That <br />
+            <span className="text-gradient">Scale & Succeed</span>
+          </h1>
+          <p className="text-xl text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed">
+            Innovative solutions built by our team, trusted by thousands of
+            users worldwide. From concept to market leader.
+          </p>
         </motion.div>
 
+        {/* Stats Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -163,33 +153,33 @@ export function ProductsPage() {
               productMetricIconMap[stat.iconKey || "users"] || Users;
 
             return (
-              <motion.div
-                key={i}
-                initial={{
-                  opacity: 0,
-                  scale: 0.9,
-                }}
-                animate={{
-                  opacity: 1,
-                  scale: 1,
-                }}
-                transition={{
-                  delay: 0.3 + i * 0.1,
-                }}
-                className="p-6 rounded-2xl bg-white/5 border border-white/10 text-center hover:border-white/20 transition-colors"
-              >
-                <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-[color:var(--bright-red)]/20 flex items-center justify-center">
-                  <Icon className="w-6 h-6 text-[color:var(--bright-red)]" />
-                </div>
-                <div className="text-3xl font-bold text-white mb-1">
-                  <CountUpStats end={stat.value} suffix={stat.suffix} />
-                </div>
-                <div className="text-sm text-gray-400">{stat.label}</div>
-              </motion.div>
+            <motion.div
+              key={i}
+              initial={{
+                opacity: 0,
+                scale: 0.9,
+              }}
+              animate={{
+                opacity: 1,
+                scale: 1,
+              }}
+              transition={{
+                delay: 0.3 + i * 0.1,
+              }}
+              className="p-6 rounded-2xl bg-white/5 border border-white/10 text-center hover:border-white/20 transition-colors"
+            >
+              <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-[color:var(--bright-red)]/20 flex items-center justify-center">
+                <Icon className="w-6 h-6 text-[color:var(--bright-red)]" />
+              </div>
+              <div className="text-3xl font-bold text-white mb-1">
+                <CountUpStats end={stat.value} suffix={stat.suffix} />
+              </div>
+              <div className="text-sm text-gray-400">{stat.label}</div>
+            </motion.div>
             );
           })}
         </motion.div>
-
+        {/* Category Filter */}
         {!loading && !error && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -345,7 +335,7 @@ export function ProductsPage() {
             })}
           </div>
         )}
-
+        {/* CTA Section - Classic Style */}
         <motion.div
           initial={{
             opacity: 0,
@@ -363,19 +353,20 @@ export function ProductsPage() {
           <div className="absolute inset-0 bg-gradient-to-br from-[color:var(--deep-navy)]/20 to-transparent pointer-events-none" />
 
           <div className="relative z-10 flex flex-col items-center justify-center">
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6"
-                dangerouslySetInnerHTML={{ __html: ctaSection.head }}
-            />
-            <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto"
-               dangerouslySetInnerHTML={{ __html: ctaSection.description }}
-            />
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+              Have a Product Idea?
+            </h2>
+            <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
+              Let's build the next big thing together. Our team specializes in
+              turning ideas into successful digital products.
+            </p>
             <Button
               variant="primary"
               glow
               triggerPopup
               className="text-lg px-8 py-4"
             >
-              {ctaSection.buttonText} <ArrowRight className="ml-2" />
+              Start Your Project <ArrowRight className="ml-2" />
             </Button>
           </div>
         </motion.div>

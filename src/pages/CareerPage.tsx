@@ -6,17 +6,7 @@ import { Button } from '../components/ui/Button';
 import { apiService } from '../services/api';
 import { Career } from '../types/api';
 
-import { usePageContent } from "../hooks/usePageContent";
-
 export function CareerPage() {
-  const { getSection } = usePageContent('career');
-
-  const heroSection = getSection('hero', {
-    head: 'Join the Top 1% <br /> <span class="text-gradient">Engineering Team</span>',
-    caption: 'We are hiring!',
-    description: "We don't just hire employees. We hire future CTOs, founders, and visionaries. Build the future with us."
-  });
-
   const [roles, setRoles] = useState<Career[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -54,14 +44,16 @@ export function CareerPage() {
         }} transition={{
           duration: 0.5
         }} className="inline-block mb-6 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm text-[color:var(--vibrant-green)] font-mono">
-          {heroSection.caption}
+          We are hiring!
         </motion.div>
-        <h1 className="text-5xl md:text-7xl font-bold mb-6 tracking-tight"
-            dangerouslySetInnerHTML={{ __html: heroSection.head }}
-        />
-        <p className="text-xl text-gray-400 max-w-2xl mx-auto"
-           dangerouslySetInnerHTML={{ __html: heroSection.description }}
-        />
+        <h1 className="text-5xl md:text-7xl font-bold mb-6 tracking-tight">
+          Join the Top 1% <br />
+          <span className="text-gradient">Engineering Team</span>
+        </h1>
+        <p className="text-xl text-gray-400 max-w-2xl mx-auto">
+          We don't just hire employees. We hire future CTOs, founders, and
+          visionaries. Build the future with us.
+        </p>
       </div>
 
       {/* Perks */}

@@ -12,7 +12,6 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import confetti from "canvas-confetti";
 import { apiService } from "../services/api";
-import { trackEvent } from "../services/analytics";
 import { Career } from "../types/api";
 import { renderRichTextToHtml } from "../utils/richText";
 
@@ -89,13 +88,6 @@ export function JobDetailPage() {
           jobTitle: jobData.jobTitle,
           file: resumeBase64,
         }),
-      });
-
-      trackEvent('job_applied', {
-        name,
-        email,
-        portfolio,
-        jobTitle: jobData.jobTitle
       });
 
       setSubmitted(true);

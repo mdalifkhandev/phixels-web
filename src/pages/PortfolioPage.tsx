@@ -4,16 +4,7 @@ import { ExternalLink, Loader2 } from "lucide-react";
 import { apiService } from "../services/api";
 import { Portfolio } from "../types/api";
 
-import { usePageContent } from "../hooks/usePageContent";
-
 export function PortfolioPage() {
-  const { getSection } = usePageContent('portfolio');
-
-  const heroSection = getSection('hero', {
-    head: 'Our Portfolio',
-    description: "Showcasing our finest work across industries. From startups to Fortune 500 enterprises."
-  });
-
   const [portfolioItems, setPortfolioItems] = useState<Portfolio[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -65,12 +56,11 @@ export function PortfolioPage() {
     <main className="bg-[#050505] min-h-screen pt-40 pb-20">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
-          <h1 className="text-5xl md:text-7xl font-bold mb-6"
-              dangerouslySetInnerHTML={{ __html: heroSection.head }}
-          />
-          <p className="text-xl text-gray-400 max-w-2xl mx-auto"
-             dangerouslySetInnerHTML={{ __html: heroSection.description }}
-          />
+          <h1 className="text-5xl md:text-7xl font-bold mb-6">Our Portfolio</h1>
+          <p className="text-xl text-gray-400 max-w-2xl mx-auto">
+            Showcasing our finest work across industries. From startups to
+            Fortune 500 enterprises.
+          </p>
         </div>
 
         {/* Filter */}

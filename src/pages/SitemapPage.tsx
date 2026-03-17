@@ -18,17 +18,7 @@ import {
 import { apiService } from "../services/api";
 import { navLinks, workCategories } from "../constants/common";
 
-import { usePageContent } from "../hooks/usePageContent";
-
 export function SitemapPage() {
-  const { getSection } = usePageContent('sitemap');
-
-  const heroSection = getSection('hero', {
-    head: 'Explore <span class="text-transparent bg-clip-text bg-gradient-to-r from-[color:var(--bright-red)] via-[color:var(--neon-yellow)] to-[color:var(--vibrant-green)] animate-gradient bg-300%">Phixels</span>',
-    caption: 'Site Navigation',
-    description: "Your complete guide to navigating our website. Discover all our pages and services in one place."
-  });
-
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [dynamicSitemap, setDynamicSitemap] = useState<any[]>([]);
@@ -202,15 +192,19 @@ export function SitemapPage() {
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 mb-6">
             <Sparkles className="w-4 h-4 text-[color:var(--neon-yellow)]" />
-            <span className="text-sm text-gray-300">{heroSection.caption}</span>
+            <span className="text-sm text-gray-300">Site Navigation</span>
           </div>
 
-          <h2 className="text-5xl md:text-7xl font-bold mb-6"
-              dangerouslySetInnerHTML={{ __html: heroSection.head }}
-          />
-          <p className="text-xl text-gray-400 max-w-2xl mx-auto"
-             dangerouslySetInnerHTML={{ __html: heroSection.description }}
-          />
+          <h1 className="text-5xl md:text-7xl font-bold mb-6">
+            Explore{" "}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[color:var(--bright-red)] via-[color:var(--neon-yellow)] to-[color:var(--vibrant-green)] animate-gradient bg-300%">
+              Phixels
+            </span>
+          </h1>
+          <p className="text-xl text-gray-400 max-w-2xl mx-auto">
+            Your complete guide to navigating our website. Discover all our
+            pages and services in one place.
+          </p>
         </motion.div>
 
         {/* Interactive Sitemap Grid */}

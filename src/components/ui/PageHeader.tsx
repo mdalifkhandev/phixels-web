@@ -6,7 +6,7 @@ interface PageHeaderProps {
     badgeIcon?: any;
     badgeWithPing?: boolean;
     title: React.ReactNode;
-    description: React.ReactNode;
+    description: string;
     align?: 'center' | 'left';
     className?: string;
 }

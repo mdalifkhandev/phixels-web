@@ -10,7 +10,6 @@ import {
 import { Button } from "./ui/Button";
 import { motion, AnimatePresence } from "framer-motion";
 import { apiService } from "../services/api";
-import { trackEvent } from "../services/analytics";
 import { AboutContent } from "../types/api";
 
 export function Footer() {
@@ -82,8 +81,6 @@ export function Footer() {
         setEmail("");
         return;
       }
-
-      trackEvent('newsletter_subscribed', { email: email });
 
       setModalType("success");
       setSubmitted(true);
@@ -283,11 +280,7 @@ export function Footer() {
               Contact
             </h4>
             <div className="space-y-6">
-              <a 
-                href={`mailto:${contact?.email || "phixels.io@gmail.com"}`} 
-                className="block group"
-                onClick={() => trackEvent('click', { channel: 'gmail' })}
-              >
+              <a href={`mailto:${contact?.email || "phixels.io@gmail.com"}`} className="block group">
                 <div className="text-gray-400 text-sm mb-1 group-hover:text-[color:var(--bright-red)] transition-colors">
                   Email Us
                 </div>
@@ -295,11 +288,7 @@ export function Footer() {
                   {contact?.email || "phixels.io@gmail.com"}
                 </div>
               </a>
-              <a 
-                href={contact?.whatsapp ? `https://wa.me/${contact.whatsapp.replace(/\+/g, '').replace(/\s/g, '')}` : "https://wa.me/8801723289090"} 
-                className="block group"
-                onClick={() => trackEvent('click', { channel: 'whatsapp' })}
-              >
+              <a href={contact?.whatsapp ? `https://wa.me/${contact.whatsapp.replace(/\+/g, '').replace(/\s/g, '')}` : "https://wa.me/8801723289090"} className="block group">
                 <div className="text-gray-400 text-sm mb-1 group-hover:text-[color:var(--vibrant-green)] transition-colors">
                   WhatsApp
                 </div>
@@ -371,7 +360,6 @@ export function Footer() {
                       src={social.icon}
                       alt={social.alt}
                       className="w-8 h-8 opacity-70 group-hover:opacity-100 transition-opacity"
-                      onClick={() => trackEvent('click', { channel: social.alt.toLowerCase() })}
                       style={{
                         filter: social.filter || "none",
                       }}

@@ -5,11 +5,9 @@ import { usePopup } from '../context/PopupContext';
 import { Button } from './ui/Button';
 import { ReviewCarousel } from './ReviewCarousel';
 import { FileUpload } from './FileUpload';
-import { usePageContent } from '../hooks/usePageContent';
 import confetti from 'canvas-confetti';
 import { BOOKED_SLOTS, COUNTRY_CODES } from '../constants/common';
 import { apiService } from '../services/api';
-import { trackEvent } from '../services/analytics';
 import type { AboutContent } from '../types/api';
 
 // Google Apps Script URL
@@ -84,17 +82,6 @@ export function MasterPopup() {
   });
   const [aboutContent, setAboutContent] = useState<AboutContent | null>(null);
 
-  const { getSection } = usePageContent('master-popup');
-
-  const sidebarSection = getSection('sidebar', {
-    head: 'Transforming Ideas Into Digital Empires',
-    description: "Join hundreds of visionary founders who scaled their dreams with Phixels."
-  });
-
-  const formSection = getSection('form', {
-    head: 'Let\'s Engineer Your Billion-Dollar Idea'
-  });
-
   // Filtered countries based on search
   const filteredCountries = COUNTRY_CODES.filter(country =>
     country.name.toLowerCase().includes(countrySearch.toLowerCase()) ||
@@ -126,13 +113,6 @@ export function MasterPopup() {
       }).catch(err => console.error("Failed to fetch about content", err));
     }
   }, [isOpen, aboutContent]);
-
-  // Track popup open
-  useEffect(() => {
-    if (isOpen) {
-      trackEvent('popup_open');
-    }
-  }, [isOpen]);
 
   // Reset state when closed
   useEffect(() => {
@@ -236,16 +216,6 @@ export function MasterPopup() {
     // Submit to Google Sheets
     await submitData(formDataPayload);
 
-    // Track funnel events
-    trackEvent('lead_submitted', { 
-      email: formData.email, 
-      name: formData.name,
-      phone: `${selectedCountry.code.replace('+', '')} ${formData.phone}`,
-      budget: formData.budget,
-      description: formData.overview
-    });
-    trackEvent('meeting_started');
-
     await new Promise(resolve => setTimeout(resolve, 1500));
     setIsSubmitting(false);
     setShowIntermediateSuccess(true);
@@ -288,17 +258,6 @@ export function MasterPopup() {
 
     // Submit to Google Sheets
     await submitData(formDataPayload);
-
-    // Track funnel conversion
-    trackEvent('meeting_booked', { 
-      email: formData.email, 
-      name: formData.name,
-      phone: `${selectedCountry.code.replace('+', '')} ${formData.phone}`,
-      budget: formData.budget,
-      description: formData.overview,
-      meetingDate: formData.date, 
-      meetingTime: formData.time 
-    });
 
     await new Promise(resolve => setTimeout(resolve, 2000));
     setIsSubmitting(false);
@@ -392,12 +351,14 @@ export function MasterPopup() {
 
               <div className="text-center mb-8">
                 <motion.h3 className="text-2xl font-bold mb-3 text-white cursor-default" whileHover={{ scale: 1.05 }} transition={{ type: 'spring', stiffness: 300 }}>
-                  <span className="bg-clip-text text-transparent bg-gradient-to-r from-white via-[color:var(--neon-yellow)] to-white bg-300% animate-gradient"
-                        dangerouslySetInnerHTML={{ __html: sidebarSection.head }}
-                  />
+                  <span className="bg-clip-text text-transparent bg-gradient-to-r from-white via-[color:var(--neon-yellow)] to-white bg-300% animate-gradient">
+                    Transforming Ideas Into
+                    <br />
+                    Digital Empires
+                  </span>
                 </motion.h3>
                 <p className="text-gray-400 text-sm leading-relaxed">
-                  {sidebarSection.description}
+                  Join hundreds of visionary founders who scaled their dreams with Phixels.
                 </p>
               </div>
 
@@ -478,9 +439,10 @@ export function MasterPopup() {
             <div className="max-w-2xl mx-auto h-full flex flex-col">
               {step < 5 && (
                 <div className="mb-8">
-                  <h2 className="text-3xl font-bold text-white mb-2"
-                      dangerouslySetInnerHTML={{ __html: formSection.head.includes('Idea') ? formSection.head.replace('Idea', '<br /><span class="text-gradient">Idea</span>') : formSection.head }}
-                  />
+                  <h2 className="text-3xl font-bold text-white mb-2">
+                    Let's Engineer Your <br />
+                    <span className="text-gradient">Billion-Dollar Idea</span>
+                  </h2>
                   <div className="flex gap-2 mt-6">
                     {[1, 2, 3, 4].map(i => (
                       <div key={i} className={`h-1 flex-1 rounded-full transition-colors ${step >= i ? 'bg-[color:var(--bright-red)]' : 'bg-white/10'}`} />

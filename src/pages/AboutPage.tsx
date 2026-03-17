@@ -117,34 +117,9 @@ const fallbackAboutContent: AboutContent = {
     description: "",
     image: "",
   },
-  contactInfo: {
-    whatsapp: "",
-    fiverr: "",
-    linkedin: "",
-    email: "",
-    behance: "",
-    facebook: "",
-    phone: "",
-    address: "",
-  },
-  clients: [],
 };
 
-import { usePageContent } from "../hooks/usePageContent";
-
 export function AboutPage() {
-  const { getSection } = usePageContent('about');
-  
-  const heroSection = getSection('hero', {
-    caption: 'Who We Are',
-    head: 'Founded by Engineers, <br /> Led by Visionaries.',
-    description: "We are a collective of obsessively detailed developers, designers, and strategists committed to building the digital infrastructure of tomorrow. We don't just write code; we engineer legacies."
-  });
-
-  const architectsSection = getSection('architects', {
-    head: 'Meet the Architects'
-  });
-
   const [aboutContent, setAboutContent] =
     useState<AboutContent>(fallbackAboutContent);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
@@ -218,13 +193,18 @@ export function AboutPage() {
             animate={{ opacity: 1, scale: 1 }}
             className="inline-block mb-6 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm text-[color:var(--neon-yellow)] font-mono"
           >
-            {heroSection.caption}
+            Who We Are
           </motion.div>
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-8 tracking-tight"
-              dangerouslySetInnerHTML={{ __html: heroSection.head.includes('Visionaries') ? heroSection.head.replace('Visionaries.', '<span class="text-transparent bg-clip-text bg-gradient-to-r from-[color:var(--bright-red)] via-white to-[color:var(--neon-yellow)] animate-gradient bg-300%">Visionaries.</span>') : heroSection.head }}
-          />
+          <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-8 tracking-tight">
+            Founded by Engineers, <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[color:var(--bright-red)] via-white to-[color:var(--neon-yellow)] animate-gradient bg-300%">
+              Led by Visionaries.
+            </span>
+          </h1>
           <p className="text-xl text-gray-400 max-w-3xl mx-auto leading-relaxed">
-            {heroSection.description}
+            We are a collective of obsessively detailed developers, designers,
+            and strategists committed to building the digital infrastructure of
+            tomorrow. We don't just write code; we engineer legacies.
           </p>
         </motion.div>
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-[color:var(--bright-red)]/10 rounded-full blur-[120px] -z-10 pointer-events-none" />
@@ -297,9 +277,10 @@ export function AboutPage() {
       </section>
 
       <section className="container mx-auto px-4 mb-32">
-        <h2 className="text-4xl font-bold text-center mb-16"
-            dangerouslySetInnerHTML={{ __html: architectsSection.head.includes('Architects') ? architectsSection.head.replace('Architects', '<span class="text-[color:var(--bright-red)]">Architects</span>') : architectsSection.head }}
-        />
+        <h2 className="text-4xl font-bold text-center mb-16">
+          Meet the{" "}
+          <span className="text-[color:var(--bright-red)]">Architects</span>
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8">
           {teamMembers.map((member, i) => (
             <motion.div

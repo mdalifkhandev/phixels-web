@@ -4,7 +4,6 @@ import { Mail, Phone, MapPin, Clock, Send, ArrowRight, CheckCircle, Sparkles, Ch
 import { Button } from '../components/ui/Button';
 import { COUNTRY_CODES } from '../constants/common';
 import { apiService } from '../services/api';
-import { trackEvent } from '../services/analytics';
 import { AboutContent } from '../types/api';
 
 // Google Apps Script URL
@@ -17,17 +16,7 @@ const validatePhone = (phone: string, countryCode: string) => {
   return cleaned.length >= minLength && cleaned.length <= maxLength && /^\d+$/.test(cleaned);
 };
 
-import { usePageContent } from "../hooks/usePageContent";
-
 export function ContactPage() {
-  const { getSection } = usePageContent('contact');
-
-  const heroSection = getSection('hero', {
-    head: 'Get in <span class="text-transparent bg-clip-text bg-gradient-to-r from-[color:var(--bright-red)] via-[color:var(--neon-yellow)] to-[color:var(--vibrant-green)] animate-gradient bg-300%">Touch</span>',
-    caption: "Let's Create Something Amazing",
-    description: "Ready to transform your vision into reality? We're here to help you build something extraordinary. Let's start the conversation."
-  });
-
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -112,13 +101,6 @@ export function ContactPage() {
 
       const data = await response.json();
       if (data.success) {
-        trackEvent('contact_submitted', {
-          name: formData.name,
-          email: formData.email,
-          phone: phone,
-          message: formData.message,
-          country: selectedCountry.name
-        });
         setShowSuccessModal(true);
         setFormData({
           name: '',
@@ -196,16 +178,20 @@ export function ContactPage() {
         }} className="inline-flex items-center gap-2 mb-6 px-4 py-2 rounded-full bg-white/5 border border-white/10">
           <Sparkles className="w-4 h-4 text-[color:var(--neon-yellow)]" />
           <span className="text-sm text-gray-300">
-            {heroSection.caption}
+            Let's Create Something Amazing
           </span>
         </motion.div>
 
-        <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-8 tracking-tight"
-            dangerouslySetInnerHTML={{ __html: heroSection.head }}
-        />
-        <p className="text-xl text-gray-400 max-w-2xl mx-auto leading-relaxed"
-           dangerouslySetInnerHTML={{ __html: heroSection.description }}
-        />
+        <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-8 tracking-tight">
+          Get in{' '}
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-[color:var(--bright-red)] via-[color:var(--neon-yellow)] to-[color:var(--vibrant-green)] animate-gradient bg-300%">
+            Touch
+          </span>
+        </h1>
+        <p className="text-xl text-gray-400 max-w-2xl mx-auto leading-relaxed">
+          Ready to transform your vision into reality? We're here to help you
+          build something extraordinary. Let's start the conversation.
+        </p>
       </motion.div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 max-w-7xl mx-auto">
@@ -402,27 +388,15 @@ export function ContactPage() {
               href: '#',
               color: 'text-[color:var(--neon-yellow)]',
               bgColor: 'bg-[color:var(--neon-yellow)]/10'
-            }].map((item, i) => <motion.a 
-                key={i} 
-                href={item.href} 
-                target={item.href.startsWith('http') ? '_blank' : undefined} 
-                rel={item.href.startsWith('http') ? 'noopener noreferrer' : undefined} 
-                onClick={() => {
-                  const channel = item.label.toLowerCase().includes('whatsapp') ? 'whatsapp' : item.label.toLowerCase().includes('email') ? 'gmail' : item.label.toLowerCase().includes('call') ? 'phone' : '';
-                  if (channel) trackEvent('click', { channel });
-                }}
-                initial={{
-                  opacity: 0,
-                  y: 20
-                }} 
-                animate={{
-                  opacity: 1,
-                  y: 0
-                }} 
-                transition={{
-                  delay: 0.5 + i * 0.1
-                }} 
-                className="group flex items-center gap-5 p-6 bg-white/5 rounded-2xl border border-white/10 hover:border-white/20 transition-all duration-300">
+            }].map((item, i) => <motion.a key={i} href={item.href} target={item.href.startsWith('http') ? '_blank' : undefined} rel={item.href.startsWith('http') ? 'noopener noreferrer' : undefined} initial={{
+              opacity: 0,
+              y: 20
+            }} animate={{
+              opacity: 1,
+              y: 0
+            }} transition={{
+              delay: 0.5 + i * 0.1
+            }} className="group flex items-center gap-5 p-6 bg-white/5 rounded-2xl border border-white/10 hover:border-white/20 transition-all duration-300">
               <div className={`w-14 h-14 rounded-xl ${item.bgColor} flex items-center justify-center ${item.color} group-hover:scale-110 transition-transform`}>
                 {item.icon ? <item.icon className="w-6 h-6" /> : <img src={item.imageIcon} alt={item.label} className="w-8 h-8" />}
               </div>
@@ -519,15 +493,9 @@ export function ContactPage() {
                 scale: 1.1,
                 y: -2
               }}>
-                <img 
-                  src={social.icon} 
-                  alt={social.alt} 
-                  className="w-8 h-8 opacity-70 group-hover:opacity-100 transition-opacity" 
-                  onClick={() => trackEvent('click', { channel: social.alt.toLowerCase() })}
-                  style={{
-                    filter: social.filter || 'none'
-                  }} 
-                />
+                <img src={social.icon} alt={social.alt} className="w-8 h-8 opacity-70 group-hover:opacity-100 transition-opacity" style={{
+                  filter: social.filter || 'none'
+                }} />
               </motion.a>)}
             </div>
           </motion.div>

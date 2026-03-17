@@ -2,12 +2,7 @@ import { useState, useRef } from 'react';
 import { motion, useScroll, useTransform, useMotionValueEvent } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Activity, ShoppingBag, Heart, MessageCircle, Star, Bell, Search, Menu, Plus, MoreHorizontal, Navigation, Clock, ChevronRight, ArrowUpRight, Wallet, ShieldCheck } from 'lucide-react';
-interface PortfolioTeaserProps {
-  head?: string;
-  description?: string;
-}
-
-export function PortfolioTeaser({ head, description }: PortfolioTeaserProps) {
+export function PortfolioTeaser() {
   const targetRef = useRef(null);
   const [headerVisible, setHeaderVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
@@ -601,12 +596,13 @@ export function PortfolioTeaser({ head, description }: PortfolioTeaserProps) {
         duration: 0.3,
         ease: 'easeOut'
       }}>
-        <h2 className="text-5xl md:text-7xl font-bold text-white mb-4 whitespace-nowrap"
-            dangerouslySetInnerHTML={{ __html: head || "Featured Work" }}
-        />
-        <p className="text-xl text-gray-400 max-w-md"
-           dangerouslySetInnerHTML={{ __html: description || "We build award-winning apps that scale. Swipe to explore our recent masterpieces." }}
-        />
+        <h2 className="text-5xl md:text-7xl font-bold text-white mb-4 whitespace-nowrap">
+          Featured <span className="text-gradient">Work</span>
+        </h2>
+        <p className="text-xl text-gray-400 max-w-md">
+          We build award-winning apps that scale. Swipe to explore our recent
+          masterpieces.
+        </p>
       </motion.div>
 
       <motion.div style={{

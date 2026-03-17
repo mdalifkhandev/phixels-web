@@ -8,7 +8,6 @@ import { apiService } from '../services/api';
 import { CaseStudy } from '../types/api';
 import { renderRichTextToHtml } from '../utils/richText';
 import { CaseStudyImage } from '../components/CaseStudyImage';
-import { trackEvent } from '../services/analytics';
 
 function Counter({
   value,
@@ -50,7 +49,6 @@ export function CaseStudyDetailPage() {
   const { id } = useParams();
   const [study, setStudy] = useState<CaseStudy | null>(null);
   const [loading, setLoading] = useState(true);
-  const [viewTracked, setViewTracked] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -83,17 +81,6 @@ export function CaseStudyDetailPage() {
 
     fetchStudy();
   }, [id]);
-
-  useEffect(() => {
-    if (study && !viewTracked) {
-      trackEvent('casestudy_view', {
-        id: id,
-        title: study.title,
-        client: study.client
-      });
-      setViewTracked(true);
-    }
-  }, [study, viewTracked, id]);
 
   if (loading) {
     return (

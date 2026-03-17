@@ -84,7 +84,5 @@ export const apiService = {
     fetch(`${BASE_URL}/page-metrics`).then((res) => handleResponse<any>(res)),
   getLegalContent: () =>
     fetch(`${BASE_URL}/legal-content`).then((res) => handleResponse<any>(res)),
-  getPageContent: (pageKey: string) =>
-    fetch(`${BASE_URL}/page-content/${pageKey}`).then((res) => handleResponse<any>(res)),
 };
 

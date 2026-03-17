@@ -3,8 +3,8 @@ import { ArrowRight } from 'lucide-react';
 import { Button } from './Button';
 
 interface CallToActionProps {
-    title: React.ReactNode;
-    description: React.ReactNode;
+    title: string;
+    description: string;
     buttonText?: string;
     backgroundImage?: string;
     variant?: 'default' | 'simple';

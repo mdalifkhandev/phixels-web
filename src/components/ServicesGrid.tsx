@@ -40,13 +40,7 @@ const colors = [
   'text-yellow-400',
 ];
 
-interface ServicesGridProps {
-  head?: string;
-  caption?: string;
-  description?: string;
-}
-
-export function ServicesGrid({ head, caption, description }: ServicesGridProps) {
+export function ServicesGrid() {
   const [services, setServices] = useState<ServiceMenuCategory[]>([]);
 
   useEffect(() => {
@@ -82,7 +76,7 @@ export function ServicesGrid({ head, caption, description }: ServicesGridProps) 
         }} viewport={{
           once: true
         }} className="inline-block mb-4 px-4 py-1 rounded-full bg-white/5 border border-white/10 text-sm text-[color:var(--neon-yellow)]">
-          {caption || "End-to-End Solutions"}
+          End-to-End Solutions
         </motion.div>
         <motion.h2 initial={{
           opacity: 0,
@@ -94,9 +88,9 @@ export function ServicesGrid({ head, caption, description }: ServicesGridProps) 
           once: true
         }} transition={{
           delay: 0.1
-        }} className="text-4xl md:text-5xl font-bold mb-4"
-           dangerouslySetInnerHTML={{ __html: head || "Our Expertise" }}
-        />
+        }} className="text-4xl md:text-5xl font-bold mb-4">
+          Our Expertise
+        </motion.h2>
         <motion.p initial={{
           opacity: 0,
           y: 20
@@ -107,9 +101,10 @@ export function ServicesGrid({ head, caption, description }: ServicesGridProps) 
           once: true
         }} transition={{
           delay: 0.2
-        }} className="text-gray-400 max-w-2xl mx-auto"
-           dangerouslySetInnerHTML={{ __html: description || "We deliver end-to-end digital solutions across the entire technology stack, tailored to your business goals." }}
-        />
+        }} className="text-gray-400 max-w-2xl mx-auto">
+          We deliver end-to-end digital solutions across the entire technology
+          stack, tailored to your business goals.
+        </motion.p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
