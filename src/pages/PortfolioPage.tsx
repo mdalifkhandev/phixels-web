@@ -30,8 +30,14 @@ export function PortfolioPage() {
     fetchPortfolio();
   }, []);
 
-  const categories = ["All", ...new Set(portfolioItems.map((item) => item.category))];
-  const filtered = filter === "All" ? portfolioItems : portfolioItems.filter((p) => p.category === filter);
+  const categories = [
+    "All",
+    ...new Set(portfolioItems.map((item) => item.category)),
+  ];
+  const filtered =
+    filter === "All"
+      ? portfolioItems
+      : portfolioItems.filter((p) => p.category === filter);
 
   if (loading) {
     return (
@@ -69,10 +75,11 @@ export function PortfolioPage() {
             <button
               key={cat}
               onClick={() => setFilter(cat)}
-              className={`px-6 py-2 rounded-full border transition-all ${filter === cat
-                ? "bg-white text-black border-white"
-                : "bg-transparent text-gray-400 border-white/20 hover:border-white"
-                }`}
+              className={`px-6 py-2 rounded-full border transition-all ${
+                filter === cat
+                  ? "bg-white text-black border-white"
+                  : "bg-transparent text-gray-400 border-white/20 hover:border-white"
+              }`}
             >
               {cat}
             </button>
@@ -95,8 +102,11 @@ export function PortfolioPage() {
                 <div className="bg-[#111111] p-4 sm:p-6 rounded-2xl border border-white/10 relative overflow-hidden">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
                     {/* Image Area */}
-                    <div className={`relative rounded-2xl overflow-hidden aspect-video sm:aspect-[16/9] md:aspect-video ${index % 2 === 1 ? "md:order-2" : ""
-                      }`}>
+                    <div
+                      className={`relative rounded-2xl overflow-hidden aspect-video sm:aspect-[16/9] md:aspect-video ${
+                        index % 2 === 1 ? "md:order-2" : ""
+                      }`}
+                    >
                       <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors z-10" />
                       <img
                         src={item.image}

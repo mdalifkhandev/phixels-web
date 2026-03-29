@@ -1,5 +1,5 @@
-import { useEffect, useState, useRef } from 'react';
-import { useInView } from 'framer-motion';
+import { useEffect, useState, useRef } from "react";
+import { useInView } from "framer-motion";
 interface CountUpStatsProps {
   end: number;
   duration?: number;
@@ -10,14 +10,14 @@ interface CountUpStatsProps {
 export function CountUpStats({
   end,
   duration = 2000,
-  suffix = '',
-  prefix = '',
-  className = ''
+  suffix = "",
+  prefix = "",
+  className = "",
 }: CountUpStatsProps) {
   const [count, setCount] = useState(0);
   const ref = useRef(null);
   const isInView = useInView(ref, {
-    once: true
+    once: true,
   });
   useEffect(() => {
     if (!isInView) return;
@@ -37,9 +37,11 @@ export function CountUpStats({
     animationFrame = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(animationFrame);
   }, [end, duration, isInView]);
-  return <span ref={ref} className={className}>
-    {prefix}
-    {count.toLocaleString()}
-    {suffix}
-  </span>;
+  return (
+    <span ref={ref} className={className}>
+      {prefix}
+      {count.toLocaleString()}
+      {suffix}
+    </span>
+  );
 }

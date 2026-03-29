@@ -25,13 +25,17 @@ const productMetricIconMap = {
   "trending-up": TrendingUp,
 } as const;
 
-const fallbackProductsPageMetrics: [PageMetric, PageMetric, PageMetric, PageMetric] =
-  [
-    { label: "Active Users", value: 1.2, suffix: "M+", iconKey: "users" },
-    { label: "Total Downloads", value: 2.5, suffix: "M+", iconKey: "download" },
-    { label: "Average Rating", value: 4.8, suffix: "", iconKey: "star" },
-    { label: "Growth Rate", value: 150, suffix: "%", iconKey: "trending-up" },
-  ];
+const fallbackProductsPageMetrics: [
+  PageMetric,
+  PageMetric,
+  PageMetric,
+  PageMetric,
+] = [
+  { label: "Active Users", value: 1.2, suffix: "M+", iconKey: "users" },
+  { label: "Total Downloads", value: 2.5, suffix: "M+", iconKey: "download" },
+  { label: "Average Rating", value: 4.8, suffix: "", iconKey: "star" },
+  { label: "Growth Rate", value: 150, suffix: "%", iconKey: "trending-up" },
+];
 
 export function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -149,33 +153,32 @@ export function ProductsPage() {
           className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16"
         >
           {metrics.map((stat, i) => {
-            const Icon =
-              productMetricIconMap[stat.iconKey || "users"] || Users;
+            const Icon = productMetricIconMap[stat.iconKey || "users"] || Users;
 
             return (
-            <motion.div
-              key={i}
-              initial={{
-                opacity: 0,
-                scale: 0.9,
-              }}
-              animate={{
-                opacity: 1,
-                scale: 1,
-              }}
-              transition={{
-                delay: 0.3 + i * 0.1,
-              }}
-              className="p-6 rounded-2xl bg-white/5 border border-white/10 text-center hover:border-white/20 transition-colors"
-            >
-              <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-[color:var(--bright-red)]/20 flex items-center justify-center">
-                <Icon className="w-6 h-6 text-[color:var(--bright-red)]" />
-              </div>
-              <div className="text-3xl font-bold text-white mb-1">
-                <CountUpStats end={stat.value} suffix={stat.suffix} />
-              </div>
-              <div className="text-sm text-gray-400">{stat.label}</div>
-            </motion.div>
+              <motion.div
+                key={i}
+                initial={{
+                  opacity: 0,
+                  scale: 0.9,
+                }}
+                animate={{
+                  opacity: 1,
+                  scale: 1,
+                }}
+                transition={{
+                  delay: 0.3 + i * 0.1,
+                }}
+                className="p-6 rounded-2xl bg-white/5 border border-white/10 text-center hover:border-white/20 transition-colors"
+              >
+                <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-[color:var(--bright-red)]/20 flex items-center justify-center">
+                  <Icon className="w-6 h-6 text-[color:var(--bright-red)]" />
+                </div>
+                <div className="text-3xl font-bold text-white mb-1">
+                  <CountUpStats end={stat.value} suffix={stat.suffix} />
+                </div>
+                <div className="text-sm text-gray-400">{stat.label}</div>
+              </motion.div>
             );
           })}
         </motion.div>

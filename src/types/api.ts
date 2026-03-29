@@ -1,249 +1,249 @@
 export interface ApiResponse<T> {
-    success: boolean;
-    statusCode: number;
-    message: string;
-    data: T;
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: T;
 }
 
 export interface Blog {
-    _id: string;
-    title: string;
-    writer: string;
-    readingTime: string;
-    details: string;
-    tags: string[];
-    image: string;
-    categoryName?: string;
-    createdAt: string;
-    createTime?: string;
-    updatedAt?: string;
-    slug?: string;
-    status?: 'draft' | 'published';
-    isFeatured?: boolean;
-    serviceId?: string;
-    authorId?: string;
+  _id: string;
+  title: string;
+  writer: string;
+  readingTime: string;
+  details: string;
+  tags: string[];
+  image: string;
+  categoryName?: string;
+  createdAt: string;
+  createTime?: string;
+  updatedAt?: string;
+  slug?: string;
+  status?: "draft" | "published";
+  isFeatured?: boolean;
+  serviceId?: string;
+  authorId?: string;
 }
 
 export interface Author {
-    _id: string;
-    name: string;
-    role: string;
-    profileImage?: string;
+  _id: string;
+  name: string;
+  role: string;
+  profileImage?: string;
 }
 
 export interface Portfolio {
-    _id: string;
-    title: string;
-    client: string;
-    category: string;
-    technology: string[];
-    activeUsers: string;
-    image: string;
-    liveLink: string;
-    createdAt: string;
-    description?: string; // For frontend mapping
+  _id: string;
+  title: string;
+  client: string;
+  category: string;
+  technology: string[];
+  activeUsers: string;
+  image: string;
+  liveLink: string;
+  createdAt: string;
+  description?: string; // For frontend mapping
 }
 
 export interface Product {
-    _id: string;
-    name: string;
-    description: string;
-    features: string[];
-    pricing?: number;
-    demoLink: string;
-    images: string[];
-    category: string;
-    reviewRating?: number | null;
-    userCount?: number | null;
-    downloadsEnabled?: boolean;
-    downloadCount?: number | null;
-    isPinned?: boolean;
-    pinOrder?: 1 | 2 | 3 | null;
-    createdAt: string;
-    tagline?: string; // For frontend mapping
+  _id: string;
+  name: string;
+  description: string;
+  features: string[];
+  pricing?: number;
+  demoLink: string;
+  images: string[];
+  category: string;
+  reviewRating?: number | null;
+  userCount?: number | null;
+  downloadsEnabled?: boolean;
+  downloadCount?: number | null;
+  isPinned?: boolean;
+  pinOrder?: 1 | 2 | 3 | null;
+  createdAt: string;
+  tagline?: string; // For frontend mapping
 }
 
 export interface Service {
-    _id: string;
-    title: string;
-    description: string;
-    icon: string;
-    features: string[];
-    images: string[];
-    createdAt: string;
-    subcategories?: string[]; // For frontend mapping
+  _id: string;
+  title: string;
+  description: string;
+  icon: string;
+  features: string[];
+  images: string[];
+  createdAt: string;
+  subcategories?: string[]; // For frontend mapping
 }
 
 export interface ServiceMenuSubcategory {
-    name: string;
-    slug: string;
+  name: string;
+  slug: string;
 }
 
 export interface ServiceMenuCategory {
-    _id: string;
-    name: string;
-    slug: string;
-    iconKey: string;
-    sortOrder?: number;
-    subcategories: ServiceMenuSubcategory[];
+  _id: string;
+  name: string;
+  slug: string;
+  iconKey: string;
+  sortOrder?: number;
+  subcategories: ServiceMenuSubcategory[];
 }
 
 export interface ServiceCategory {
-    _id: string;
-    name: string;
-    slug: string;
-    description: string;
-    iconKey: string;
-    heroImage?: string;
-    bannerImage?: string;
-    sortOrder?: number;
-    isActive?: boolean;
+  _id: string;
+  name: string;
+  slug: string;
+  description: string;
+  iconKey: string;
+  heroImage?: string;
+  bannerImage?: string;
+  sortOrder?: number;
+  isActive?: boolean;
 }
 
 export interface ServiceSubcategory {
-    _id: string;
-    categoryId: string;
-    name: string;
-    slug: string;
-    shortDescription: string;
-    longDescription?: string;
-    coverImage?: string;
-    gallery?: string[];
-    keyFeatures?: string[];
-    techStack?: string[];
-    processSteps?: string[];
-    sortOrder?: number;
-    isActive?: boolean;
+  _id: string;
+  categoryId: string;
+  name: string;
+  slug: string;
+  shortDescription: string;
+  longDescription?: string;
+  coverImage?: string;
+  gallery?: string[];
+  keyFeatures?: string[];
+  techStack?: string[];
+  processSteps?: string[];
+  sortOrder?: number;
+  isActive?: boolean;
 }
 
 export interface ServiceCategoryDetail {
-    category: ServiceCategory;
-    subcategories: ServiceSubcategory[];
+  category: ServiceCategory;
+  subcategories: ServiceSubcategory[];
 }
 
 export interface ServiceSubcategoryDetail {
-    category: ServiceCategory;
-    subcategory: ServiceSubcategory;
+  category: ServiceCategory;
+  subcategory: ServiceSubcategory;
 }
 
 export interface CaseStudy {
-    _id: string;
-    title: string;
-    client: string;
-    category: string;
-    challenge: string;
-    solution: string;
-    result: string;
-    image: string;
-    link: string;
-    createdAt: string;
+  _id: string;
+  title: string;
+  client: string;
+  category: string;
+  challenge: string;
+  solution: string;
+  result: string;
+  image: string;
+  link: string;
+  createdAt: string;
 }
 
 export interface Career {
-    _id: string;
-    jobTitle: string;
-    jobType: string;
-    location: string;
-    description: string;
-    requirements: string[];
-    responsibilities: string[];
-    salaryRange: string;
-    deadline: string;
-    applicationEmail: string;
-    createdAt: string;
+  _id: string;
+  jobTitle: string;
+  jobType: string;
+  location: string;
+  description: string;
+  requirements: string[];
+  responsibilities: string[];
+  salaryRange: string;
+  deadline: string;
+  applicationEmail: string;
+  createdAt: string;
 }
 
 export interface Review {
-    _id: string;
-    name: string;
-    role: string;
-    image: string;
-    rating: number;
-    review: string;
-    project: string;
-    budget: string;
-    duration: string;
-    summary: string;
-    createdAt?: string;
-    updatedAt?: string;
+  _id: string;
+  name: string;
+  role: string;
+  image: string;
+  rating: number;
+  review: string;
+  project: string;
+  budget: string;
+  duration: string;
+  summary: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface AboutMetric {
-    label: string;
-    value: number;
-    suffix: string;
+  label: string;
+  value: number;
+  suffix: string;
 }
 
 export interface AboutPhilosophy {
-    heading: string;
-    description: string;
-    image?: string;
+  heading: string;
+  description: string;
+  image?: string;
 }
 
 export interface AboutContactInfo {
-    whatsapp: string;
-    fiverr: string;
-    linkedin: string;
-    email: string;
-    behance: string;
-    facebook: string;
-    phone: string;
-    address: string;
+  whatsapp: string;
+  fiverr: string;
+  linkedin: string;
+  email: string;
+  behance: string;
+  facebook: string;
+  phone: string;
+  address: string;
 }
 
 export interface AboutContent {
-    _id?: string;
-    metrics: AboutMetric[];
-    philosophy: AboutPhilosophy;
-    contactInfo: AboutContactInfo;
-    clients: { name: string; logo: string }[];
-    createdAt?: string;
-    updatedAt?: string;
+  _id?: string;
+  metrics: AboutMetric[];
+  philosophy: AboutPhilosophy;
+  contactInfo: AboutContactInfo;
+  clients: { name: string; logo: string }[];
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface TeamMemberSocialLinks {
-    linkedin?: string;
-    twitter?: string;
-    github?: string;
+  linkedin?: string;
+  twitter?: string;
+  github?: string;
 }
 
 export interface TeamMember {
-    _id: string;
-    name: string;
-    role: string;
-    image?: string;
-    socialLinks?: TeamMemberSocialLinks;
-    sortOrder?: number;
-    isActive?: boolean;
-    createdAt?: string;
-    updatedAt?: string;
+  _id: string;
+  name: string;
+  role: string;
+  image?: string;
+  socialLinks?: TeamMemberSocialLinks;
+  sortOrder?: number;
+  isActive?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
-export type PageMetricIconKey = 'users' | 'download' | 'star' | 'trending-up';
+export type PageMetricIconKey = "users" | "download" | "star" | "trending-up";
 
 export interface PageMetric {
-    label: string;
-    value: number;
-    suffix: string;
-    iconKey?: PageMetricIconKey;
+  label: string;
+  value: number;
+  suffix: string;
+  iconKey?: PageMetricIconKey;
 }
 
 export interface PageMetricsContent {
-    _id?: string;
-    homeHeroMetrics: [PageMetric, PageMetric];
-    servicesPageMetrics: [PageMetric, PageMetric, PageMetric, PageMetric];
-    productsPageMetrics: [PageMetric, PageMetric, PageMetric, PageMetric];
-    createdAt?: string;
-    updatedAt?: string;
+  _id?: string;
+  homeHeroMetrics: [PageMetric, PageMetric];
+  servicesPageMetrics: [PageMetric, PageMetric, PageMetric, PageMetric];
+  productsPageMetrics: [PageMetric, PageMetric, PageMetric, PageMetric];
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface LegalSection {
-    title: string;
-    content: string;
+  title: string;
+  content: string;
 }
 
 export interface LegalContent {
-    privacyPolicy: LegalSection[];
-    termsConditions: LegalSection[];
-    updatedAt?: string;
+  privacyPolicy: LegalSection[];
+  termsConditions: LegalSection[];
+  updatedAt?: string;
 }

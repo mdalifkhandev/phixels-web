@@ -1,15 +1,11 @@
-import React, { useEffect, useState, createContext, useContext } from 'react';
+import React, { useEffect, useState, createContext, useContext } from "react";
 type PopupContextType = {
   isOpen: boolean;
   openPopup: () => void;
   closePopup: () => void;
 };
 const PopupContext = createContext<PopupContextType | undefined>(undefined);
-export function PopupProvider({
-  children
-}: {
-  children: React.ReactNode;
-}) {
+export function PopupProvider({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
   const openPopup = () => setIsOpen(true);
   const closePopup = () => setIsOpen(false);
@@ -17,9 +13,9 @@ export function PopupProvider({
   useEffect(() => {
     const initialTimer = setTimeout(() => {
       // Only open if not already visited/converted (mock logic)
-      if (!sessionStorage.getItem('popupShown')) {
+      if (!sessionStorage.getItem("popupShown")) {
         setIsOpen(true);
-        sessionStorage.setItem('popupShown', 'true');
+        sessionStorage.setItem("popupShown", "true");
       }
     }, 2000); // 2s delay on load
     const intervalTimer = setInterval(() => {
@@ -34,18 +30,22 @@ export function PopupProvider({
       clearInterval(intervalTimer);
     };
   }, [isOpen]);
-  return <PopupContext.Provider value={{
-    isOpen,
-    openPopup,
-    closePopup
-  }}>
+  return (
+    <PopupContext.Provider
+      value={{
+        isOpen,
+        openPopup,
+        closePopup,
+      }}
+    >
       {children}
-    </PopupContext.Provider>;
+    </PopupContext.Provider>
+  );
 }
 export function usePopup() {
   const context = useContext(PopupContext);
   if (context === undefined) {
-    throw new Error('usePopup must be used within a PopupProvider');
+    throw new Error("usePopup must be used within a PopupProvider");
   }
   return context;
 }

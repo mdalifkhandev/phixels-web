@@ -41,13 +41,17 @@ const iconMap: Record<string, any> = {
   brain: Brain,
 };
 
-const fallbackServicesPageMetrics: [PageMetric, PageMetric, PageMetric, PageMetric] =
-  [
-    { label: "Projects Delivered", value: 500, suffix: "+" },
-    { label: "Happy Clients", value: 300, suffix: "+" },
-    { label: "Expert Developers", value: 50, suffix: "+" },
-    { label: "Countries Served", value: 25, suffix: "+" },
-  ];
+const fallbackServicesPageMetrics: [
+  PageMetric,
+  PageMetric,
+  PageMetric,
+  PageMetric,
+] = [
+  { label: "Projects Delivered", value: 500, suffix: "+" },
+  { label: "Happy Clients", value: 300, suffix: "+" },
+  { label: "Expert Developers", value: 50, suffix: "+" },
+  { label: "Countries Served", value: 25, suffix: "+" },
+];
 
 export function ServicesPage() {
   const [services, setServices] = useState<ServiceMenuCategory[]>([]);

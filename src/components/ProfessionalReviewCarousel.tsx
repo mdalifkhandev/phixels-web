@@ -1,9 +1,8 @@
-import { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Star, CheckCircle } from 'lucide-react';
-import { apiService } from '../services/api';
-import type { Review } from '../types/api';
-
+import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Star, CheckCircle } from "lucide-react";
+import { apiService } from "../services/api";
+import type { Review } from "../types/api";
 
 export function ProfessionalReviewCarousel() {
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -18,7 +17,7 @@ export function ProfessionalReviewCarousel() {
           setReviews(response.data || []);
         }
       } catch (error) {
-        console.error('Failed to load reviews', error);
+        console.error("Failed to load reviews", error);
       }
     };
 
@@ -28,7 +27,7 @@ export function ProfessionalReviewCarousel() {
   useEffect(() => {
     if (isPaused || reviews.length === 0) return;
     const timer = setInterval(() => {
-      setCurrentIndex(prev => (prev + 1) % reviews.length);
+      setCurrentIndex((prev) => (prev + 1) % reviews.length);
     }, 6000);
     return () => clearInterval(timer);
   }, [isPaused, reviews.length]);
@@ -62,7 +61,6 @@ export function ProfessionalReviewCarousel() {
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentIndex}
-
                 // --- FAST DRAG LOGIC ---
                 drag="x"
                 dragConstraints={{ left: 0, right: 0 }}
@@ -72,15 +70,15 @@ export function ProfessionalReviewCarousel() {
                   if (offset.x < -swipeThreshold) {
                     setCurrentIndex((prev) => (prev + 1) % reviews.length);
                   } else if (offset.x > swipeThreshold) {
-                    setCurrentIndex((prev) => (prev - 1 + reviews.length) % reviews.length);
+                    setCurrentIndex(
+                      (prev) => (prev - 1 + reviews.length) % reviews.length,
+                    );
                   }
                 }}
-
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.3, ease: 'easeOut' }}
-
+                transition={{ duration: 0.3, ease: "easeOut" }}
                 className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 h-full items-center cursor-grab active:cursor-grabbing"
               >
                 <div className="lg:col-span-5 flex flex-col justify-center order-2 lg:order-1 select-none">
@@ -93,7 +91,11 @@ export function ProfessionalReviewCarousel() {
                         <Star
                           key={i}
                           size={20}
-                          className={i < reviews[currentIndex].rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-600'}
+                          className={
+                            i < reviews[currentIndex].rating
+                              ? "fill-yellow-400 text-yellow-400"
+                              : "text-gray-600"
+                          }
                         />
                       ))}
                     </div>
@@ -124,7 +126,11 @@ export function ProfessionalReviewCarousel() {
                 {/* Center Column: Image */}
                 <div className="lg:col-span-3 flex justify-center items-center order-1 lg:order-2 select-none">
                   <div className="relative w-full max-w-[280px] aspect-[3/4] rounded-2xl overflow-hidden shadow-2xl group ring-4 ring-white pointer-events-none">
-                    <img src={reviews[currentIndex].image} alt={reviews[currentIndex].name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                    <img
+                      src={reviews[currentIndex].image}
+                      alt={reviews[currentIndex].name}
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-60" />
                   </div>
                 </div>
@@ -183,7 +189,7 @@ export function ProfessionalReviewCarousel() {
               <button
                 key={index}
                 onClick={() => handleDotClick(index)}
-                className={`h-2 rounded-full transition-all duration-300 ${index === currentIndex ? 'w-8 bg-[color:var(--bright-red)]' : 'w-2 bg-white/20 hover:bg-white/40'}`}
+                className={`h-2 rounded-full transition-all duration-300 ${index === currentIndex ? "w-8 bg-[color:var(--bright-red)]" : "w-2 bg-white/20 hover:bg-white/40"}`}
                 aria-label={`Go to review ${index + 1}`}
               />
             ))}

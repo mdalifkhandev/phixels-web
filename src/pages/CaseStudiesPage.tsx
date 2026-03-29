@@ -110,7 +110,10 @@ export function CaseStudiesPage() {
                 >
                   <div className="lg:w-1/2 relative overflow-hidden bg-gray-800 lg:order-first">
                     <img
-                      src={study.image || "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80"}
+                      src={
+                        study.image ||
+                        "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80"
+                      }
                       alt={study.title}
                       className="absolute inset-0 w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700"
                       loading="lazy"
@@ -139,18 +142,22 @@ export function CaseStudiesPage() {
                         <h3 className="text-gray-400 text-xs uppercase font-bold mb-1">
                           Challenge
                         </h3>
-                        <div 
+                        <div
                           className="text-gray-300 text-sm line-clamp-3 leading-6 prose prose-invert prose-p:my-0 prose-headings:my-0 prose-ol:my-0 prose-ul:my-0"
-                          dangerouslySetInnerHTML={{ __html: study.challenge || "" }}
+                          dangerouslySetInnerHTML={{
+                            __html: study.challenge || "",
+                          }}
                         />
                       </div>
                       <div>
                         <h3 className="text-gray-400 text-xs uppercase font-bold mb-1">
                           Solution
                         </h3>
-                        <div 
+                        <div
                           className="text-gray-300 text-sm line-clamp-3 leading-6 prose prose-invert prose-p:my-0 prose-headings:my-0 prose-ol:my-0 prose-ul:my-0"
-                          dangerouslySetInnerHTML={{ __html: study.solution || "" }}
+                          dangerouslySetInnerHTML={{
+                            __html: study.solution || "",
+                          }}
                         />
                       </div>
                     </div>
@@ -165,9 +172,11 @@ export function CaseStudiesPage() {
                           <div className="text-xs uppercase tracking-wider text-gray-500 mb-1">
                             Result
                           </div>
-                          <div 
+                          <div
                             className="text-base font-semibold text-white line-clamp-3 leading-6 prose prose-invert prose-p:my-0 prose-headings:my-0 prose-ol:my-0 prose-ul:my-0"
-                            dangerouslySetInnerHTML={{ __html: study.result || "" }}
+                            dangerouslySetInnerHTML={{
+                              __html: study.result || "",
+                            }}
                           />
                         </div>
                       </div>

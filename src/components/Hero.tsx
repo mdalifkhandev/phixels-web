@@ -47,8 +47,9 @@ export function Hero() {
   const { scrollY } = useScroll();
   const y1 = useTransform(scrollY, [0, 500], [0, 200]);
   const y2 = useTransform(scrollY, [0, 500], [0, -150]);
-  const [metrics, setMetrics] =
-    useState<[PageMetric, PageMetric]>(fallbackHomeHeroMetrics);
+  const [metrics, setMetrics] = useState<[PageMetric, PageMetric]>(
+    fallbackHomeHeroMetrics,
+  );
 
   useEffect(() => {
     const fetchPageMetrics = async () => {
@@ -136,7 +137,11 @@ export function Hero() {
           <div className="glass-panel p-5 rounded-xl border-l-4 border-[color:var(--bright-red)] shadow-[0_0_20px_rgba(237,31,36,0.2)] hover:shadow-[0_0_30px_rgba(237,31,36,0.4)] transition-shadow duration-300">
             <div className="text-xs text-gray-400 mb-1">{metrics[0].label}</div>
             <div className="text-3xl font-bold text-white flex items-center gap-1">
-              {metrics[0].suffix.startsWith("+") ? null : metrics[0].suffix === "%" ? "+" : null}
+              {metrics[0].suffix.startsWith("+")
+                ? null
+                : metrics[0].suffix === "%"
+                  ? "+"
+                  : null}
               <Counter value={metrics[0].value} suffix={metrics[0].suffix} />
             </div>
           </div>

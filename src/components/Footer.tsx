@@ -25,17 +25,23 @@ export function Footer() {
   const [about, setAbout] = useState<AboutContent | null>(null);
 
   useEffect(() => {
-    apiService.getAboutContent().then(res => {
-      if (res.success && res.data) {
-        setAbout(res.data);
-      }
-    }).catch(err => console.error("Error fetching about content for footer:", err));
+    apiService
+      .getAboutContent()
+      .then((res) => {
+        if (res.success && res.data) {
+          setAbout(res.data);
+        }
+      })
+      .catch((err) =>
+        console.error("Error fetching about content for footer:", err),
+      );
   }, []);
 
   const contact = about?.contactInfo;
 
   const GAS_DEPLOYMENT_URL =
-    import.meta.env.VITE_GAS_DEPLOYMENT_URL || 'https://script.google.com/macros/s/AKfycbzYH-TfT_uR-2uxR8G2my7KElsR_x0f9GekGO35oSqq-qXkjI8k1zPSRvbIrATJDCg/exec';
+    import.meta.env.VITE_GAS_DEPLOYMENT_URL ||
+    "https://script.google.com/macros/s/AKfycbzYH-TfT_uR-2uxR8G2my7KElsR_x0f9GekGO35oSqq-qXkjI8k1zPSRvbIrATJDCg/exec";
 
   useEffect(() => {
     setEmail("");
@@ -120,12 +126,13 @@ export function Footer() {
               </button>
 
               <div
-                className={`w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center ${modalType === "success"
-                  ? "bg-[color:var(--vibrant-green)]/20"
-                  : modalType === "already-subscribed"
-                    ? "bg-[color:var(--neon-yellow)]/20"
-                    : "bg-red-500/20"
-                  }`}
+                className={`w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center ${
+                  modalType === "success"
+                    ? "bg-[color:var(--vibrant-green)]/20"
+                    : modalType === "already-subscribed"
+                      ? "bg-[color:var(--neon-yellow)]/20"
+                      : "bg-red-500/20"
+                }`}
               >
                 {modalType === "success" ? (
                   <CheckCircle className="w-8 h-8 text-[color:var(--vibrant-green)]" />
@@ -280,7 +287,10 @@ export function Footer() {
               Contact
             </h4>
             <div className="space-y-6">
-              <a href={`mailto:${contact?.email || "phixels.io@gmail.com"}`} className="block group">
+              <a
+                href={`mailto:${contact?.email || "phixels.io@gmail.com"}`}
+                className="block group"
+              >
                 <div className="text-gray-400 text-sm mb-1 group-hover:text-[color:var(--bright-red)] transition-colors">
                   Email Us
                 </div>
@@ -288,7 +298,14 @@ export function Footer() {
                   {contact?.email || "phixels.io@gmail.com"}
                 </div>
               </a>
-              <a href={contact?.whatsapp ? `https://wa.me/${contact.whatsapp.replace(/\+/g, '').replace(/\s/g, '')}` : "https://wa.me/8801723289090"} className="block group">
+              <a
+                href={
+                  contact?.whatsapp
+                    ? `https://wa.me/${contact.whatsapp.replace(/\+/g, "").replace(/\s/g, "")}`
+                    : "https://wa.me/8801723289090"
+                }
+                className="block group"
+              >
                 <div className="text-gray-400 text-sm mb-1 group-hover:text-[color:var(--vibrant-green)] transition-colors">
                   WhatsApp
                 </div>
@@ -315,12 +332,16 @@ export function Footer() {
                 {[
                   {
                     icon: "/Linkedin.svg",
-                    href: contact?.linkedin || "https://www.linkedin.com/company/106724193",
+                    href:
+                      contact?.linkedin ||
+                      "https://www.linkedin.com/company/106724193",
                     alt: "LinkedIn",
                   },
                   {
                     icon: "/WhatsApp.svg",
-                    href: contact?.whatsapp ? `https://wa.me/${contact.whatsapp.replace(/\+/g, '').replace(/\s/g, '')}` : "https://wa.me/8801723289090",
+                    href: contact?.whatsapp
+                      ? `https://wa.me/${contact.whatsapp.replace(/\+/g, "").replace(/\s/g, "")}`
+                      : "https://wa.me/8801723289090",
                     alt: "WhatsApp",
                   },
                   {
@@ -330,13 +351,16 @@ export function Footer() {
                   },
                   {
                     icon: "/Behance.svg",
-                    href: contact?.behance || "https://www.behance.net/phixelsio",
+                    href:
+                      contact?.behance || "https://www.behance.net/phixelsio",
                     alt: "Behance",
                     filter: "brightness(0) invert(1)",
                   },
                   {
                     icon: "/Facebook.svg",
-                    href: contact?.facebook || "https://www.facebook.com/Phixels.agency",
+                    href:
+                      contact?.facebook ||
+                      "https://www.facebook.com/Phixels.agency",
                     alt: "Facebook",
                   },
                 ].map((social, i) => (
@@ -444,4 +468,3 @@ export function Footer() {
     </footer>
   );
 }
-

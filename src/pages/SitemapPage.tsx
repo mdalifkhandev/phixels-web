@@ -32,9 +32,14 @@ export function SitemapPage() {
           apiService.getCaseStudies(),
         ]);
 
-        const allServices = categoriesRes?.data || (Array.isArray(categoriesRes) ? categoriesRes : []);
-        const allProducts = productsRes?.data || (Array.isArray(productsRes) ? productsRes : []);
-        const allCaseStudies = caseStudiesRes?.data || (Array.isArray(caseStudiesRes) ? caseStudiesRes : []);
+        const allServices =
+          categoriesRes?.data ||
+          (Array.isArray(categoriesRes) ? categoriesRes : []);
+        const allProducts =
+          productsRes?.data || (Array.isArray(productsRes) ? productsRes : []);
+        const allCaseStudies =
+          caseStudiesRes?.data ||
+          (Array.isArray(caseStudiesRes) ? caseStudiesRes : []);
 
         const sections = navLinks.map((nav) => {
           let links: any[] = [];

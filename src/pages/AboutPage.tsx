@@ -117,6 +117,17 @@ const fallbackAboutContent: AboutContent = {
     description: "",
     image: "",
   },
+  contactInfo: {
+    whatsapp: "",
+    fiverr: "",
+    linkedin: "",
+    email: "",
+    behance: "",
+    facebook: "",
+    phone: "",
+    address: "",
+  },
+  clients: [],
 };
 
 export function AboutPage() {
@@ -311,7 +322,9 @@ export function AboutPage() {
                   <a
                     href={member.socialLinks?.linkedin || "#"}
                     target={member.socialLinks?.linkedin ? "_blank" : undefined}
-                    rel={member.socialLinks?.linkedin ? "noreferrer" : undefined}
+                    rel={
+                      member.socialLinks?.linkedin ? "noreferrer" : undefined
+                    }
                     className={`text-white transition-colors ${
                       member.socialLinks?.linkedin
                         ? "hover:text-[color:var(--bright-red)]"
