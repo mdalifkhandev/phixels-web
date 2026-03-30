@@ -24,15 +24,14 @@ const GAS_DEPLOYMENT_URL =
   import.meta.env.VITE_GAS_DEPLOYMENT_URL ||
   "https://script.google.com/macros/s/AKfycbzYH-TfT_uR-2uxR8G2my7KElsR_x0f9GekGO35oSqq-qXkjI8k1zPSRvbIrATJDCg/exec";
 
-const validatePhone = (phone: string, countryCode: string) => {
-  const cleaned = phone.replace(/\D/g, "");
-  const minLength = countryCode === "+1" ? 10 : 7;
-  const maxLength = countryCode === "+1" ? 10 : 15;
-  return (
-    cleaned.length >= minLength &&
-    cleaned.length <= maxLength &&
-    /^\d+$/.test(cleaned)
-  );
+import { isValidPhoneNumber, type CountryCode } from 'libphonenumber-js/min';
+
+const validatePhone = (phone: string, countryIsoCode: string) => {
+  try {
+    return isValidPhoneNumber(phone, countryIsoCode as CountryCode);
+  } catch (error) {
+    return false;
+  }
 };
 
 export function ContactPage() {
@@ -99,7 +98,7 @@ export function ContactPage() {
     if (!formData.email.trim()) newErrors.email = "Email is required";
     if (
       !formData.phone.trim() ||
-      !validatePhone(formData.phone, selectedCountry.code)
+      !validatePhone(formData.phone, selectedCountry.country)
     )
       newErrors.phone = "Valid phone number required for selected country";
     if (!formData.message.trim()) newErrors.message = "Message is required";

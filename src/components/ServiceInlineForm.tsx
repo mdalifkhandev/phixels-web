@@ -27,15 +27,14 @@ const budgetOptions = [
   "More than $50k",
 ];
 
-const validatePhone = (phone: string, countryCode: string) => {
-  const cleaned = phone.replace(/\D/g, "");
-  const minLength = countryCode === "+1" ? 10 : 7;
-  const maxLength = countryCode === "+1" ? 10 : 15;
-  return (
-    cleaned.length >= minLength &&
-    cleaned.length <= maxLength &&
-    /^\d+$/.test(cleaned)
-  );
+import { isValidPhoneNumber, type CountryCode } from 'libphonenumber-js/min';
+
+const validatePhone = (phone: string, countryIsoCode: string) => {
+  try {
+    return isValidPhoneNumber(phone, countryIsoCode as CountryCode);
+  } catch (error) {
+    return false;
+  }
 };
 
 async function submitData(formDataPayload: Record<string, string>) {
@@ -144,7 +143,7 @@ export function ServiceInlineForm({ serviceTitle }: { serviceTitle: string }) {
 
     if (!formData.phone.trim()) {
       nextErrors.phone = "Phone number is required";
-    } else if (!validatePhone(formData.phone, selectedCountry.code)) {
+    } else if (!validatePhone(formData.phone, selectedCountry.country)) {
       nextErrors.phone = `Please enter a valid phone number for ${selectedCountry.name}`;
     }
 
