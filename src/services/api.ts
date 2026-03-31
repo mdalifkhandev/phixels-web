@@ -104,4 +104,36 @@ export const apiService = {
       body: formData,
     }).then((res) => handleResponse<any>(res));
   },
+
+  // Project Requests
+  createProjectRequest: (data: any) =>
+    fetch(`${BASE_URL}/project-requests`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    }).then((res) => handleResponse<any>(res)),
+
+  // Contact Requests
+  createContactRequest: (data: any) =>
+    fetch(`${BASE_URL}/contact-requests`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    }).then((res) => handleResponse<any>(res)),
+
+  // Newsletter
+  subscribeNewsletter: (data: any) =>
+    fetch(`${BASE_URL}/newsletter-subscriptions`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    }).then((res) => handleResponse<any>(res)),
+
+  // Job Applications
+  createJobApplication: (data: any) =>
+    fetch(`${BASE_URL}/job-applications`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    }).then((res) => handleResponse<any>(res)),
 };

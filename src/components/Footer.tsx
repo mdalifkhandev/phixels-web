@@ -39,10 +39,6 @@ export function Footer() {
 
   const contact = about?.contactInfo;
 
-  const GAS_DEPLOYMENT_URL =
-    import.meta.env.VITE_GAS_DEPLOYMENT_URL ||
-    "https://script.google.com/macros/s/AKfycbzYH-TfT_uR-2uxR8G2my7KElsR_x0f9GekGO35oSqq-qXkjI8k1zPSRvbIrATJDCg/exec";
-
   useEffect(() => {
     setEmail("");
     setError("");
@@ -65,28 +61,12 @@ export function Footer() {
     setError("");
 
     try {
-      const response = await fetch(GAS_DEPLOYMENT_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: new URLSearchParams({
-          formType: "newsletter",
-          email: email,
-        }),
-      });
+      const payload = {
+        email: email,
+        requestId: crypto.randomUUID(),
+      };
 
-      const text = await response.text();
-
-      if (
-        text.includes("already_subscribed") ||
-        text.toLowerCase().includes("already")
-      ) {
-        setModalType("already-subscribed");
-        setSubmitted(true);
-        setEmail("");
-        return;
-      }
+      await apiService.subscribeNewsletter(payload);
 
       setModalType("success");
       setSubmitted(true);

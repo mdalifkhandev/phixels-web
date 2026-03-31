@@ -25,10 +25,6 @@ export function JobDetailPage() {
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [modalType, setModalType] = useState<"success" | "error" | null>(null);
 
-  const GAS_DEPLOYMENT_URL =
-    import.meta.env.VITE_GAS_DEPLOYMENT_URL ||
-    "https://script.google.com/macros/s/AKfycbzYH-TfT_uR-2uxR8G2my7KElsR_x0f9GekGO35oSqq-qXkjI8k1zPSRvbIrATJDCg/exec";
-
   useEffect(() => {
     const fetchJob = async () => {
       if (!id) return;
@@ -67,28 +63,27 @@ export function JobDetailPage() {
     const portfolio = (form.elements.namedItem("portfolio") as HTMLInputElement)
       .value;
 
-    let resumeBase64 = "";
-    if (resumeFile) {
-      resumeBase64 = await new Promise<string>((resolve) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string);
-        reader.readAsDataURL(resumeFile);
-      });
-    }
-
     try {
-      await fetch(GAS_DEPLOYMENT_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({
-          formType: "job",
-          name,
-          email,
-          portfolio,
-          jobTitle: jobData.jobTitle,
-          file: resumeBase64,
-        }),
-      });
+      // Upload Resume to Cloudinary first
+      let uploadedFiles: any[] = [];
+      if (resumeFile) {
+        const uploadResult = await apiService.uploadFiles([resumeFile]);
+        if (uploadResult.success) {
+          uploadedFiles = uploadResult.data;
+        }
+      }
+
+      // Save to MongoDB via JobApplication
+      const payload = {
+        name,
+        email,
+        portfolio,
+        jobTitle: jobData.jobTitle,
+        resumeUrl: uploadedFiles[0]?.url || "#",
+        requestId: crypto.randomUUID(),
+      };
+
+      await apiService.createJobApplication(payload);
 
       setSubmitted(true);
       setModalType("success");

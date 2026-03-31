@@ -19,20 +19,7 @@ import { apiService } from "../services/api";
 import { AboutContent } from "../types/api";
 import { trackEvent } from "../services/analytics";
 
-// Google Apps Script URL
-const GAS_DEPLOYMENT_URL =
-  import.meta.env.VITE_GAS_DEPLOYMENT_URL ||
-  "https://script.google.com/macros/s/AKfycbzYH-TfT_uR-2uxR8G2my7KElsR_x0f9GekGO35oSqq-qXkjI8k1zPSRvbIrATJDCg/exec";
-
-import { isValidPhoneNumber, type CountryCode } from 'libphonenumber-js/min';
-
-const validatePhone = (phone: string, countryIsoCode: string) => {
-  try {
-    return isValidPhoneNumber(phone, countryIsoCode as CountryCode);
-  } catch (error) {
-    return false;
-  }
-};
+import { validatePhone } from "../utils/validation";
 
 export function ContactPage() {
   const [formData, setFormData] = useState({
@@ -126,38 +113,33 @@ export function ContactPage() {
       }
     }
 
-    const phone = selectedCountry.code + formData.phone;
+    const phoneStr = `${selectedCountry.code.replace("+", "")} ${formData.phone}`;
+    const newRequestId = crypto.randomUUID();
+
     try {
-      const response = await fetch(GAS_DEPLOYMENT_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: new URLSearchParams({
-          formType: "contactMessages",
-          name: formData.name,
-          email: formData.email,
-          phone: phone,
-          country: selectedCountry.name,
-          message: formData.message,
-          filesData: JSON.stringify(uploadedFiles), // Cloudinary URLs
-        }),
-      });
+      // Save to native database (ContactRequest)
+      const payload = {
+        name: formData.name,
+        email: formData.email,
+        phone: phoneStr,
+        country: selectedCountry.name,
+        message: formData.message,
+        files: uploadedFiles,
+        requestId: newRequestId,
+      };
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+      const dbResult = await apiService.createContactRequest(payload);
 
-      const data = await response.json();
-      if (data.success) {
+      if (dbResult.success) {
         // Track analytics event
         void trackEvent("contact_submitted", {
           name: formData.name,
           email: formData.email,
-          phone: phone,
+          phone: phoneStr,
           country: selectedCountry.name,
           message: formData.message,
           files: uploadedFiles,
+          requestId: newRequestId,
         });
 
         setShowSuccessModal(true);
@@ -169,10 +151,10 @@ export function ContactPage() {
         });
         setFiles([]);
       } else {
-        setError(data.error || "Something went wrong.");
+        setError(dbResult.message || "Something went wrong.");
       }
-    } catch (err) {
-      setError("Network error. Please try again.");
+    } catch (err: any) {
+      setError(err.message || "Network error. Please try again.");
     } finally {
       setSubmitting(false);
     }

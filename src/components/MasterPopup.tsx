@@ -19,48 +19,8 @@ import { BOOKED_SLOTS, COUNTRY_CODES } from "../constants/common";
 import { apiService } from "../services/api";
 import type { AboutContent } from "../types/api";
 import { trackEvent } from "../services/analytics";
+import { validatePhone } from "../utils/validation";
 
-// Google Apps Script URL
-const GAS_DEPLOYMENT_URL =
-  import.meta.env.VITE_GAS_DEPLOYMENT_URL ||
-  "https://script.google.com/macros/s/AKfycbzYH-TfT_uR-2uxR8G2my7KEls_x0f9GekGO35oSqq-qXkjI8k1zPSRvbIrATJDCg/exec";
-import { isValidPhoneNumber, type CountryCode } from 'libphonenumber-js/min';
-
-const validatePhone = (phone: string, countryIsoCode: string) => {
-  try {
-    return isValidPhoneNumber(phone, countryIsoCode as CountryCode);
-  } catch (error) {
-    return false;
-  }
-};
-
-async function submitData(formDataPayload: Record<string, string>) {
-  try {
-    const params = new URLSearchParams();
-    Object.keys(formDataPayload).forEach((key) => {
-      params.append(key, formDataPayload[key] || "");
-    });
-
-    const response = await fetch(GAS_DEPLOYMENT_URL, {
-      method: "POST",
-      mode: "cors",
-      body: params,
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const result = await response.json();
-    return result;
-  } catch (error) {
-    console.error("Error submitting form:", error);
-    return { success: false, error };
-  }
-}
 
 // Helper to convert file to Base64
 
@@ -78,6 +38,7 @@ export function MasterPopup() {
   const budgetDropdownRef = useRef<HTMLDivElement>(null);
   const countryDropdownRef = useRef<HTMLDivElement>(null);
   const [requestId, setRequestId] = useState<string>("");
+  const [dbId, setDbId] = useState<string>("");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -144,6 +105,7 @@ export function MasterPopup() {
         setShowCountryDropdown(false);
         setCountrySearch("");
         setRequestId("");
+        setDbId("");
         setFormData({
           name: "",
           email: "",
@@ -221,22 +183,28 @@ export function MasterPopup() {
       }
     }
 
-    // Prepare data for Google Apps Script (Step 1 - Lead)
-    const formDataPayload = {
-      formType: "master",
-      fullName: formData.name,
+    // Save to native database (Step 1 - Lead)
+    const payload = {
+      name: formData.name,
       email: formData.email,
       phone: `${selectedCountry.code.replace("+", "")} ${formData.phone}`,
       country: selectedCountry.name,
       budget: formData.budget,
       description: formData.overview,
-      filesData: JSON.stringify(uploadedFiles), // Contains Cloudinary URLs
+      files: uploadedFiles, 
       requestId: newRequestId,
-      isFinal: "false",
+      status: "Pending",
+      formType: "master-popup",
     };
 
-    // Submit to Google Sheets
-    const result = await submitData(formDataPayload);
+    try {
+      const dbResult = await apiService.createProjectRequest(payload);
+      if (dbResult?.data?._id) {
+        setDbId(dbResult.data._id);
+      }
+    } catch (error) {
+      console.error("Failed to create project request", error);
+    }
 
     // Track analytics event (Step 1)
     void trackEvent("lead_submitted", {
@@ -247,7 +215,7 @@ export function MasterPopup() {
       budget: formData.budget,
       description: formData.overview,
       requestId: newRequestId,
-      folderUrl: result?.folderUrl || "#",
+      folderUrl: "#",
       files: uploadedFiles, // Now contains proper URLs
     });
 
@@ -278,24 +246,21 @@ export function MasterPopup() {
       }
     }
 
-    // Prepare data for Google Apps Script (Step 4 - Booking Confirmed)
-    const formDataPayload = {
-      formType: "master",
-      fullName: formData.name,
-      email: formData.email,
-      phone: `${selectedCountry.code.replace("+", "")} ${formData.phone}`,
-      country: selectedCountry.name,
-      budget: formData.budget,
-      description: formData.overview,
-      filesData: JSON.stringify(uploadedFiles), // Contains Cloudinary URLs
+    // Update native database (Step 4 - Booking Confirmed)
+    const updatePayload = {
       meetingDate: formData.date,
       meetingTime: formData.time,
-      requestId: requestId,
-      isFinal: "true",
+      status: "Confirmed",
+      ...(uploadedFiles.length > 0 && { files: uploadedFiles }),
     };
 
-    // Submit to Google Sheets
-    const result = await submitData(formDataPayload);
+    try {
+      if (dbId) {
+        await apiService.updateProjectRequest(dbId, updatePayload);
+      }
+    } catch (error) {
+      console.error("Failed to update project request", error);
+    }
 
     // Track analytics event (Final)
     void trackEvent("meeting_booked", {
@@ -308,7 +273,7 @@ export function MasterPopup() {
       meetingDate: formData.date,
       meetingTime: formData.time,
       requestId: requestId,
-      folderUrl: result?.folderUrl || "#",
+      folderUrl: "#",
       files: uploadedFiles, // Added Cloudinary URLs to final event
     });
 

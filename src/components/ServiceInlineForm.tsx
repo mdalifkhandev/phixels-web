@@ -14,10 +14,6 @@ import { Button } from "./ui/Button";
 import { trackEvent } from "../services/analytics";
 import { apiService } from "../services/api";
 
-const GAS_DEPLOYMENT_URL =
-  import.meta.env.VITE_GAS_DEPLOYMENT_URL ||
-  "https://script.google.com/macros/s/AKfycbzYH-TfT_uR-2uxR8G2my7KElsR_x0f9GekGO35oSqq-qXkjI8k1zPSRvbIrATJDCg/exec";
-
 const budgetOptions = [
   "Less than $1k",
   "$1k - $3k",
@@ -27,35 +23,8 @@ const budgetOptions = [
   "More than $50k",
 ];
 
-import { isValidPhoneNumber, type CountryCode } from 'libphonenumber-js/min';
+import { validatePhone } from "../utils/validation";
 
-const validatePhone = (phone: string, countryIsoCode: string) => {
-  try {
-    return isValidPhoneNumber(phone, countryIsoCode as CountryCode);
-  } catch (error) {
-    return false;
-  }
-};
-
-async function submitData(formDataPayload: Record<string, string>) {
-  const params = new URLSearchParams();
-  Object.keys(formDataPayload).forEach((key) => {
-    params.append(key, formDataPayload[key] || "");
-  });
-
-  const response = await fetch(GAS_DEPLOYMENT_URL, {
-    method: "POST",
-    mode: "cors",
-    body: params,
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-  });
-
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
-  }
-
-  return response.json();
-}
 
 export function ServiceInlineForm({ serviceTitle }: { serviceTitle: string }) {
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
@@ -68,6 +37,7 @@ export function ServiceInlineForm({ serviceTitle }: { serviceTitle: string }) {
   const [showBudgetDropdown, setShowBudgetDropdown] = useState(false);
   const [countrySearch, setCountrySearch] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [dbId, setDbId] = useState("");
 
   const countryDropdownRef = useRef<HTMLDivElement>(null);
   const budgetDropdownRef = useRef<HTMLDivElement>(null);
@@ -193,19 +163,22 @@ export function ServiceInlineForm({ serviceTitle }: { serviceTitle: string }) {
       }
 
       const payload = {
-        formType: "service-inline",
-        fullName: formData.name,
+        name: formData.name,
         email: formData.email,
         phone: `${selectedCountry.code.replace("+", "")} ${formData.phone}`,
         country: selectedCountry.name,
         budget: formData.budget,
         description: `[${serviceTitle}] ${formData.overview}`,
-        filesData: JSON.stringify(uploadedFiles),
+        files: uploadedFiles,
         requestId: newRequestId,
-        isFinal: "false",
+        status: "Pending",
+        formType: "service-inline",
       };
 
-      const result = await submitData(payload);
+      const dbResult = await apiService.createProjectRequest(payload);
+      if (dbResult?.data?._id) {
+        setDbId(dbResult.data._id);
+      }
 
       // Track analytics event (Step 1)
       void trackEvent("lead_submitted", {
@@ -216,7 +189,7 @@ export function ServiceInlineForm({ serviceTitle }: { serviceTitle: string }) {
         budget: formData.budget,
         description: `[${serviceTitle}] ${formData.overview}`,
         requestId: newRequestId,
-        folderUrl: result?.folderUrl || "#",
+        folderUrl: "#",
         files: uploadedFiles,
       });
 
@@ -243,22 +216,16 @@ export function ServiceInlineForm({ serviceTitle }: { serviceTitle: string }) {
         }
       }
 
-      const payload = {
-        formType: "service-inline",
-        fullName: formData.name,
-        email: formData.email,
-        phone: `${selectedCountry.code.replace("+", "")} ${formData.phone}`,
-        country: selectedCountry.name,
-        budget: formData.budget,
-        description: `[${serviceTitle}] ${formData.overview}`,
-        filesData: JSON.stringify(uploadedFiles),
+      const updatePayload = {
         meetingDate: formData.date,
         meetingTime: formData.time,
-        requestId: requestId || crypto.randomUUID(),
-        isFinal: "true",
+        status: "Confirmed",
+        ...(uploadedFiles.length > 0 && { files: uploadedFiles }),
       };
 
-      const result = await submitData(payload);
+      if (dbId) {
+        await apiService.updateProjectRequest(dbId, updatePayload);
+      }
 
       // Track analytics event (Final)
       void trackEvent("meeting_booked", {
@@ -271,7 +238,7 @@ export function ServiceInlineForm({ serviceTitle }: { serviceTitle: string }) {
         meetingDate: formData.date,
         meetingTime: formData.time,
         requestId: requestId || crypto.randomUUID(),
-        folderUrl: result?.folderUrl || "#",
+        folderUrl: "#",
         files: uploadedFiles,
       });
 
