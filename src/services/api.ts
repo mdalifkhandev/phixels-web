@@ -113,6 +113,13 @@ export const apiService = {
       body: JSON.stringify(data),
     }).then((res) => handleResponse<any>(res)),
 
+  updateProjectRequest: (id: string, data: any) =>
+    fetch(`${BASE_URL}/project-requests/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    }).then((res) => handleResponse<any>(res)),
+
   // Contact Requests
   createContactRequest: (data: any) =>
     fetch(`${BASE_URL}/contact-requests`, {

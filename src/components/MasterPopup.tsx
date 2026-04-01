@@ -258,42 +258,44 @@ export function MasterPopup() {
       if (dbId) {
         await apiService.updateProjectRequest(dbId, updatePayload);
       }
+
+      // Track analytics event (Final)
+      void trackEvent("meeting_booked", {
+        name: formData.name,
+        email: formData.email,
+        phone: `${selectedCountry.code.replace("+", "")} ${formData.phone}`,
+        country: selectedCountry.name,
+        budget: formData.budget,
+        description: formData.overview,
+        meetingDate: formData.date,
+        meetingTime: formData.time,
+        requestId: requestId,
+        folderUrl: "#",
+        files: uploadedFiles, // Added Cloudinary URLs to final event
+      });
+
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      setIsSubmitting(false);
+      setStep(5); // Success step
+      setFiles([]); // Clear files after final success
+
+      // Trigger confetti
+      confetti({
+        particleCount: 150,
+        spread: 80,
+        origin: { y: 0.6 },
+        colors: ["#ED1F24", "#FFFF00", "#00CD49"],
+      });
+
+      // Auto close
+      setTimeout(() => {
+        closePopup();
+      }, 4000);
     } catch (error) {
       console.error("Failed to update project request", error);
+      setIsSubmitting(false);
+      alert("Something went wrong while confirming your booking. Please try again.");
     }
-
-    // Track analytics event (Final)
-    void trackEvent("meeting_booked", {
-      name: formData.name,
-      email: formData.email,
-      phone: `${selectedCountry.code.replace("+", "")} ${formData.phone}`,
-      country: selectedCountry.name,
-      budget: formData.budget,
-      description: formData.overview,
-      meetingDate: formData.date,
-      meetingTime: formData.time,
-      requestId: requestId,
-      folderUrl: "#",
-      files: uploadedFiles, // Added Cloudinary URLs to final event
-    });
-
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    setIsSubmitting(false);
-    setStep(5); // Success step
-    setFiles([]); // Clear files after final success
-
-    // Trigger confetti
-    confetti({
-      particleCount: 150,
-      spread: 80,
-      origin: { y: 0.6 },
-      colors: ["#ED1F24", "#FFFF00", "#00CD49"],
-    });
-
-    // Auto close
-    setTimeout(() => {
-      closePopup();
-    }, 4000);
   };
 
   const isSlotBooked = (dateStr: string, timeStr: string) => {

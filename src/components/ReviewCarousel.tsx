@@ -88,7 +88,7 @@ export function ReviewCarousel() {
                   />
                 ))}
               </div>
-              <p className="text-gray-300 text-sm leading-relaxed italic mb-6">
+              <p className="text-gray-300 text-sm leading-relaxed italic mb-6 line-clamp-5">
                 "{reviews[current].review}"
               </p>
             </div>
