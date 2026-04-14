@@ -1,95 +1,79 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Search, Calendar, Clock, CheckCircle, X, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "../components/ui/Button";
 import { BlogCard } from "../components/BlogCard";
-import { apiService } from "../services/api";
-import { Blog, ServiceCategory, Author } from "../types/api";
+
+// Hooks
+import { useBlogs, useAuthors } from "../hooks/queries/useBlogs";
+import { useServiceCategories } from "../hooks/queries/useServices";
+import { useSubscribeNewsletter } from "../hooks/queries/useNewsletter";
+
+// Utils
 import { stripRichText } from "../utils/richText";
 
 export function BlogPage() {
   const navigate = useNavigate();
-  const [blogs, setBlogs] = useState<Blog[]>([]);
-  const [serviceCategories, setServiceCategories] = useState<ServiceCategory[]>(
-    [],
-  );
-  const [authors, setAuthors] = useState<Author[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  
+  // State for UI non-server state
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
-
-  // Newsletter States
   const [newsletterEmail, setNewsletterEmail] = useState("");
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [newsletterLoading, setNewsletterLoading] = useState(false);
   const [newsletterError, setNewsletterError] = useState("");
   const [newsletterSubscribed, setNewsletterSubscribed] = useState(false);
 
-  useEffect(() => {
-    const fetchBlogs = async () => {
-      try {
-        setLoading(true);
-        const response = await apiService.getBlogs();
-        const serviceResponse = await apiService.getServiceCategories();
-        if (response.success) {
-          setBlogs(
-            response.data.filter((blog: Blog) => blog.status === "published"),
-          );
-        } else {
-          setError(response.message || "Failed to fetch blogs");
-        }
-        if (serviceResponse.success) {
-          setServiceCategories(
-            serviceResponse.data.filter(
-              (service: ServiceCategory) => service.isActive !== false,
-            ),
-          );
-        }
+  // Queries
+  const { data: rawBlogs, isLoading: loadingBlogs, isError, error } = useBlogs();
+  const { data: rawCategories } = useServiceCategories();
+  const { data: authorsData } = useAuthors();
 
-        const authorsResponse = await apiService.getAuthors();
-        if (authorsResponse.success) {
-          setAuthors(authorsResponse.data);
-        }
-      } catch (err: any) {
-        setError(err.message || "An error occurred while fetching blogs");
-      } finally {
-        setLoading(false);
-      }
-    };
+  const blogs = rawBlogs ?? [];
+  const categories = rawCategories ?? [];
+  const authors = authorsData ?? [];
 
-    fetchBlogs();
-  }, []);
+  // Mutation
+  const subscribeMutation = useSubscribeNewsletter();
 
-  const categories = [
-    "All",
-    ...new Set(blogs.map((blog) => blog.categoryName || "General")),
-  ];
-  const serviceById = useMemo(
-    () => new Map(serviceCategories.map((service) => [service._id, service])),
-    [serviceCategories],
-  );
+  // Memoized derived data
+  const publishedBlogs = useMemo(() => {
+    return blogs.filter((blog: any) => blog.status === "published");
+  }, [blogs]);
 
-  const filteredPosts = blogs.filter((post) => {
-    const matchesSearch =
-      post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      stripRichText(post.details)
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase());
-    const matchesCategory =
-      selectedCategory === "All" ||
-      (post.categoryName || "General") === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
+  const activeCategories = useMemo(() => {
+    return categories.filter((service: any) => service.isActive !== false);
+  }, [categories]);
 
-  const featuredPost =
-    filteredPosts.find((post) => post.isFeatured) ||
-    (filteredPosts.length > 0 ? filteredPosts[0] : null);
+  const categoryOptions = useMemo(() => {
+    return ["All", ...new Set(publishedBlogs.map((blog: any) => blog.categoryName || "General"))];
+  }, [publishedBlogs]);
 
+  const serviceById = useMemo(() => {
+    return new Map(activeCategories.map((service: any) => [service._id, service]));
+  }, [activeCategories]);
+
+  const filteredPosts = useMemo(() => {
+    const term = searchTerm.toLowerCase();
+    return publishedBlogs.filter((post: any) => {
+      const matchesSearch =
+        post.title.toLowerCase().includes(term) ||
+        stripRichText(post.details).toLowerCase().includes(term);
+      const matchesCategory =
+        selectedCategory === "All" ||
+        (post.categoryName || "General") === selectedCategory;
+      return matchesSearch && matchesCategory;
+    });
+  }, [searchTerm, selectedCategory, publishedBlogs]);
+
+  const featuredPost = useMemo(() => {
+    return filteredPosts.find((post: any) => post.isFeatured) || 
+           (filteredPosts.length > 0 ? filteredPosts[0] : null);
+  }, [filteredPosts]);
+
+  // Handlers
   const handleNewsletterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (newsletterSubscribed) return;
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -98,17 +82,10 @@ export function BlogPage() {
       return;
     }
 
-    setNewsletterLoading(true);
     setNewsletterError("");
 
     try {
-      const payload = {
-        email: newsletterEmail,
-        requestId: crypto.randomUUID(),
-      };
-
-      const result = await apiService.subscribeNewsletter(payload);
-
+      const result = await subscribeMutation.mutateAsync(newsletterEmail);
       if (result.success) {
         setShowSuccessModal(true);
         setNewsletterSubscribed(true);
@@ -117,20 +94,12 @@ export function BlogPage() {
       } else {
         setNewsletterError(result.message || "Something went wrong.");
       }
-    } catch (error: any) {
-      console.error("Newsletter subscription error:", error);
-      // Backend error messages will be captured here from handleResponse
-      setNewsletterError(error.message || "Connection error. Please try again later.");
-    } finally {
-      setNewsletterLoading(false);
+    } catch (err: any) {
+      setNewsletterError(err.message || "Connection error. Please try again later.");
     }
   };
 
-  const handleShare = async (
-    e: React.MouseEvent,
-    title: string,
-    id: string,
-  ) => {
+  const handleShare = async (e: React.MouseEvent, title: string, id: string) => {
     e.preventDefault();
     const url = `${window.location.origin}/blog/${id}`;
     if (navigator.share) {
@@ -141,12 +110,10 @@ export function BlogPage() {
       }
     } else {
       await navigator.clipboard.writeText(url);
-      // Note: User's UI didn't have a specific "Copied!" tooltip in this version,
-      // but I'll keep the logic simple or just rely on the native share.
     }
   };
 
-  if (loading) {
+  if (loadingBlogs) {
     return (
       <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center pt-20">
         <Loader2 className="w-12 h-12 text-[color:var(--bright-red)] animate-spin mb-4" />
@@ -155,11 +122,11 @@ export function BlogPage() {
     );
   }
 
-  if (error) {
+  if (isError) {
     return (
       <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center pt-20 p-4">
         <div className="text-center py-20 text-red-500 bg-red-500/10 rounded-2xl border border-red-500/20 max-w-2xl w-full">
-          {error}
+          {(error as any)?.message || "Failed to fetch blogs"}
         </div>
       </div>
     );
@@ -302,7 +269,7 @@ export function BlogPage() {
             <div className="bg-white/5 p-6 rounded-2xl border border-white/10">
               <h3 className="text-lg font-bold text-white mb-4">Categories</h3>
               <ul className="space-y-2">
-                {categories.map((cat) => (
+                {categoryOptions.map((cat: any) => (
                   <li
                     key={cat}
                     onClick={() => setSelectedCategory(cat)}
@@ -312,8 +279,8 @@ export function BlogPage() {
                     {cat !== "All" && (
                       <span className="text-xs bg-black/20 px-2 py-1 rounded">
                         {
-                          blogs.filter(
-                            (p) => (p.categoryName || "General") === cat,
+                          publishedBlogs.filter(
+                            (p: any) => (p.categoryName || "General") === cat,
                           ).length
                         }
                       </span>
@@ -354,11 +321,11 @@ export function BlogPage() {
                   type="submit"
                   className="w-full"
                   variant="primary"
-                  disabled={newsletterLoading || newsletterSubscribed}
+                  disabled={subscribeMutation.isPending || newsletterSubscribed}
                 >
                   {newsletterSubscribed
                     ? "Subscribed"
-                    : newsletterLoading
+                    : subscribeMutation.isPending
                       ? "Subscribing..."
                       : "Subscribe"}
                 </Button>
@@ -370,7 +337,7 @@ export function BlogPage() {
           <div className="lg:col-span-3">
             <AnimatePresence mode="popLayout">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {filteredPosts.map((post) => (
+                {filteredPosts.map((post: any) => (
                   <BlogCard
                     key={post._id}
                     post={post}

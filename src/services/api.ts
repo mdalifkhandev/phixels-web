@@ -1,146 +1,99 @@
 /// <reference types="vite/client" />
-const BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "https://api.phixels.agency/api/v1";
+import axios from "axios";
+import { 
+  Blog, 
+  Portfolio, 
+  Product, 
+  Service, 
+  ServiceMenuCategory, 
+  ServiceCategory, 
+  ServiceCategoryDetail, 
+  ServiceSubcategoryDetail,
+  CaseStudy,
+  Career,
+  Review,
+  Author,
+  AboutContent,
+  TeamMember,
+  PageMetricsContent,
+  LegalContent
+} from "../types/api";
 
-async function handleResponse<T>(response: Response): Promise<T> {
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.message || "Something went wrong");
-  }
-  const data = await response.json();
-  return data;
-}
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://api.phixels.agency/api/v1";
+
+const apiClient = axios.create({
+  baseURL: BASE_URL,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
+// Helper to extract data from axios response
+const getData = <T>(response: any): T => response.data?.data || response.data;
 
 export const apiService = {
   // Blogs
-  getBlogs: () =>
-    fetch(`${BASE_URL}/blogs`).then((res) => handleResponse<any>(res)),
-  getFeaturedBlogs: () =>
-    fetch(`${BASE_URL}/blogs/featured`).then((res) => handleResponse<any>(res)),
-  getBlogById: (id: string) =>
-    fetch(`${BASE_URL}/blogs/${id}`).then((res) => handleResponse<any>(res)),
-  getBlogBySlug: (slug: string) =>
-    fetch(`${BASE_URL}/blogs/slug/${slug}`).then((res) =>
-      handleResponse<any>(res),
-    ),
+  getBlogs: () => apiClient.get("/blogs").then(res => getData<Blog[]>(res)),
+  getFeaturedBlogs: () => apiClient.get("/blogs/featured").then(res => getData<Blog[]>(res)),
+  getBlogById: (id: string) => apiClient.get(`/blogs/${id}`).then(res => getData<Blog>(res)),
+  getBlogBySlug: (slug: string) => apiClient.get(`/blogs/slug/${slug}`).then(res => getData<Blog>(res)),
 
   // Portfolio
-  getPortfolios: () =>
-    fetch(`${BASE_URL}/portfolio`).then((res) => handleResponse<any>(res)),
-  getPortfolioById: (id: string) =>
-    fetch(`${BASE_URL}/portfolio/${id}`).then((res) =>
-      handleResponse<any>(res),
-    ),
+  getPortfolios: () => apiClient.get("/portfolio").then(res => getData<Portfolio[]>(res)),
+  getPortfolioById: (id: string) => apiClient.get(`/portfolio/${id}`).then(res => getData<Portfolio>(res)),
 
   // Products
-  getProducts: () =>
-    fetch(`${BASE_URL}/products`).then((res) => handleResponse<any>(res)),
-  getPinnedProducts: () =>
-    fetch(`${BASE_URL}/products/pinned`).then((res) =>
-      handleResponse<any>(res),
-    ),
-  getProductById: (id: string) =>
-    fetch(`${BASE_URL}/products/${id}`).then((res) => handleResponse<any>(res)),
+  getProducts: () => apiClient.get("/products").then(res => getData<Product[]>(res)),
+  getPinnedProducts: () => apiClient.get("/products/pinned").then(res => getData<Product[]>(res)),
+  getProductById: (id: string) => apiClient.get(`/products/${id}`).then(res => getData<Product>(res)),
 
   // Services
-  getServices: () =>
-    fetch(`${BASE_URL}/services`).then((res) => handleResponse<any>(res)),
-  getServiceById: (id: string) =>
-    fetch(`${BASE_URL}/services/${id}`).then((res) => handleResponse<any>(res)),
-  getServiceMenu: () =>
-    fetch(`${BASE_URL}/services/menu`).then((res) => handleResponse<any>(res)),
-  getServiceCategories: () =>
-    fetch(`${BASE_URL}/services/categories`).then((res) =>
-      handleResponse<any>(res),
-    ),
-  getServiceCategoryBySlug: (categorySlug: string) =>
-    fetch(`${BASE_URL}/services/categories/${categorySlug}`).then((res) =>
-      handleResponse<any>(res),
-    ),
-  getServiceSubcategoryBySlugs: (
-    categorySlug: string,
-    subcategorySlug: string,
-  ) =>
-    fetch(
-      `${BASE_URL}/services/categories/${categorySlug}/subcategories/${subcategorySlug}`,
-    ).then((res) => handleResponse<any>(res)),
+  getServices: () => apiClient.get("/services").then(res => getData<Service[]>(res)),
+  getServiceById: (id: string) => apiClient.get(`/services/${id}`).then(res => getData<Service>(res)),
+  getServiceMenu: () => apiClient.get("/services/menu").then(res => getData<ServiceMenuCategory[]>(res)),
+  getServiceCategories: () => apiClient.get("/services/categories").then(res => getData<ServiceCategory[]>(res)),
+  getServiceCategoryBySlug: (categorySlug: string) => 
+    apiClient.get(`/services/categories/${categorySlug}`).then(res => getData<ServiceCategoryDetail>(res)),
+  getServiceSubcategoryBySlugs: (categorySlug: string, subcategorySlug: string) =>
+    apiClient.get(`/services/categories/${categorySlug}/subcategories/${subcategorySlug}`).then(res => getData<ServiceSubcategoryDetail>(res)),
 
   // Case Studies
-  getCaseStudies: () =>
-    fetch(`${BASE_URL}/case-studies`).then((res) => handleResponse<any>(res)),
-  getCaseStudyById: (id: string) =>
-    fetch(`${BASE_URL}/case-studies/${id}`).then((res) =>
-      handleResponse<any>(res),
-    ),
+  getCaseStudies: () => apiClient.get("/case-studies").then(res => getData<CaseStudy[]>(res)),
+  getCaseStudyById: (id: string) => apiClient.get(`/case-studies/${id}`).then(res => getData<CaseStudy>(res)),
 
   // Careers
-  getCareers: () =>
-    fetch(`${BASE_URL}/careers`).then((res) => handleResponse<any>(res)),
-  getCareerById: (id: string) =>
-    fetch(`${BASE_URL}/careers/${id}`).then((res) => handleResponse<any>(res)),
+  getCareers: () => apiClient.get("/careers").then(res => getData<Career[]>(res)),
+  getCareerById: (id: string) => apiClient.get(`/careers/${id}`).then(res => getData<Career>(res)),
 
   // Reviews
-  getReviews: () =>
-    fetch(`${BASE_URL}/reviews`).then((res) => handleResponse<any>(res)),
+  getReviews: () => apiClient.get("/reviews").then(res => getData<Review[]>(res)),
 
-  // Authors
-  getAuthors: () =>
-    fetch(`${BASE_URL}/authors`).then((res) => handleResponse<any>(res)),
-  getAboutContent: () =>
-    fetch(`${BASE_URL}/about-content`).then((res) => handleResponse<any>(res)),
-  getTeamMembers: () =>
-    fetch(`${BASE_URL}/team-members`).then((res) => handleResponse<any>(res)),
-  getPageMetrics: () =>
-    fetch(`${BASE_URL}/page-metrics`).then((res) => handleResponse<any>(res)),
-  getLegalContent: () =>
-    fetch(`${BASE_URL}/legal-content`).then((res) => handleResponse<any>(res)),
+  // Authors / Content
+  getAuthors: () => apiClient.get("/authors").then(res => getData<Author[]>(res)),
+  getAboutContent: () => apiClient.get("/about-content").then(res => getData<AboutContent>(res)),
+  getTeamMembers: () => apiClient.get("/team-members").then(res => getData<TeamMember[]>(res)),
+  getPageMetrics: () => apiClient.get("/page-metrics").then(res => getData<PageMetricsContent>(res)),
+  getLegalContent: () => apiClient.get("/legal-content").then(res => getData<LegalContent>(res)),
 
   // Upload
   uploadFiles: (files: File[]) => {
     const formData = new FormData();
     files.forEach((file) => formData.append("files", file));
-    return fetch(`${BASE_URL}/upload`, {
-      method: "POST",
-      body: formData,
-    }).then((res) => handleResponse<any>(res));
+    return apiClient.post("/upload", formData, {
+      headers: { "Content-Type": "multipart/form-data" }
+    }).then(res => getData<any>(res));
   },
 
   // Project Requests
-  createProjectRequest: (data: any) =>
-    fetch(`${BASE_URL}/project-requests`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    }).then((res) => handleResponse<any>(res)),
-
-  updateProjectRequest: (id: string, data: any) =>
-    fetch(`${BASE_URL}/project-requests/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    }).then((res) => handleResponse<any>(res)),
+  createProjectRequest: (data: any) => apiClient.post("/project-requests", data).then(res => getData<any>(res)),
+  updateProjectRequest: (id: string, data: any) => apiClient.patch(`/project-requests/${id}`, data).then(res => getData<any>(res)),
 
   // Contact Requests
-  createContactRequest: (data: any) =>
-    fetch(`${BASE_URL}/contact-requests`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    }).then((res) => handleResponse<any>(res)),
+  createContactRequest: (data: any) => apiClient.post("/contact-requests", data).then(res => getData<any>(res)),
 
   // Newsletter
-  subscribeNewsletter: (data: any) =>
-    fetch(`${BASE_URL}/newsletter-subscriptions`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    }).then((res) => handleResponse<any>(res)),
+  subscribeNewsletter: (data: any) => apiClient.post("/newsletter-subscriptions", data).then(res => getData<any>(res)),
 
   // Job Applications
-  createJobApplication: (data: any) =>
-    fetch(`${BASE_URL}/job-applications`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    }).then((res) => handleResponse<any>(res)),
+  createJobApplication: (data: any) => apiClient.post("/job-applications", data).then(res => getData<any>(res)),
 };

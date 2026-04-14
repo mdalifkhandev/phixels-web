@@ -1,45 +1,30 @@
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ExternalLink, Loader2 } from "lucide-react";
-import { apiService } from "../services/api";
-import { Portfolio } from "../types/api";
+
+// Hooks
+import { usePortfolio } from "../hooks/queries/usePortfolio";
 
 export function PortfolioPage() {
-  const [portfolioItems, setPortfolioItems] = useState<Portfolio[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState("All");
 
-  useEffect(() => {
-    const fetchPortfolio = async () => {
-      try {
-        setLoading(true);
-        const response = await apiService.getPortfolios();
-        if (response.success) {
-          setPortfolioItems(response.data);
-        } else {
-          setError(response.message || "Failed to fetch portfolio");
-        }
-      } catch (err: any) {
-        setError(err.message || "An error occurred while fetching portfolio");
-      } finally {
-        setLoading(false);
-      }
-    };
+  // Use the React Query hook
+  const { data: rawItems, isLoading, isError, error } = usePortfolio();
 
-    fetchPortfolio();
-  }, []);
+  const items = rawItems ?? [];
 
-  const categories = [
-    "All",
-    ...new Set(portfolioItems.map((item) => item.category)),
-  ];
-  const filtered =
-    filter === "All"
-      ? portfolioItems
-      : portfolioItems.filter((p) => p.category === filter);
+  // Categories and filtering are now memoized and declarative
+  const categories = useMemo(() => {
+    return ["All", ...new Set(items.map((item: any) => item.category))];
+  }, [items]);
 
-  if (loading) {
+  const filtered = useMemo(() => {
+    return filter === "All"
+      ? items
+      : items.filter((p: any) => p.category === filter);
+  }, [filter, items]);
+
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center pt-20">
         <Loader2 className="w-12 h-12 text-[color:var(--bright-red)] animate-spin mb-4" />
@@ -48,11 +33,11 @@ export function PortfolioPage() {
     );
   }
 
-  if (error) {
+  if (isError) {
     return (
       <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center pt-20 p-4">
         <div className="text-center py-20 text-red-500 bg-red-500/10 rounded-2xl border border-red-500/20 max-w-2xl w-full">
-          {error}
+          {(error as any)?.message || "Failed to fetch portfolio"}
         </div>
       </div>
     );
@@ -71,7 +56,7 @@ export function PortfolioPage() {
 
         {/* Filter */}
         <div className="flex flex-wrap justify-center gap-4 mb-16">
-          {categories.map((cat) => (
+          {categories.map((cat: any) => (
             <button
               key={cat}
               onClick={() => setFilter(cat)}
@@ -89,7 +74,7 @@ export function PortfolioPage() {
         {/* Projects */}
         <div className="space-y-12 md:space-y-20">
           <AnimatePresence mode="popLayout">
-            {filtered.map((item, index) => (
+            {filtered.map((item: any, index: number) => (
               <motion.div
                 key={item._id}
                 layout
@@ -135,7 +120,7 @@ export function PortfolioPage() {
                         {item.description}
                       </p>
                       <div className="flex flex-wrap gap-2">
-                        {item.technology?.map((tech) => (
+                        {item.technology?.map((tech: string) => (
                           <span
                             key={tech}
                             className="px-3 py-1 bg-white/10 rounded-full text-xs sm:text-sm text-gray-300 border border-white/20"

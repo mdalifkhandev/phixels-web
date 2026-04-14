@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { Github, Linkedin, Loader2, Twitter } from "lucide-react";
 import { CountUpStats } from "../components/CountUpStats";
-import { apiService } from "../services/api";
-import type { AboutContent, TeamMember } from "../types/api";
+
+// Hooks
+import { useAboutContent, useTeamMembers } from "../hooks/queries/useContent";
 
 function TeamPlaceholder() {
   return (
@@ -110,67 +111,18 @@ function TeamPlaceholder() {
   );
 }
 
-const fallbackAboutContent: AboutContent = {
-  metrics: [],
-  philosophy: {
-    heading: "Our Philosophy",
-    description: "",
-    image: "",
-  },
-  contactInfo: {
-    whatsapp: "",
-    fiverr: "",
-    linkedin: "",
-    email: "",
-    behance: "",
-    facebook: "",
-    phone: "",
-    address: "",
-  },
-  clients: [],
-};
-
 export function AboutPage() {
-  const [aboutContent, setAboutContent] =
-    useState<AboutContent>(fallbackAboutContent);
-  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data: aboutContent, isLoading: loadingAbout, isError: isErrorAbout, error: errorAbout } = useAboutContent();
+  const { data: rawTeamMembers, isLoading: loadingTeam, isError: isErrorTeam, error: errorTeam } = useTeamMembers();
 
-  useEffect(() => {
-    const fetchAboutPageData = async () => {
-      try {
-        setLoading(true);
-        const [aboutResponse, teamResponse] = await Promise.all([
-          apiService.getAboutContent(),
-          apiService.getTeamMembers(),
-        ]);
+  // Sorting team members declaratively
+  const teamMembers = useMemo(() => {
+    const members = Array.isArray(rawTeamMembers) ? rawTeamMembers : [];
+    return [...members].sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
+  }, [rawTeamMembers]);
 
-        if (aboutResponse.success) {
-          setAboutContent(aboutResponse.data);
-        } else {
-          setError(aboutResponse.message || "Failed to fetch About content");
-        }
-
-        if (teamResponse.success) {
-          setTeamMembers(
-            [...teamResponse.data].sort(
-              (a: TeamMember, b: TeamMember) =>
-                (a.sortOrder || 0) - (b.sortOrder || 0),
-            ),
-          );
-        }
-      } catch (err: any) {
-        setError(
-          err.message || "An error occurred while fetching About page data",
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    void fetchAboutPageData();
-  }, []);
+  const loading = loadingAbout || loadingTeam;
+  const error = isErrorAbout || isErrorTeam ? (errorAbout || errorTeam) : null;
 
   if (loading) {
     return (
@@ -181,11 +133,11 @@ export function AboutPage() {
     );
   }
 
-  if (error) {
+  if (error || !aboutContent) {
     return (
       <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center pt-20 p-4">
         <div className="text-center py-20 text-red-500 bg-red-500/10 rounded-2xl border border-red-500/20 max-w-2xl w-full">
-          {error}
+          {(error as any)?.message || "An error occurred while fetching About page data"}
         </div>
       </div>
     );
@@ -225,7 +177,7 @@ export function AboutPage() {
         <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20" />
         <div className="container mx-auto px-4 relative z-10">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-12">
-            {aboutContent.metrics.map((stat, i) => (
+            {aboutContent.metrics?.map((stat: any, i: number) => (
               <motion.div
                 key={`${stat.label}-${i}`}
                 className="text-center"
@@ -254,13 +206,13 @@ export function AboutPage() {
             viewport={{ once: true }}
           >
             <h2 className="text-4xl font-bold mb-6">
-              {aboutContent.philosophy.heading}
+              {aboutContent.philosophy?.heading}
             </h2>
             <div className="space-y-6 text-gray-400 text-lg leading-relaxed">
-              {(aboutContent.philosophy.description || "")
+              {(aboutContent.philosophy?.description || "")
                 .split(/\n+/)
                 .filter(Boolean)
-                .map((paragraph, index) => (
+                .map((paragraph: string, index: number) => (
                   <p key={index}>{paragraph}</p>
                 ))}
             </div>
@@ -274,10 +226,10 @@ export function AboutPage() {
             <div className="aspect-square rounded-2xl overflow-hidden grayscale hover:grayscale-0 transition-all duration-700">
               <img
                 src={
-                  aboutContent.philosophy.image ||
+                  aboutContent.philosophy?.image ||
                   "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=800&q=80"
                 }
-                alt={aboutContent.philosophy.heading || "Team working"}
+                alt={aboutContent.philosophy?.heading || "Team working"}
                 className="w-full h-full object-cover"
               />
             </div>
@@ -293,7 +245,7 @@ export function AboutPage() {
           <span className="text-[color:var(--bright-red)]">Architects</span>
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8">
-          {teamMembers.map((member, i) => (
+          {teamMembers.map((member: any, i: number) => (
             <motion.div
               key={member._id}
               initial={{ opacity: 0, y: 20 }}
