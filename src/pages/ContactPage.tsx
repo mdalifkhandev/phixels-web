@@ -456,6 +456,7 @@ export function ContactPage() {
                       files={files}
                       onFilesChange={setFiles}
                       maxSizeMB={10}
+                      acceptedTypes={["image/*", ".pdf"]}
                       compact={true}
                     />
                   </div>
