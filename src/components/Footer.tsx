@@ -71,9 +71,9 @@ export function Footer() {
       setModalType("success");
       setSubmitted(true);
       setEmail("");
-    } catch (err) {
+    } catch (err: any) {
       console.error("Newsletter submission error:", err);
-      setModalType("error");
+      setError(err.message || "Connection error. Please try again later.");
     } finally {
       setSubmitting(false);
     }
@@ -411,12 +411,12 @@ export function Footer() {
                 <AnimatePresence>
                   {error && (
                     <motion.div
-                      initial={{ opacity: 0, y: -10 }}
+                      initial={{ opacity: 0, y: -5 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0 }}
-                      className="flex items-center gap-2 text-red-400 text-xs font-medium"
+                      className="flex items-center gap-1 text-red-500 text-[10px] sm:text-xs font-medium mt-1"
                     >
-                      <AlertCircle size={14} />
+                      <span>⚠️</span>
                       {error}
                     </motion.div>
                   )}

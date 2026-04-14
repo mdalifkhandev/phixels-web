@@ -8,10 +8,6 @@ import { apiService } from "../services/api";
 import { Blog, ServiceCategory, Author } from "../types/api";
 import { stripRichText } from "../utils/richText";
 
-const GAS_DEPLOYMENT_URL =
-  import.meta.env.VITE_GAS_DEPLOYMENT_URL ||
-  "https://script.google.com/macros/s/AKfycbzYH-TfT_uR-2uxR8G2my7KElsR_x0f9GekGO35oSqq-qXkjI8k1zPSRvbIrATJDCg/exec";
-
 export function BlogPage() {
   const navigate = useNavigate();
   const [blogs, setBlogs] = useState<Blog[]>([]);
@@ -106,43 +102,25 @@ export function BlogPage() {
     setNewsletterError("");
 
     try {
-      const response = await fetch(GAS_DEPLOYMENT_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({
-          formType: "newsletter",
-          email: newsletterEmail,
-        }),
-      });
+      const payload = {
+        email: newsletterEmail,
+        requestId: crypto.randomUUID(),
+      };
 
-      const text = await response.text();
+      const result = await apiService.subscribeNewsletter(payload);
 
-      if (
-        text.includes("already_subscribed") ||
-        text.toLowerCase().includes("already")
-      ) {
-        setNewsletterError("This email is already subscribed.");
-        setNewsletterLoading(false);
-        return;
+      if (result.success) {
+        setShowSuccessModal(true);
+        setNewsletterSubscribed(true);
+        setNewsletterEmail("");
+        setTimeout(() => setShowSuccessModal(false), 3000);
+      } else {
+        setNewsletterError(result.message || "Something went wrong.");
       }
-
-      setShowSuccessModal(true);
-      setNewsletterSubscribed(true);
-      setNewsletterEmail("");
-
-      setTimeout(() => {
-        setShowSuccessModal(false);
-      }, 3000);
-    } catch (error) {
-      console.error(error);
-      // Falling back to success modal as per the user's logic (similar to Footer)
-      setShowSuccessModal(true);
-      setNewsletterSubscribed(true);
-      setNewsletterEmail("");
-
-      setTimeout(() => {
-        setShowSuccessModal(false);
-      }, 3000);
+    } catch (error: any) {
+      console.error("Newsletter subscription error:", error);
+      // Backend error messages will be captured here from handleResponse
+      setNewsletterError(error.message || "Connection error. Please try again later.");
     } finally {
       setNewsletterLoading(false);
     }
@@ -367,7 +345,9 @@ export function BlogPage() {
                 />
 
                 {newsletterError && (
-                  <p className="text-red-400 text-sm mb-2">{newsletterError}</p>
+                  <p className="text-red-500 text-sm mb-3 mt-1 flex items-center gap-1">
+                    <span>⚠️</span> {newsletterError}
+                  </p>
                 )}
 
                 <Button
