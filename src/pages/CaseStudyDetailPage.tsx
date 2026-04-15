@@ -63,19 +63,19 @@ export function CaseStudyDetailPage() {
           apiService.getCaseStudyById(id),
           apiService.getServiceCategories(),
         ]);
-        if (response.success) {
-          let resolvedCategory = response.data.category;
-          if (catsRes.success && Array.isArray(catsRes.data)) {
-            const category = catsRes.data.find(
+        if (response) {
+          let resolvedCategory = response.category;
+          if (Array.isArray(catsRes)) {
+            const category = catsRes.find(
               (c: any) => c._id === resolvedCategory,
             );
             if (category) {
               resolvedCategory = category.name;
             }
           }
-          setStudy({ ...response.data, category: resolvedCategory });
+          setStudy({ ...response, category: resolvedCategory });
         } else {
-          setError(response.message || "Case study not found");
+          setError("Case study not found");
         }
       } catch (err: any) {
         setError(

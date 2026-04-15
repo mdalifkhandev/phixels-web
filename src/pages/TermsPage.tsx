@@ -13,9 +13,7 @@ export function TermsPage() {
     const fetchContent = async () => {
       try {
         const response = await apiService.getLegalContent();
-        if (response.success) {
-          setContent(response.data);
-        }
+        setContent(response);
       } catch (error) {
         console.error("Failed to fetch terms & conditions:", error);
       } finally {

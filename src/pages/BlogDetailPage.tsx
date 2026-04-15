@@ -82,8 +82,8 @@ export function BlogDetailPage() {
         let mainBlog: Blog | null = null;
         try {
           const slugResponse = await apiService.getBlogBySlug(id);
-          if (slugResponse.success && slugResponse.data) {
-            mainBlog = slugResponse.data;
+          if (slugResponse) {
+            mainBlog = slugResponse;
           }
         } catch (err) {
           // Slug lookup failed, which is expected if 'id' is a real MongoDB ID
@@ -94,8 +94,8 @@ export function BlogDetailPage() {
         if (!mainBlog) {
           try {
             const idResponse = await apiService.getBlogById(id);
-            if (idResponse.success && idResponse.data) {
-              mainBlog = idResponse.data;
+            if (idResponse) {
+              mainBlog = idResponse;
             }
           } catch (err) {
             console.error("ID lookup also failed:", err);
@@ -126,20 +126,17 @@ export function BlogDetailPage() {
               apiService.getAuthors().catch(() => null),
             ]);
 
-          if (
-            categoriesResponse?.success &&
-            Array.isArray(categoriesResponse.data)
-          ) {
-            setServiceCategories(categoriesResponse.data);
+          if (Array.isArray(categoriesResponse)) {
+            setServiceCategories(categoriesResponse);
           }
 
-          if (authorsResponse?.success && Array.isArray(authorsResponse.data)) {
-            setAuthors(authorsResponse.data);
+          if (Array.isArray(authorsResponse)) {
+            setAuthors(authorsResponse);
           }
 
-          if (blogsResponse?.success && Array.isArray(blogsResponse.data)) {
+          if (Array.isArray(blogsResponse)) {
             setAllBlogs(
-              blogsResponse.data.filter((b: Blog) => b.status === "published"),
+              blogsResponse.filter((b: Blog) => b.status === "published"),
             );
           }
         } catch (err) {

@@ -30,14 +30,11 @@ export function JobDetailPage() {
       if (!id) return;
       try {
         setLoading(true);
-        const response = await apiService.getCareerById(id);
-        if (response.success) {
-          setJobData(response.data);
-        } else {
-          setError(response.message || "Failed to fetch job details");
-        }
+        const response = await apiService.getJobById(id);
+        setJobData(response);
       } catch (err: any) {
-        setError(err.message || "An error occurred while fetching job details");
+        console.error("Error fetching job:", err);
+        setError(err.message || "Failed to load job details");
       } finally {
         setLoading(false);
       }
