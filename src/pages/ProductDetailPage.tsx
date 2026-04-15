@@ -31,11 +31,7 @@ export function ProductDetailPage() {
         setLoading(true);
         setError(null);
         const response = await apiService.getProductById(id);
-        if (response.success) {
-          setProduct(response.data);
-        } else {
-          setError(response.message || "Failed to load product");
-        }
+        setProduct(response);
       } catch (err: any) {
         console.error("Error fetching product:", err);
         setError(err.message || "Failed to load product");
