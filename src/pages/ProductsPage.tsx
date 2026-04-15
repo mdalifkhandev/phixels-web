@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import {
@@ -16,7 +16,8 @@ import {
 import { Button } from "../components/ui/Button";
 import { CountUpStats } from "../components/CountUpStats";
 import { apiService } from "../services/api";
-import { PageMetric, Product } from "../types/api";
+import { useQuery } from "@tanstack/react-query";
+import type { PageMetric, Product } from "../types/api";
 
 const productMetricIconMap = {
   users: Users,
@@ -38,43 +39,27 @@ const fallbackProductsPageMetrics: [
 ];
 
 export function ProductsPage() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [metrics, setMetrics] = useState<
-    [PageMetric, PageMetric, PageMetric, PageMetric]
-  >(fallbackProductsPageMetrics);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState("All");
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        setLoading(true);
-        const [response, pageMetricsResponse] = await Promise.all([
-          apiService.getProducts(),
-          apiService.getPageMetrics(),
-        ]);
-        if (response.success) {
-          setProducts(response.data);
-        } else {
-          setError(response.message || "Failed to fetch products");
-        }
-        if (
-          pageMetricsResponse.success &&
-          pageMetricsResponse.data?.productsPageMetrics?.length === 4
-        ) {
-          setMetrics(pageMetricsResponse.data.productsPageMetrics);
-        }
-      } catch (err: any) {
-        setError(err.message || "An error occurred while fetching products");
-        setMetrics(fallbackProductsPageMetrics);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const { data: products = [], isLoading, isError } = useQuery<Product[]>({
+    queryKey: ['products'],
+    queryFn: () => apiService.getProducts(),
+    staleTime: 1000 * 60 * 5,
+  });
 
-    fetchProducts();
-  }, []);
+  const { data: pageMetricsData } = useQuery({
+    queryKey: ['page-metrics'],
+    queryFn: () => apiService.getPageMetrics(),
+    staleTime: 1000 * 60 * 10,
+  });
+
+  const metrics: [PageMetric, PageMetric, PageMetric, PageMetric] =
+    pageMetricsData?.productsPageMetrics?.length === 4
+      ? pageMetricsData.productsPageMetrics
+      : fallbackProductsPageMetrics;
+
+  const loading = isLoading;
+  const error = isError ? "Failed to fetch products" : null;
 
   const categories = ["All", ...new Set(products.map((p) => p.category))];
   const filteredProducts =

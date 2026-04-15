@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
@@ -24,7 +24,8 @@ import { ProfessionalReviewCarousel } from "../components/ProfessionalReviewCaro
 import { PageHeader } from "../components/ui/PageHeader";
 import { CallToAction } from "../components/ui/CallToAction";
 import { apiService } from "../services/api";
-import { PageMetric, ServiceMenuCategory } from "../types/api";
+import { useQuery } from "@tanstack/react-query";
+import type { PageMetric, ServiceMenuCategory } from "../types/api";
 
 const iconMap: Record<string, any> = {
   code: Code,
@@ -54,43 +55,27 @@ const fallbackServicesPageMetrics: [
 ];
 
 export function ServicesPage() {
-  const [services, setServices] = useState<ServiceMenuCategory[]>([]);
-  const [metrics, setMetrics] = useState<
-    [PageMetric, PageMetric, PageMetric, PageMetric]
-  >(fallbackServicesPageMetrics);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [expandedService, setExpandedService] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchServices = async () => {
-      try {
-        setLoading(true);
-        const [response, pageMetricsResponse] = await Promise.all([
-          apiService.getServiceMenu(),
-          apiService.getPageMetrics(),
-        ]);
-        if (response.success) {
-          setServices(response.data);
-        } else {
-          setError(response.message || "Failed to fetch services");
-        }
-        if (
-          pageMetricsResponse.success &&
-          pageMetricsResponse.data?.servicesPageMetrics?.length === 4
-        ) {
-          setMetrics(pageMetricsResponse.data.servicesPageMetrics);
-        }
-      } catch (err: any) {
-        setError(err.message || "An error occurred while fetching services");
-        setMetrics(fallbackServicesPageMetrics);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const { data: services = [], isLoading, isError } = useQuery<ServiceMenuCategory[]>({
+    queryKey: ['service-menu'],
+    queryFn: () => apiService.getServiceMenu(),
+    staleTime: 1000 * 60 * 5,
+  });
 
-    fetchServices();
-  }, []);
+  const { data: pageMetricsData } = useQuery({
+    queryKey: ['page-metrics'],
+    queryFn: () => apiService.getPageMetrics(),
+    staleTime: 1000 * 60 * 10,
+  });
+
+  const metrics: [PageMetric, PageMetric, PageMetric, PageMetric] =
+    pageMetricsData?.servicesPageMetrics?.length === 4
+      ? pageMetricsData.servicesPageMetrics
+      : fallbackServicesPageMetrics;
+
+  const loading = isLoading;
+  const error = isError ? "Failed to fetch services" : null;
 
   const getServiceColor = (index: number) => {
     const colors = [

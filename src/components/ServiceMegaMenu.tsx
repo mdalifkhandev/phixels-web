@@ -51,13 +51,9 @@ export function ServiceMegaMenu() {
       try {
         setLoading(true);
         const response = await apiService.getServiceMenu();
-        if (response.success) {
-          const menuData = response.data || [];
-          setServiceMenu(menuData);
-          setActiveService(menuData[0] || null);
-        } else {
-          setError(response.message || "Failed to load services");
-        }
+        const menuData = response || [];
+        setServiceMenu(menuData);
+        setActiveService(menuData[0] || null);
       } catch (err: any) {
         setError(err.message || "Failed to load services");
       } finally {

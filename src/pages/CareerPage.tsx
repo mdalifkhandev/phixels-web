@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
@@ -12,33 +12,17 @@ import {
 } from "lucide-react";
 import { Button } from "../components/ui/Button";
 import { apiService } from "../services/api";
-import { Career } from "../types/api";
+import { useQuery } from "@tanstack/react-query";
+import type { Career } from "../types/api";
 
 export function CareerPage() {
-  const [roles, setRoles] = useState<Career[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data: roles = [], isLoading: loading, isError } = useQuery<Career[]>({
+    queryKey: ['careers'],
+    queryFn: () => apiService.getCareers(),
+    staleTime: 1000 * 60 * 5,
+  });
 
-  useEffect(() => {
-    const fetchCareers = async () => {
-      try {
-        setLoading(true);
-        const response = await apiService.getCareers();
-        console.log(response);
-        if (response.success) {
-          setRoles(response.data);
-        } else {
-          setError(response.message || "Failed to fetch career opportunities");
-        }
-      } catch (err: any) {
-        setError(err.message || "An error occurred while fetching careers");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCareers();
-  }, []);
+  const error = isError ? 'Failed to fetch career opportunities' : null;
 
   return (
     <main className="pt-44 pb-20 bg-[#050505] min-h-screen">

@@ -13,9 +13,7 @@ export function ProfessionalReviewCarousel() {
     const fetchReviews = async () => {
       try {
         const response = await apiService.getReviews();
-        if (response.success) {
-          setReviews(response.data || []);
-        }
+        setReviews(response || []);
       } catch (error) {
         console.error("Failed to load reviews", error);
       }

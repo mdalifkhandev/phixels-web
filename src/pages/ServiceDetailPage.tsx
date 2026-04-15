@@ -28,11 +28,7 @@ export function ServiceDetailPage() {
           category,
           subcategory,
         );
-        if (response.success) {
-          setServiceDetail(response.data);
-        } else {
-          setError(response.message || "Service not found");
-        }
+        setServiceDetail(response);
       } catch (err: any) {
         setError(
           err.message || "An error occurred while fetching service details",

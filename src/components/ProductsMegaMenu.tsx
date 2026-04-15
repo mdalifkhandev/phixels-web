@@ -16,11 +16,7 @@ export function ProductsMegaMenu() {
       try {
         setLoading(true);
         const response = await apiService.getPinnedProducts();
-        if (response.success) {
-          setProducts(response.data);
-        } else {
-          setError(response.message || "Failed to fetch products");
-        }
+        setProducts(response || []);
       } catch (err: any) {
         setError(err.message || "An error occurred while fetching products");
       } finally {

@@ -55,8 +55,8 @@ export function Hero() {
     const fetchPageMetrics = async () => {
       try {
         const response = await apiService.getPageMetrics();
-        if (response.success && response.data?.homeHeroMetrics?.length === 2) {
-          setMetrics(response.data.homeHeroMetrics);
+        if (response?.homeHeroMetrics?.length === 2) {
+          setMetrics(response.homeHeroMetrics);
         }
       } catch {
         setMetrics(fallbackHomeHeroMetrics);

@@ -61,9 +61,7 @@ export function ServicesGrid() {
     const fetchServices = async () => {
       try {
         const response = await apiService.getServiceMenu();
-        if (response.success) {
-          setServices(response.data || []);
-        }
+        setServices(response || []);
       } catch (error) {
         console.error("Failed to load services", error);
       }

@@ -53,11 +53,7 @@ export function ServiceCategoryPage() {
       try {
         setLoading(true);
         const response = await apiService.getServiceCategoryBySlug(category);
-        if (response.success) {
-          setServiceDetail(response.data);
-        } else {
-          setError(response.message || "Service not found");
-        }
+        setServiceDetail(response);
       } catch (err: any) {
         setError(
           err.message || "An error occurred while fetching service details",
