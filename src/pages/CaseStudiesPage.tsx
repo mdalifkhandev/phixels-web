@@ -20,14 +20,14 @@ export function CaseStudiesPage() {
           apiService.getCaseStudies(),
           apiService.getServiceCategories(),
         ]);
-        if (casesRes.success) {
-          setCases(casesRes.data);
+        if (Array.isArray(casesRes)) {
+          setCases(casesRes);
         } else {
-          setError(casesRes.message || "Failed to fetch case studies");
+          setError("Failed to fetch case studies");
         }
-        if (catsRes.success && Array.isArray(catsRes.data)) {
+        if (Array.isArray(catsRes)) {
           const map: Record<string, string> = {};
-          for (const cat of catsRes.data) {
+          for (const cat of catsRes) {
             map[cat._id] = cat.name;
           }
           setCategoryMap(map);
