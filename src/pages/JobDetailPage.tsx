@@ -30,7 +30,7 @@ export function JobDetailPage() {
       if (!id) return;
       try {
         setLoading(true);
-        const response = await apiService.getJobById(id);
+        const response = await apiService.getCareerById(id);
         setJobData(response);
       } catch (err: any) {
         console.error("Error fetching job:", err);
