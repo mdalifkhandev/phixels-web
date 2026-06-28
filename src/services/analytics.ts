@@ -1,5 +1,5 @@
 const BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "https://api.phixels.agency/api/v1";
+  import.meta.env.VITE_API_BASE_URL;
 
 interface AnalyticsEvent {
   eventType: string;
