@@ -1,13 +1,13 @@
 /// <reference types="vite/client" />
 import axios from "axios";
-import { 
-  Blog, 
-  Portfolio, 
-  Product, 
-  Service, 
-  ServiceMenuCategory, 
-  ServiceCategory, 
-  ServiceCategoryDetail, 
+import {
+  Blog,
+  Portfolio,
+  Product,
+  Service,
+  ServiceMenuCategory,
+  ServiceCategory,
+  ServiceCategoryDetail,
   ServiceSubcategoryDetail,
   CaseStudy,
   Career,
@@ -19,7 +19,7 @@ import {
   LegalContent
 } from "../types/api";
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://api.phixels.agency/api/v1";
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const apiClient = axios.create({
   baseURL: BASE_URL,
@@ -52,7 +52,7 @@ export const apiService = {
   getServiceById: (id: string) => apiClient.get(`/services/${id}`).then(res => getData<Service>(res)),
   getServiceMenu: () => apiClient.get("/services/menu").then(res => getData<ServiceMenuCategory[]>(res)),
   getServiceCategories: () => apiClient.get("/services/categories").then(res => getData<ServiceCategory[]>(res)),
-  getServiceCategoryBySlug: (categorySlug: string) => 
+  getServiceCategoryBySlug: (categorySlug: string) =>
     apiClient.get(`/services/categories/${categorySlug}`).then(res => getData<ServiceCategoryDetail>(res)),
   getServiceSubcategoryBySlugs: (categorySlug: string, subcategorySlug: string) =>
     apiClient.get(`/services/categories/${categorySlug}/subcategories/${subcategorySlug}`).then(res => getData<ServiceSubcategoryDetail>(res)),
